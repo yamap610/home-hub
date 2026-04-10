@@ -1697,6 +1697,7 @@ function App() {
   const [toast, setToast]           = React.useState(null);
   const [syncing, setSyncing]       = React.useState(false);
   const [isOnline, setIsOnline]     = React.useState(firebaseReady);
+  const [showCsv, setShowCsv]       = React.useState(false);
   const [showFirebaseTip, setShowFirebaseTip] = React.useState(!firebaseReady);
   const unsubRef = React.useRef(null);
 
@@ -1890,9 +1891,8 @@ function App() {
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:'.6rem' }}>
             <div className={`sync-dot${isOnline?'':' offline'}`} title={isOnline?'已連線 Firebase':'本機模式'} />
-            <div style={{position:'relative'}}>
-              <div className="header-room" style={{cursor:'pointer'}} onClick={e=>{e.stopPropagation();setShowCsv(true);}}>CSV</div>
-            </div>
+            <div className="header-room" onClick={()=>window.location.href='index.html'}>🏡</div>
+            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>CSV</div>
             <div className="header-room" onClick={handleLogout}>登出</div>
           </div>
         </div>

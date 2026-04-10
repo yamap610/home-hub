@@ -151,92 +151,127 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .field-label{font-size:.62rem;color:var(--text-light);letter-spacing:.1em;margin-bottom:.2rem;}
 .field-value{font-size:.83rem;color:var(--text);}
 
-/* ── CSV 匯入 Modal ── */
-function CsvImportModal({onImport,onClose}){
+/* ── CSV Modal（三分頁：說明/匯入/匯出）── */
+function CsvImportModal({clothes, onImport, onClose}){
+  const[tab,setTab]=React.useState('guide');
   const[csvText,setCsvText]=React.useState('');
   const[preview,setPreview]=React.useState(null);
   const[err,setErr]=React.useState('');
-  const TYPE_OPTS=['上衣','洋裝/連身','裙子/褲子','套裝','外套','居家','配件','其他'];
-  const SIZE_OPTS=['S','M','L','XL','70cm','80cm','90cm','100cm','110cm','120cm','12m','18m','24m','2T','3T','4T'];
-  const SLEEVE_OPTS=['長袖','短袖','無袖','加厚'];
-  const SOURCE_OPTS=['自購','恩典牌','二手','禮物'];
-  const STATUS_OPTS=['當季','非當季','穿不下','已轉贈/售出'];
-  const EXAMPLE='name,type,size,sleeve,source,status,location,worn,note\n粉色小兔包屁衣,洋裝/連身,80cm,短袖,自購,當季,臥室衣櫃第一格,true,初生禮物\n格紋外套,外套,90cm,長袖,恩典牌,非當季,儲藏室,false,\n藍色牛仔褲,裙子/褲子,2T,長袖,二手,當季,,true,';
 
-  function downloadExample(){
-    const hints=['# 欄位說明（此列請刪除後再匯入）',`# type 選項：${TYPE_OPTS.join('、')}`,`# size 選項：${SIZE_OPTS.join('、')} 或自定義文字`,`# sleeve 選項：${SLEEVE_OPTS.join('、')}`,`# source 選項：${SOURCE_OPTS.join('、')}`,`# status 選項：${STATUS_OPTS.join('、')}`,'# worn：true 或 false','# name / location / note 可留空'].join('\n');
-    const blob=new Blob([hints+'\n\n'+EXAMPLE],{type:'text/csv;charset=utf-8;'});
-    const url=URL.createObjectURL(blob);
-    const a=document.createElement('a');a.href=url;a.download='wardrobe_template.csv';a.click();URL.revokeObjectURL(url);
-  }
+  const TYPES='上衣, 洋裝/連身, 裙子/褲子, 套裝, 外套, 居家, 配件, 其他';
+  const SLEEVES='長袖, 短袖, 無袖, 加厚';
+  const SOURCES='自購, 恩典牌, 二手, 禮物';
+  const STATUSES='當季, 非當季, 穿不下, 已轉贈/售出';
+  const EXAMPLE=[
+    'name,type,size,sleeve,source,status,location,worn,note',
+    '粉色小兔包屁衣,洋裝/連身,80cm,短袖,自購,當季,臥室衣櫃第一格,true,',
+    '格紋外套,外套,90cm,長袖,恩典牌,非當季,儲藏室,false,',
+    '藍色牛仔褲,裙子/褲子,2T,長袖,二手,當季,,true,',
+  ].join('\n');
+  const VALID_TYPES=['上衣','洋裝/連身','裙子/褲子','套裝','外套','居家','配件','其他'];
+  const VALID_SL=['長袖','短袖','無袖','加厚'];
+  const VALID_SRC=['自購','恩典牌','二手','禮物'];
+  const VALID_ST=['當季','非當季','穿不下','已轉贈/售出'];
 
   function handleParse(){
     setErr('');setPreview(null);
-    if(!csvText.trim()){setErr('請貼上 CSV 內容');return;}
-    const cleaned=csvText.split('\n').filter(l=>!l.trim().startsWith('#')).join('\n');
-    const result=Papa.parse(cleaned.trim(),{header:true,skipEmptyLines:true});
-    if(!result.data.length){setErr('解析失敗，請確認格式正確');return;}
+    if(!csvText.trim()){setErr('請貼上內容');return;}
+    const result=Papa.parse(csvText.trim(),{header:true,skipEmptyLines:true});
+    if(!result.data.length){setErr('解析失敗，請確認格式');return;}
     const parsed=result.data.map(r=>({
-      id:gid(),name:r.name?.trim()||'',
-      type:TYPE_OPTS.includes(r.type?.trim())?r.type.trim():'其他',
+      id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+      name:r.name?.trim()||'',
+      type:VALID_TYPES.includes(r.type?.trim())?r.type.trim():'其他',
       size:r.size?.trim()||'',sizeDisplay:r.size?.trim()||'',
-      sleeve:SLEEVE_OPTS.includes(r.sleeve?.trim())?r.sleeve.trim():'長袖',
-      source:SOURCE_OPTS.includes(r.source?.trim())?r.source.trim():'自購',
-      status:STATUS_OPTS.includes(r.status?.trim())?r.status.trim():'當季',
-      location:r.location?.trim()||'',worn:r.worn?.trim()==='true',
-      note:r.note?.trim()||'',createdAt:Date.now(),updatedAt:Date.now(),
+      sleeve:VALID_SL.includes(r.sleeve?.trim())?r.sleeve.trim():'長袖',
+      source:VALID_SRC.includes(r.source?.trim())?r.source.trim():'自購',
+      status:VALID_ST.includes(r.status?.trim())?r.status.trim():'當季',
+      location:r.location?.trim()||'',
+      worn:r.worn?.trim()==='true',
+      note:r.note?.trim()||'',
+      createdAt:Date.now(),updatedAt:Date.now(),
     }));
+    if(!parsed.length){setErr('沒有有效資料');return;}
     setPreview(parsed);
   }
-
+  function handleExport(){
+    const header='name,type,size,sleeve,source,status,location,worn,note';
+    const rows=(clothes||[]).map(c=>[c.name,c.type,c.sizeDisplay||c.size,c.sleeve,c.source,c.status,c.location||'',c.worn?'true':'false',c.note||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+    const csv=[header,...rows].join('\n');
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`wardrobe_${Date.now()}.csv`;a.click();URL.revokeObjectURL(url);
+  }
+  const SH={background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.85rem 1rem',fontSize:'.73rem',color:'var(--text-light)',lineHeight:1.8,marginBottom:'.75rem'};
+  const SF={background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.75rem 1rem',fontSize:'.7rem',color:'var(--text-light)',fontFamily:'monospace',lineHeight:1.8,marginBottom:'.75rem',whiteSpace:'pre-wrap',overflowX:'auto'};
   return(
     <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal-sheet"><div className="modal-handle"/>
-        <div className="modal-title">📥 CSV 批次匯入</div>
-        <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.85rem 1rem',marginBottom:'1rem',fontSize:'.78rem',color:'var(--text-light)',lineHeight:1.7}}>
-          <div style={{fontWeight:500,color:'var(--text)',marginBottom:'.4rem'}}>使用步驟</div>
-          <div>① 下載範例檔，用 Excel 填寫（保留第一行標題）</div>
-          <div>② 選項欄位只能填規定選項，不可自創</div>
-          <div>③ 填好後複製全部，貼到下方</div>
-          <div>④ 解析預覽確認後匯入</div>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="modal-title">📊 Google Sheet 批量匯入</div>
+        <div style={{display:'flex',background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'3px',gap:'3px',marginBottom:'.85rem'}}>
+          {[['guide','📋 說明'],['import','📥 匯入'],['export','📤 匯出']].map(([k,l])=>(
+            <button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:'.5rem',border:'none',borderRadius:'.7rem',fontFamily:'inherit',fontSize:'.78rem',cursor:'pointer',background:tab===k?'var(--bg)':'transparent',color:tab===k?'var(--text)':'var(--text-light)',fontWeight:tab===k?500:300}}>{l}</button>
+          ))}
         </div>
-        <button onClick={downloadExample} style={{width:'100%',marginBottom:'1rem',padding:'.65rem',background:'var(--bg)',border:'1px solid var(--border)',borderRadius:'1rem',fontFamily:'inherit',fontSize:'.82rem',color:'var(--text-light)',cursor:'pointer'}}>
-          📄 下載範例 CSV（含選項說明）
-        </button>
-        <div style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.75rem 1rem',marginBottom:'1rem',fontSize:'.7rem',color:'var(--text-light)',lineHeight:1.9}}>
-          <div><b style={{color:'var(--text)'}}>type：</b>{TYPE_OPTS.join('、')}</div>
-          <div><b style={{color:'var(--text)'}}>sleeve：</b>{SLEEVE_OPTS.join('、')}</div>
-          <div><b style={{color:'var(--text)'}}>source：</b>{SOURCE_OPTS.join('、')}</div>
-          <div><b style={{color:'var(--text)'}}>status：</b>{STATUS_OPTS.join('、')}</div>
-          <div><b style={{color:'var(--text)'}}>worn：</b>true 或 false</div>
-        </div>
-        <div className="form-group">
-          <label className="form-label">貼上 CSV 內容</label>
-          <textarea className="form-input" rows={6}
-            style={{resize:'vertical',fontFamily:'monospace',fontSize:'.75rem',lineHeight:1.6}}
+        {tab==='guide'&&(<>
+          <div style={SH}>
+            <b style={{color:'var(--text)'}}>步驟：</b><br/>
+            ① 開啟 Google Sheet，第一列填欄位名稱（見下方格式）<br/>
+            ② 填寫資料，選項欄位只能填規定的值<br/>
+            ③ 全選資料 → 複製（Ctrl+C）<br/>
+            ④ 切換「匯入」→ 貼上 → 解析預覽 → 確認匯入<br/><br/>
+            <b style={{color:'var(--text)'}}>Sheet 有異動後如何更新：</b><br/>
+            在 Sheet 修改完後，重新全選複製，再次執行匯入。<br/>
+            ⚠️ 相同 name 的衣物會自動略過，若要修改，<br/>
+            請先在 App 刪除該衣物，再重新匯入新版本。
+          </div>
+          <div style={SH}>
+            <b style={{color:'var(--text)'}}>欄位對照：</b><br/>
+            <b style={{color:'var(--text)'}}>name</b> — 衣物名稱（可留空）<br/>
+            <b style={{color:'var(--text)'}}>type</b>（必填）— 只能填：{TYPES}<br/>
+            <b style={{color:'var(--text)'}}>size</b> — 尺碼，如：80cm / 2T / S（可自訂）<br/>
+            <b style={{color:'var(--text)'}}>sleeve</b> — 只能填：{SLEEVES}<br/>
+            <b style={{color:'var(--text)'}}>source</b> — 只能填：{SOURCES}<br/>
+            <b style={{color:'var(--text)'}}>status</b> — 只能填：{STATUSES}<br/>
+            <b style={{color:'var(--text)'}}>location</b> — 擺放位置（可留空）<br/>
+            <b style={{color:'var(--text)'}}>worn</b> — 是否穿過：true 或 false<br/>
+            <b style={{color:'var(--text)'}}>note</b> — 備註（可留空）
+          </div>
+          <div style={SF}>{EXAMPLE}</div>
+        </>)}
+        {tab==='import'&&(<>
+          <div style={SH}>從 Google Sheet 複製全部資料後貼到下方（含第一列標題）。</div>
+          <textarea style={{width:'100%',minHeight:160,background:'var(--card)',border:'1.5px solid var(--border)',borderRadius:'1rem',padding:'.75rem 1rem',fontFamily:'monospace',fontSize:'.75rem',color:'var(--text)',outline:'none',resize:'vertical',lineHeight:1.6,marginBottom:'.75rem'}}
             placeholder={'name,type,size,sleeve,source,status,location,worn,note\n粉色包屁衣,洋裝/連身,80cm,短袖,自購,當季,,true,'}
             value={csvText} onChange={e=>{setCsvText(e.target.value);setPreview(null);setErr('');}}/>
-        </div>
-        {err&&<div style={{fontSize:'.75rem',color:'var(--danger)',marginBottom:'.75rem'}}>{err}</div>}
-        {preview&&(
-          <div style={{background:'rgba(143,177,122,.1)',border:'1px solid rgba(143,177,122,.3)',borderRadius:'1rem',padding:'.75rem 1rem',marginBottom:'.75rem',fontSize:'.78rem',color:'var(--text)'}}>
+          {err&&<div style={{fontSize:'.75rem',color:'var(--danger)',marginBottom:'.75rem'}}>{err}</div>}
+          {preview&&(<div style={{background:'rgba(143,177,122,.1)',border:'1px solid rgba(143,177,122,.3)',borderRadius:'1rem',padding:'.75rem 1rem',marginBottom:'.75rem',fontSize:'.78rem',color:'var(--text)'}}>
             解析到 <b>{preview.length}</b> 筆，確認後點「匯入」
             <div style={{marginTop:'.4rem',color:'var(--text-light)',fontSize:'.7rem'}}>
               {preview.slice(0,3).map((p,i)=><div key={i}>• {p.name||'（未命名）'} — {p.type} {p.size} {p.status}</div>)}
               {preview.length>3&&<div>…還有 {preview.length-3} 筆</div>}
             </div>
+          </div>)}
+          <div style={{display:'flex',gap:'.75rem'}}>
+            <button style={{flex:1,background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',color:'var(--text-light)',cursor:'pointer'}} onClick={()=>{setCsvText('');setPreview(null);setErr('');}}>清除</button>
+            {!preview
+              ?<button style={{flex:2,background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer',opacity:csvText.trim()?1:.4}} onClick={handleParse} disabled={!csvText.trim()}>解析預覽</button>
+              :<button style={{flex:2,background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer'}} onClick={()=>onImport(preview)}>確認匯入 {preview.length} 筆</button>
+            }
           </div>
-        )}
-        <div className="modal-actions">
-          <button className="btn-cancel" onClick={()=>{setCsvText('');setPreview(null);setErr('');}}>清除</button>
-          {!preview
-            ?<button className="btn-submit" onClick={handleParse} disabled={!csvText.trim()}>解析預覽</button>
-            :<button className="btn-submit" onClick={()=>onImport(preview)}>確認匯入 {preview.length} 筆</button>}
+        </>)}
+        {tab==='export'&&(<>
+          <div style={SH}>匯出後貼到 Google Sheet 編輯，修改完再回來匯入更新。目前共 <b style={{color:'var(--text)'}}>{(clothes||[]).length}</b> 件衣物。</div>
+          <button style={{width:'100%',background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.85rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer'}} onClick={handleExport}>下載 CSV 檔案</button>
+        </>)}
+        <div style={{marginTop:'1rem'}}>
+          <button style={{width:'100%',background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',color:'var(--text-light)',cursor:'pointer'}} onClick={onClose}>關閉</button>
         </div>
       </div>
     </div>
   );
 }
+
 
 /* 批次狀態改 modal */
 .status-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem;}
@@ -590,6 +625,8 @@ function App(){
           </div>
           <div className="header-right">
             <div className={`sync-dot${online?'':' offline'}`}/>
+            <div className="header-room" onClick={()=>window.location.href='index.html'}>🏡</div>
+            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>CSV</div>
             <div className="header-room" onClick={()=>{if(window.confirm('確定登出？')){if(unsub.current)unsub.current();setRc('');setClothes([]);localStorage.removeItem('last_room_ward2');}}}>登出</div>
             <div className="header-more" onClick={e=>{e.stopPropagation();setShowMore(m=>!m);}}>
               ⋮
@@ -597,9 +634,6 @@ function App(){
                 <div className="more-menu" onClick={e=>e.stopPropagation()}>
                   <div className="more-item" onClick={()=>{setBatch(b=>!b);setSelected(new Set());setShowMore(false);}}>
                     {batch?'✕ 退出批次模式':'☑ 批次管理'}
-                  </div>
-                  <div className="more-item" onClick={()=>{setShowCsv(true);setShowMore(false);}}>
-                    📥 CSV 批次匯入
                   </div>
                 </div>
               )}
@@ -689,7 +723,7 @@ function App(){
       {(showForm||editItem)&&<ClothForm initial={editItem} onSave={saveFn} onClose={()=>{setShowForm(false);setEditItem(null);}}/>}
       {detail&&<DetailModal cloth={clothes.find(c=>c.id===detail.id)||detail} onClose={()=>setDetail(null)} onEdit={()=>{setEditItem(clothes.find(c=>c.id===detail.id)||detail);setDetail(null);}} onDelete={()=>delFn(detail.id)}/>}
       {batchStatus&&<BatchStatusModal count={selected.size} onSave={batchStatusFn} onClose={()=>setBatchStatus(false)}/>}
-      {showCsv&&<CsvImportModal onImport={csvImportFn} onClose={()=>setShowCsv(false)}/>}
+      {showCsv&&<CsvImportModal clothes={clothes} onImport={csvImportFn} onClose={()=>setShowCsv(false)}/>}
       {toast&&<div className="toast">{toast}</div>}
     </div>
   );
