@@ -21,6 +21,7 @@
 
 <!-- Day.js -->
 <script src="https://unpkg.com/dayjs@1.11.9/dayjs.min.js"></script>
+<script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 
 <style>
   :root {
@@ -893,6 +894,14 @@
   .nav-item-icon { font-size: 1.2rem; }
   .nav-item-label { font-size: .58rem; letter-spacing: .12em; color: var(--home-text-light); }
   .nav-item.active .nav-item-label { color: var(--home-text); font-weight: 500; }
+
+  .csv-tabs{display:flex;background:var(--home-card);border:1px solid var(--home-border);border-radius:1rem;padding:3px;gap:3px;margin-bottom:.85rem;}
+  .csv-tab{flex:1;padding:.5rem;border:none;border-radius:.7rem;font-family:inherit;font-size:.78rem;cursor:pointer;background:transparent;color:var(--home-text-light);transition:all .15s;}
+  .csv-tab.active{background:var(--home-bg);color:var(--home-text);font-weight:500;}
+  .csv-format{background:var(--home-card);border:1px solid var(--home-border);border-radius:1rem;padding:.75rem 1rem;font-size:.7rem;color:var(--home-text-light);font-family:monospace;line-height:1.8;margin-bottom:.75rem;white-space:pre-wrap;overflow-x:auto;}
+  .csv-guide{background:rgba(220,203,195,.15);border:1px solid var(--home-border);border-radius:1rem;padding:.85rem 1rem;font-size:.73rem;color:var(--home-text-light);line-height:1.8;margin-bottom:.75rem;}
+  .csv-guide b{color:var(--home-text);}
+
 </style>
 </head>
 <body>
@@ -1022,6 +1031,154 @@ function calcNextDue(dueDateStr, recurrence) {
 // ── uuid 簡易版 ──
 function genId() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+
+// ── 提醒 CSV Modal ──
+function ReminderCsvModal({items, onImport, onClose}){
+  const[tab,setTab]=React.useState('guide');
+  const[csvText,setCsvText]=React.useState('');
+  const[preview,setPreview]=React.useState(null);
+  const[err,setErr]=React.useState('');
+
+  const SHEET_URL='https://docs.google.com/spreadsheets/';
+  const EXAMPLE=[
+    'title,type,recurrence,dueDate,amount,description',
+    '水電費,financial,monthly,2026-05-10,1200,每月10號繳費',
+    'Netflix,subscription,monthly,2026-05-15,390,',
+    '換濾芯,consumable,quarterly,2026-06-01,,三個月換一次',
+    '打掃冰箱,chore,monthly,2026-05-20,,',
+    '打流感疫苗,health,yearly,2026-10-01,,',
+  ].join('\n');
+
+  const TYPE_OPTS='financial, subscription, consumable, chore, health, other';
+  const RECUR_OPTS='once, daily, weekly, biweekly, monthly, bimonthly, quarterly, semiannual, yearly';
+
+  function handleParse(){
+    setErr('');setPreview(null);
+    if(!csvText.trim()){setErr('請貼上 CSV 內容');return;}
+    const cleaned=csvText.split('\n').filter(l=>!l.trim().startsWith('#')).join('\n');
+    const result=Papa.parse(cleaned.trim(),{header:true,skipEmptyLines:true});
+    if(!result.data.length){setErr('解析失敗，請確認格式');return;}
+    const VALID_TYPES=['financial','subscription','consumable','chore','health','other'];
+    const VALID_RECUR=['once','daily','weekly','biweekly','monthly','bimonthly','quarterly','semiannual','yearly'];
+    const parsed=result.data.filter(r=>r.title?.trim()).map(r=>({
+      id: Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+      title: r.title?.trim()||'',
+      type:  VALID_TYPES.includes(r.type?.trim())?r.type.trim():'other',
+      recurrence: VALID_RECUR.includes(r.recurrence?.trim())?r.recurrence.trim():'once',
+      dueDate: r.dueDate?.trim()||'',
+      amount: r.amount?.trim()||'',
+      description: r.description?.trim()||'',
+      status:'pending', completionHistory:[],
+      priority:'low', createdAt:Date.now(), updatedAt:Date.now(),
+    }));
+    if(!parsed.length){setErr('沒有有效資料（title 欄位必填）');return;}
+    setPreview(parsed);
+  }
+
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="modal-title">📊 Google Sheet 批量匯入</div>
+        <div className="csv-tabs">
+          {[['guide','📋 說明'],['import','📥 匯入'],['export','📤 匯出']].map(([k,l])=>(
+            <button key={k} className={`csv-tab${tab===k?' active':''}`} onClick={()=>setTab(k)}>{l}</button>
+          ))}
+        </div>
+
+        {tab==='guide'&&(
+          <div>
+            <div className="csv-guide">
+              <b>步驟：</b><br/>
+              ① 開啟 Google Sheet，第一列填入欄位名稱（見下方）<br/>
+              ② 依格式填寫資料，選項欄位只能填規定的值<br/>
+              ③ 全選所有資料 → 複製（Ctrl+C）<br/>
+              ④ 切換到「匯入」分頁，貼上後按「解析預覽」<br/>
+              ⑤ 確認無誤後按「確認匯入」<br/><br/>
+              <b>更新資料（新增/修改/刪除）：</b><br/>
+              在 Sheet 修改後，重新全選複製，再次執行匯入即可。<br/>
+              ⚠️ 匯入時若名稱相同會自動略過，需先在 App 內刪除舊資料再重新匯入。
+            </div>
+            <div className="csv-guide">
+              <b>欄位對照表：</b><br/>
+              <b>title</b>（必填）— 提醒名稱，例：水電費<br/>
+              <b>type</b>（必填）— 類型，只能填：<br/>
+              　financial（財務）、subscription（訂閱）<br/>
+              　consumable（耗材）、chore（家務）<br/>
+              　health（健康）、other（其他）<br/>
+              <b>recurrence</b> — 週期，只能填：<br/>
+              　once、daily、weekly、biweekly<br/>
+              　monthly、bimonthly、quarterly、semiannual、yearly<br/>
+              <b>dueDate</b> — 到期日，格式：YYYY-MM-DD<br/>
+              <b>amount</b> — 金額（財務/訂閱填，其他可留空）<br/>
+              <b>description</b> — 備註（可留空）
+            </div>
+            <div className="csv-format">{EXAMPLE}</div>
+          </div>
+        )}
+
+        {tab==='import'&&(
+          <div>
+            <div className="csv-guide">
+              從 Google Sheet 複製資料後貼到下方，第一列需為欄位名稱。
+            </div>
+            <div style={{marginBottom:'.75rem'}}>
+              <label style={{fontSize:'.72rem',letterSpacing:'.15em',color:'var(--home-text-light)',display:'block',marginBottom:'.5rem'}}>貼上 Google Sheet 複製的內容</label>
+              <textarea
+                style={{width:'100%',minHeight:160,background:'var(--home-card)',border:'1.5px solid var(--home-border)',borderRadius:'1rem',padding:'.75rem 1rem',fontFamily:'monospace',fontSize:'.75rem',color:'var(--home-text)',outline:'none',resize:'vertical',lineHeight:1.6}}
+                placeholder={'title,type,recurrence,dueDate,amount,description\n水電費,financial,monthly,2026-05-10,1200,'}
+                value={csvText} onChange={e=>{setCsvText(e.target.value);setPreview(null);setErr('');}}/>
+            </div>
+            {err&&<div style={{fontSize:'.75rem',color:'var(--home-accent)',marginBottom:'.75rem'}}>{err}</div>}
+            {preview&&(
+              <div style={{background:'rgba(143,177,122,.1)',border:'1px solid rgba(143,177,122,.3)',borderRadius:'1rem',padding:'.75rem 1rem',marginBottom:'.75rem',fontSize:'.78rem'}}>
+                解析到 <b>{preview.length}</b> 筆，確認後點「匯入」<br/>
+                <div style={{marginTop:'.4rem',color:'var(--home-text-light)',fontSize:'.7rem'}}>
+                  {preview.slice(0,3).map((p,i)=><div key={i}>• {p.title} — {p.type} / {p.recurrence}</div>)}
+                  {preview.length>3&&<div>…還有 {preview.length-3} 筆</div>}
+                </div>
+              </div>
+            )}
+            <div style={{display:'flex',gap:'.75rem'}}>
+              <button style={{flex:1,background:'var(--home-card)',border:'1px solid var(--home-border)',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',color:'var(--home-text-light)',cursor:'pointer'}}
+                onClick={()=>{setCsvText('');setPreview(null);setErr('');}}>清除</button>
+              {!preview
+                ?<button style={{flex:2,background:'var(--home-text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--home-bg)',cursor:'pointer',opacity:csvText.trim()?1:.4}}
+                    onClick={handleParse} disabled={!csvText.trim()}>解析預覽</button>
+                :<button style={{flex:2,background:'var(--home-text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--home-bg)',cursor:'pointer'}}
+                    onClick={()=>onImport(preview)}>確認匯入 {preview.length} 筆</button>
+              }
+            </div>
+          </div>
+        )}
+
+        {tab==='export'&&(
+          <div>
+            <div className="csv-guide">
+              匯出後可貼到 Google Sheet 查看或編輯，修改完再匯入更新。
+            </div>
+            <div style={{marginBottom:'1rem',fontSize:'.82rem',color:'var(--home-text-light)'}}>目前共 {items.length} 筆提醒資料</div>
+            <button style={{width:'100%',background:'var(--home-text)',border:'none',borderRadius:'1rem',padding:'.85rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--home-bg)',cursor:'pointer'}}
+              onClick={()=>{
+                const header='title,type,recurrence,dueDate,amount,description,status';
+                const rows=items.map(i=>[i.title,i.type,i.recurrence,i.dueDate||'',i.amount||'',i.description||'',i.status].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+                const csv=[header,...rows].join('\n');
+                const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+                const url=URL.createObjectURL(blob);
+                const a=document.createElement('a');a.href=url;a.download=`reminders_${Date.now()}.csv`;a.click();URL.revokeObjectURL(url);
+              }}>下載 CSV 檔案</button>
+          </div>
+        )}
+
+        <div style={{marginTop:'1rem'}}>
+          <button style={{width:'100%',background:'var(--home-card)',border:'1px solid var(--home-border)',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',color:'var(--home-text-light)',cursor:'pointer'}}
+            onClick={onClose}>關閉</button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ──────────────────────────
@@ -1669,6 +1826,18 @@ function App() {
     showToast('已刪除');
   }
 
+
+  async function handleCsvImport(newItems) {
+    const existing = new Set(reminders.map(r => r.title + r.type));
+    const toAdd = newItems.filter(n => !existing.has(n.title + n.type));
+    if (!toAdd.length) { showToast('沒有新資料（相同名稱+類型已略過）'); setShowCsv(false); return; }
+    for (const item of toAdd) {
+      await handleSave(item);
+    }
+    setShowCsv(false);
+    showToast(`✓ 匯入 ${toAdd.length} 筆`);
+  }
+
   function handleQuickCheck(reminder) {
     if (reminder.status === 'completed') return;
     // 財務/訂閱快速打卡不詢問金額（可從卡片快速完成）
@@ -1721,6 +1890,9 @@ function App() {
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:'.6rem' }}>
             <div className={`sync-dot${isOnline?'':' offline'}`} title={isOnline?'已連線 Firebase':'本機模式'} />
+            <div style={{position:'relative'}}>
+              <div className="header-room" style={{cursor:'pointer'}} onClick={e=>{e.stopPropagation();setShowCsv(true);}}>CSV</div>
+            </div>
             <div className="header-room" onClick={handleLogout}>登出</div>
           </div>
         </div>
@@ -1850,6 +2022,13 @@ function App() {
         />
       )}
 
+      {showCsv && (
+        <ReminderCsvModal
+          items={reminders}
+          onImport={handleCsvImport}
+          onClose={() => setShowCsv(false)}
+        />
+      )}
       {/* Toast */}
       {toast && <div className="toast">{toast}</div>}
     </div>

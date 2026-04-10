@@ -14,6 +14,7 @@
 <script src="https://unpkg.com/dayjs@1.11.9/dayjs.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+<script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
 :root{
   --bg:#FDFCFA;--card:#F6F2EE;--border:#EDE4E0;
@@ -462,6 +463,99 @@ function ArticleFormModal({initial,onSave,onClose}){
   );
 }
 
+
+function WikiCsvModal({items,onImport,onClose}){
+  const[tab,setTab]=React.useState('guide');
+  const[csvText,setCsvText]=React.useState('');
+  const[preview,setPreview]=React.useState(null);
+  const[err,setErr]=React.useState('');
+  const VALID_CATS=['recipe','health','baby','home','finance','travel','tool','memo','other'];
+  const EXAMPLE=['title,category,tags,url,note','好用的嬰兒推車比較,baby,推車 育兒,https://example.com,輕便型首選','氣炸鍋雞胸肉食譜,recipe,雞肉 快手菜,https://example.com/recipe,180度20分鐘','家庭財務規劃指南,finance,理財 規劃,,個人筆記'].join('\n');
+  function handleParse(){
+    setErr('');setPreview(null);
+    if(!csvText.trim()){setErr('請貼上內容');return;}
+    const result=Papa.parse(csvText.trim(),{header:true,skipEmptyLines:true});
+    if(!result.data.length){setErr('解析失敗');return;}
+    const parsed=result.data.filter(r=>r.title?.trim()).map(r=>({
+      id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
+      title:r.title?.trim()||'',
+      category:VALID_CATS.includes(r.category?.trim())?r.category.trim():'other',
+      tags:(r.tags||'').split(/[\s,，]+/).map(t=>t.trim()).filter(Boolean),
+      url:r.url?.trim()||'',
+      imageUrl:'',
+      note:r.note?.trim()||'',
+      domain:r.url?.trim()?r.url.replace(/https?:\/\/(www\.)?/,'').split('/')[0]:'',
+      og:{},
+      createdAt:Date.now(),updatedAt:Date.now(),
+    }));
+    if(!parsed.length){setErr('沒有有效資料（title 必填）');return;}
+    setPreview(parsed);
+  }
+  function handleExport(){
+    const header='title,category,tags,url,note';
+    const rows=items.map(i=>[i.title,i.category,(i.tags||[]).join(' '),i.url||'',i.note||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+    const csv=[header,...rows].join('\n');
+    const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`wiki_${Date.now()}.csv`;a.click();URL.revokeObjectURL(url);
+  }
+  const SH={background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.85rem 1rem',fontSize:'.73rem',color:'var(--text-light)',lineHeight:1.8,marginBottom:'.75rem'};
+  const SF={background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.75rem 1rem',fontSize:'.7rem',color:'var(--text-light)',fontFamily:'monospace',lineHeight:1.8,marginBottom:'.75rem',whiteSpace:'pre-wrap',overflowX:'auto'};
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="modal-title">📊 Google Sheet 批量匯入</div>
+        <div style={{display:'flex',background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'3px',gap:'3px',marginBottom:'.85rem'}}>
+          {[['guide','📋 說明'],['import','📥 匯入'],['export','📤 匯出']].map(([k,l])=>(<button key={k} onClick={()=>setTab(k)} style={{flex:1,padding:'.5rem',border:'none',borderRadius:'.7rem',fontFamily:'inherit',fontSize:'.78rem',cursor:'pointer',background:tab===k?'var(--bg)':'transparent',color:tab===k?'var(--text)':'var(--text-light)',fontWeight:tab===k?500:300}}>{l}</button>))}
+        </div>
+        {tab==='guide'&&(<>
+          <div style={SH}>
+            <b style={{color:'var(--text)'}}>步驟：</b><br/>
+            ① 開啟 Google Sheet，第一列填欄位名稱<br/>
+            ② 填寫資料，category 只能填規定的值<br/>
+            ③ 全選 → 複製（Ctrl+C）<br/>
+            ④ 切換「匯入」→ 貼上 → 解析預覽 → 確認匯入<br/><br/>
+            <b style={{color:'var(--text)'}}>Sheet 有異動後如何更新：</b><br/>
+            在 Sheet 修改完後，重新全選複製，再次匯入。<br/>
+            ⚠️ 相同 title 的書籤會自動略過，若要修改，<br/>
+            請先在 App 刪除，再重新匯入新版本。
+          </div>
+          <div style={SH}>
+            <b style={{color:'var(--text)'}}>欄位對照：</b><br/>
+            <b style={{color:'var(--text)'}}>title</b>（必填）— 書籤標題<br/>
+            <b style={{color:'var(--text)'}}>category</b>（必填）— 只能填：<br/>
+            　recipe 食譜 / health 健康 / baby 育兒 / home 居家<br/>
+            　finance 財務 / travel 旅遊 / tool 工具 / memo 備忘 / other 其他<br/>
+            <b style={{color:'var(--text)'}}>tags</b> — 標籤，多個用空格分隔（可留空）<br/>
+            <b style={{color:'var(--text)'}}>url</b> — 網址（可留空，留空則無封面圖）<br/>
+            <b style={{color:'var(--text)'}}>note</b> — 筆記內容，支援 Markdown（可留空）
+          </div>
+          <div style={SF}>{EXAMPLE}</div>
+        </>)}
+        {tab==='import'&&(<>
+          <div style={SH}>從 Google Sheet 複製資料後貼到下方（含第一列標題）。</div>
+          <div style={{marginBottom:'.75rem'}}>
+            <textarea style={{width:'100%',minHeight:160,background:'var(--card)',border:'1.5px solid var(--border)',borderRadius:'1rem',padding:'.75rem 1rem',fontFamily:'monospace',fontSize:'.75rem',color:'var(--text)',outline:'none',resize:'vertical',lineHeight:1.6}}
+              placeholder={'title,category,tags,url,note\n嬰兒推車比較,baby,推車 育兒,https://example.com,'}
+              value={csvText} onChange={e=>{setCsvText(e.target.value);setPreview(null);setErr('');}}/>
+          </div>
+          {err&&<div style={{fontSize:'.75rem',color:'var(--danger)',marginBottom:'.75rem'}}>{err}</div>}
+          {preview&&(<div style={{background:'rgba(143,177,122,.1)',border:'1px solid rgba(143,177,122,.3)',borderRadius:'1rem',padding:'.75rem 1rem',marginBottom:'.75rem',fontSize:'.78rem',color:'var(--text)'}}>解析到 <b>{preview.length}</b> 筆<div style={{marginTop:'.4rem',color:'var(--text-light)',fontSize:'.7rem'}}>{preview.slice(0,3).map((p,i)=><div key={i}>• {p.title} — {p.category}</div>)}{preview.length>3&&<div>…還有 {preview.length-3} 筆</div>}</div></div>)}
+          <div style={{display:'flex',gap:'.75rem'}}>
+            <button style={{flex:1,background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',color:'var(--text-light)',cursor:'pointer'}} onClick={()=>{setCsvText('');setPreview(null);setErr('');}}>清除</button>
+            {!preview?<button style={{flex:2,background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer',opacity:csvText.trim()?1:.4}} onClick={handleParse} disabled={!csvText.trim()}>解析預覽</button>:<button style={{flex:2,background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer'}} onClick={()=>onImport(preview)}>確認匯入 {preview.length} 筆</button>}
+          </div>
+        </>)}
+        {tab==='export'&&(<>
+          <div style={SH}>匯出目前所有書籤，貼到 Google Sheet 編輯後再匯入更新。目前共 <b style={{color:'var(--text)'}}>{items.length}</b> 筆。</div>
+          <button style={{width:'100%',background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.85rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer'}} onClick={handleExport}>下載 CSV 檔案</button>
+        </>)}
+        <div style={{marginTop:'1rem'}}><button style={{width:'100%',background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',color:'var(--text-light)',cursor:'pointer'}} onClick={onClose}>關閉</button></div>
+      </div>
+    </div>
+  );
+}
+
 /* ── 詳情頁（全頁）── */
 function DetailPage({article,onBack,onEdit,onDelete}){
   const[confirmDel,setConfirmDel]=React.useState(false);
@@ -610,6 +704,7 @@ function App(){
   const[toast,setToast]      =React.useState(null);
   const[online,setOnline]    =React.useState(fbOk);
   const[syncing,setSyncing]  =React.useState(false);
+  const[showCsv,setShowCsv]  =React.useState(false);
   const[viewMode,setViewMode]=React.useState('grid'); // 'grid' | 'list'
   const unsub=React.useRef(null);
 
@@ -629,6 +724,17 @@ function App(){
   },[rc]);
 
   const t2=msg=>{setToast(msg);setTimeout(()=>setToast(null),2200);};
+
+
+  async function handleWikiImport(newItems){
+    const existing=new Set(articles.map(a=>a.title));
+    const toAdd=newItems.filter(n=>!existing.has(n.title));
+    if(!toAdd.length){t2('沒有新資料（相同標題已略過）');setShowCsv(false);return;}
+    const ref=aRef(rc);
+    if(ref){const b=db.batch();toAdd.forEach(item=>{const{id,...d}=item;b.set(ref.doc(id),d);});try{await b.commit();}catch{t2('⚠️ 同步失敗');}}
+    else{setArticles(a=>[...toAdd,...a]);}
+    setShowCsv(false);t2(`✓ 匯入 ${toAdd.length} 筆`);
+  }
 
   function addRecent(id){
     const nr=[id,...(LL(`wiki_recent_${rc}`)||[]).filter(x=>x!==id)].slice(0,6);
@@ -675,6 +781,7 @@ function App(){
       <DetailPage article={cur} onBack={()=>setViewItem(null)}
         onEdit={()=>{setEditItem(cur);setViewItem(null);}}
         onDelete={()=>delFn(cur.id)}/>
+      {showCsv&&<WikiCsvModal items={articles} onImport={handleWikiImport} onClose={()=>setShowCsv(false)}/>}
       {(showForm||editItem)&&<ArticleFormModal initial={editItem} onSave={saveFn} onClose={()=>{setShowForm(false);setEditItem(null);}}/>}
       {toast&&<div className="toast">{toast}</div>}
     </>);
@@ -694,6 +801,8 @@ function App(){
               <button className={`vt-btn${viewMode==='grid'?' active':''}`} onClick={()=>setViewMode('grid')} title="網格">⊞</button>
               <button className={`vt-btn${viewMode==='list'?' active':''}`} onClick={()=>setViewMode('list')} title="列表">☰</button>
             </div>
+            <div className="header-room" onClick={()=>window.location.href='index.html'}>🏡</div>
+            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>CSV</div>
             <div className="header-room" onClick={()=>{if(window.confirm('確定登出？')){if(unsub.current)unsub.current();setRc('');setArticles([]);localStorage.removeItem('last_room_wiki');}}}>登出</div>
           </div>
         </div>
@@ -749,6 +858,7 @@ function App(){
         ))}
       </div>
 
+      {showCsv&&<WikiCsvModal items={articles} onImport={handleWikiImport} onClose={()=>setShowCsv(false)}/>}
       {(showForm||editItem)&&<ArticleFormModal initial={editItem} onSave={saveFn} onClose={()=>{setShowForm(false);setEditItem(null);}}/>}
       {toast&&<div className="toast">{toast}</div>}
     </div>
