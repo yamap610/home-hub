@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>家庭數位管家</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/dayjs@1.11.9/dayjs.min.js"></script>
+<style>
+:root{--bg:#FDFCFA;--card:#F6F2EE;--border:#EDE4E0;--primary:#DCCBC3;--accent:#DDC7BF;--text:#584B42;--text-light:#8B7D75;--success:#8FB17A;--warning:#D4A574;--danger:#C9876B;--urgent:#E74C3C;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;}
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 20% 20%,rgba(220,203,195,.35) 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(221,199,191,.25) 0%,transparent 55%),var(--bg);}
+.login-logo{font-family:'Noto Serif TC',serif;font-size:2.2rem;font-weight:300;letter-spacing:.15em;margin-bottom:.4rem;text-align:center;}
+.login-sub{font-size:.78rem;color:var(--text-light);letter-spacing:.2em;margin-bottom:3rem;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:2rem;box-shadow:0 4px 24px rgba(88,75,66,.07);padding:2.5rem 2rem;width:100%;max-width:340px;}
+.login-label{font-size:.75rem;letter-spacing:.18em;color:var(--text-light);margin-bottom:.6rem;display:block;}
+.login-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:1rem;padding:.85rem 1.1rem;font-size:1.1rem;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--text);letter-spacing:.25em;text-align:center;outline:none;transition:border-color .2s;}
+.login-input:focus{border-color:var(--accent);}
+.login-input::placeholder{letter-spacing:.1em;font-size:.9rem;color:var(--primary);}
+.login-hint{font-size:.72rem;color:var(--text-light);text-align:center;margin:.6rem 0 1.8rem;}
+.btn-login{width:100%;background:var(--primary);border:none;border-radius:1rem;padding:.9rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;font-weight:500;color:var(--text);letter-spacing:.15em;cursor:pointer;transition:background .2s;}
+.btn-login:hover{background:var(--accent);}
+.quick-codes{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;}
+.quick-btn{background:var(--bg);border:1px solid var(--border);border-radius:.6rem;padding:.3rem .7rem;font-size:.78rem;color:var(--text);cursor:pointer;letter-spacing:.1em;}
+.quick-btn:hover{background:var(--primary);}
+.app-wrap{max-width:480px;margin:0 auto;padding-bottom:90px;}
+.app-header{position:sticky;top:0;z-index:100;background:rgba(253,252,250,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,0) 1.25rem 0;}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:56px;}
+.header-logo{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:400;letter-spacing:.1em;}
+.header-right{display:flex;align-items:center;gap:.6rem;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 0 2px rgba(143,177,122,.3);}
+.sync-dot.offline{background:var(--text-light);box-shadow:none;}
+.room-badge{font-size:.7rem;color:var(--text-light);background:var(--card);padding:.25rem .7rem;border-radius:.5rem;border:1px solid var(--border);cursor:pointer;letter-spacing:.08em;}
+.greeting-wrap{padding:1.5rem 1.25rem .75rem;}
+.greeting-date{font-size:.72rem;color:var(--text-light);letter-spacing:.12em;margin-bottom:.3rem;}
+.greeting-text{font-family:'Noto Serif TC',serif;font-size:1.45rem;font-weight:300;letter-spacing:.05em;line-height:1.4;}
+.greeting-sub{font-size:.78rem;color:var(--text-light);margin-top:.35rem;}
+.stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;padding:0 1rem .85rem;}
+.ss-card{background:var(--card);border:1px solid var(--border);border-radius:1.25rem;padding:.85rem .6rem;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s;}
+.ss-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(88,75,66,.1);}
+.ss-icon{font-size:1.1rem;margin-bottom:.3rem;}
+.ss-num{font-family:'Noto Serif TC',serif;font-size:1.35rem;font-weight:300;line-height:1;margin-bottom:.2rem;}
+.ss-label{font-size:.58rem;color:var(--text-light);letter-spacing:.06em;}
+.ss-urgent .ss-num{color:var(--urgent);}
+.section-header{display:flex;align-items:center;justify-content:space-between;padding:.1rem 1.25rem .55rem;}
+.section-title{font-size:.68rem;letter-spacing:.2em;color:var(--text-light);font-weight:500;}
+.section-more{font-size:.68rem;color:var(--primary);cursor:pointer;letter-spacing:.06em;}
+.urgent-list{padding:0 1rem;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.25rem;}
+.urgent-card{background:var(--card);border:1.5px solid rgba(231,76,60,.2);border-radius:1.35rem;padding:.7rem 1rem;display:flex;align-items:center;gap:.75rem;position:relative;overflow:hidden;}
+.urgent-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--urgent);border-radius:1.35rem 0 0 1.35rem;}
+.urgent-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.urgent-body{flex:1;min-width:0;}
+.urgent-title{font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.urgent-due{font-size:.68rem;color:var(--urgent);margin-top:.1rem;}
+.urgent-type{font-size:.62rem;padding:.08rem .4rem;border-radius:1rem;background:rgba(231,76,60,.1);color:var(--urgent);}
+.lowstock-strip{margin:0 1rem .25rem;background:rgba(212,165,116,.1);border:1px solid rgba(212,165,116,.3);border-radius:1.25rem;padding:.75rem 1rem;}
+.lowstock-title{font-size:.7rem;font-weight:500;color:var(--warning);margin-bottom:.4rem;}
+.lowstock-row{display:flex;justify-content:space-between;font-size:.75rem;padding:.1rem 0;}
+.bookmark-scroll{display:flex;gap:.65rem;padding:0 1rem .85rem;overflow-x:auto;scrollbar-width:none;}
+.bookmark-scroll::-webkit-scrollbar{display:none;}
+.bm-mini{background:var(--card);border:1px solid var(--border);border-radius:1.2rem;overflow:hidden;width:130px;flex-shrink:0;cursor:pointer;transition:box-shadow .15s;}
+.bm-mini:hover{box-shadow:0 3px 12px rgba(88,75,66,.1);}
+.bm-mini-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
+.bm-mini-placeholder{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:linear-gradient(135deg,var(--bg),var(--primary));}
+.bm-mini-body{padding:.45rem .6rem .55rem;}
+.bm-mini-title{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.15rem;}
+.bm-mini-domain{font-size:.6rem;color:var(--text-light);opacity:.75;}
+.monthly-card{margin:0 1rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1.1rem 1.25rem;}
+.monthly-row{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;margin-bottom:.4rem;}
+.monthly-name{display:flex;align-items:center;gap:.4rem;color:var(--text);}
+.monthly-done{opacity:.55;text-decoration:line-through;}
+.monthly-amount{font-weight:400;color:var(--text);font-family:'Noto Serif TC',serif;}
+.monthly-total-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);}
+.monthly-total-label{font-size:.7rem;color:var(--text-light);letter-spacing:.1em;}
+.monthly-total-num{font-family:'Noto Serif TC',serif;font-size:1.15rem;font-weight:300;}
+.monthly-month{font-size:.68rem;color:var(--primary);background:var(--bg);border:1px solid var(--border);border-radius:.45rem;padding:.12rem .5rem;}
+.settings-overlay{position:fixed;inset:0;background:rgba(88,75,66,.35);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+.settings-sheet{background:var(--bg);border-radius:2rem 2rem 0 0;width:100%;max-width:480px;padding:1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom,0px));}
+.settings-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.5rem;}
+.settings-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:400;letter-spacing:.1em;margin-bottom:1.5rem;text-align:center;}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 0;border-bottom:1px solid var(--border);}
+.settings-row:last-child{border-bottom:none;}
+.settings-key{font-size:.82rem;color:var(--text);}
+.settings-val{font-size:.78rem;color:var(--text-light);}
+.settings-logout{width:100%;margin-top:1.25rem;padding:.85rem;background:rgba(201,135,107,.1);border:1px solid rgba(201,135,107,.3);border-radius:1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--danger);cursor:pointer;}
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(253,252,250,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom,0px));z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:.2rem;opacity:.4;cursor:pointer;padding:.2rem .8rem;border-radius:1rem;transition:opacity .15s;}
+.nav-item.active{opacity:1;}
+.nav-item-icon{font-size:1.2rem;}
+.nav-item-label{font-size:.58rem;letter-spacing:.12em;color:var(--text-light);}
+.nav-item.active .nav-item-label{color:var(--text);font-weight:500;}
+.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.65rem 1.4rem;border-radius:2rem;font-size:.8rem;z-index:500;white-space:nowrap;animation:toastIn .25s ease forwards;pointer-events:none;}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(10px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const FIREBASE_CONFIG={apiKey:"AIzaSyAFGSQOvAp1thZkWBZ-nLHe-uR8llDQDI8",authDomain:"home-hub-be41f.firebaseapp.com",projectId:"home-hub-be41f",storageBucket:"home-hub-be41f.firebasestorage.app",messagingSenderId:"286497032414",appId:"1:286497032414:web:16d3f0242a400d0de85a4f"};
+let db=null,fbOk=false;
+try{if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();db.enablePersistence({synchronizeTabs:true}).catch(()=>{});fbOk=true;}catch(e){}
+function col(path){return db&&fbOk?db.collection(path):null;}
+
+const REMINDER_TYPE={financial:'💳',subscription:'📱',consumable:'🔄',chore:'🏠',health:'💊',other:'📌'};
+const CAT_WIKI={recipe:'🍳',health:'💊',baby:'🍼',home:'🏠',finance:'💰',travel:'✈️',tool:'🔧',memo:'📝',other:'📌'};
+const LL=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch{return null;}};
+const SL=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+
+function getGreeting(){
+  const h=dayjs().hour();
+  if(h<6)  return{text:'深夜了，注意休息',sub:'晚安 🌙'};
+  if(h<12) return{text:'早安，美好的一天',sub:'今日要完成的事都記得了嗎？'};
+  if(h<14) return{text:'午安，稍事休息',sub:'下午繼續加油 ☀️'};
+  if(h<18) return{text:'午後好',sub:'今天過得如何？'};
+  if(h<22) return{text:'晚上好',sub:'家人都平安就是最好的一天 🌿'};
+  return{text:'夜深了',sub:'記得早點休息 🌙'};
+}
+
+function LoginPage({onLogin}){
+  const[code,setCode]=React.useState('');const[err,setErr]=React.useState('');
+  function go(){const t=code.trim();if(!t){setErr('請輸入房間碼');return;}if(t.length<4){setErr('至少4位');return;}onLogin(t);}
+  return(
+    <div className="login-wrap">
+      <div className="login-logo">家庭數位管家</div>
+      <div className="login-sub">FAMILY DIGITAL BUTLER</div>
+      <div className="login-card">
+        <label className="login-label">房間碼 ROOM CODE</label>
+        <input className="login-input" placeholder="輸入你的房間碼" value={code} maxLength={12}
+          onChange={e=>{setCode(e.target.value);setErr('');}} onKeyDown={e=>e.key==='Enter'&&go()}/>
+        {err&&<div style={{fontSize:'.72rem',color:'var(--danger)',textAlign:'center',marginTop:'.4rem'}}>{err}</div>}
+        <div className="login-hint">家人共用相同房間碼，資料即時同步</div>
+        <button className="btn-login" onClick={go}>進入管家 →</button>
+        <div className="quick-codes">
+          {['DEMO','HOME','FAMILY'].map(c=>(
+            <button key={c} className="quick-btn" onClick={()=>{setCode(c);setErr('');}}>{c}</button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SettingsModal({roomCode,onClose,onLogout}){
+  return(
+    <div className="settings-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="settings-sheet">
+        <div className="settings-handle"/>
+        <div className="settings-title">設定</div>
+        <div className="settings-row"><span className="settings-key">房間碼</span><span className="settings-val">{roomCode}</span></div>
+        <div className="settings-row"><span className="settings-key">同步狀態</span><span className="settings-val">{fbOk?'✓ Firebase 已連線':'本機模式'}</span></div>
+        <div className="settings-row"><span className="settings-key">版本</span><span className="settings-val">v1.0.0</span></div>
+        <button className="settings-logout" onClick={onLogout}>登出此房間</button>
+      </div>
+    </div>
+  );
+}
+
+function BmMini({article,onClick}){
+  const[imgErr,setImgErr]=React.useState(false);
+  const img=article.imageUrl||(article.og?.ogImage)||'';
+  const catIcon=CAT_WIKI[article.category]||'📌';
+  return(
+    <div className="bm-mini" onClick={onClick}>
+      {img&&!imgErr?<img className="bm-mini-img" src={img} alt={article.title} onError={()=>setImgErr(true)}/>:<div className="bm-mini-placeholder">{catIcon}</div>}
+      <div className="bm-mini-body">
+        <div className="bm-mini-title">{article.title}</div>
+        {article.domain&&<div className="bm-mini-domain">{article.domain}</div>}
+      </div>
+    </div>
+  );
+}
+
+function App(){
+  const[rc,setRc]=React.useState(()=>{
+    const u=new URLSearchParams(window.location.search).get('room');
+    if(u){localStorage.setItem('last_room_hub',u);return u;}
+    return localStorage.getItem('last_room_hub')||'';
+  });
+  const[reminders,setReminders]=React.useState([]);
+  const[inventory,setInventory]=React.useState([]);
+  const[wardrobe,setWardrobe]  =React.useState([]);
+  const[wiki,setWiki]          =React.useState([]);
+  const[showSettings,setShowSettings]=React.useState(false);
+  const[online,setOnline]=React.useState(fbOk);
+  const[toast,setToast]  =React.useState(null);
+  const unsubs=React.useRef([]);
+
+  React.useEffect(()=>{
+    if(!rc)return;
+    localStorage.setItem('last_room_hub',rc);
+    if(!db||!fbOk){
+      setReminders(LL(`reminders_${rc}`)||[]);
+      setInventory(LL(`inv_${rc}`)||[]);
+      setWardrobe(LL(`ward2_${rc}`)||[]);
+      setWiki(LL(`wiki_${rc}`)||[]);
+      setOnline(false);return;
+    }
+    const u1=db.collection('reminders').doc(rc).collection('items').onSnapshot(s=>{setReminders(s.docs.map(d=>({id:d.id,...d.data()})));setOnline(true);},(()=>{}));
+    const u2=db.collection('inventory').doc(rc).collection('items').onSnapshot(s=>{setInventory(s.docs.map(d=>({id:d.id,...d.data()})));},(()=>{}));
+    const u3=db.collection('wardrobe').doc(rc).collection('items').onSnapshot(s=>{setWardrobe(s.docs.map(d=>({id:d.id,...d.data()})));},(()=>{}));
+    const u4=db.collection('wiki').doc(rc).collection('articles').orderBy('updatedAt','desc').limit(6).onSnapshot(s=>{setWiki(s.docs.map(d=>({id:d.id,...d.data()})));},(()=>{}));
+    unsubs.current=[u1,u2,u3,u4];
+    return()=>unsubs.current.forEach(u=>u());
+  },[rc]);
+
+  const t2=msg=>{setToast(msg);setTimeout(()=>setToast(null),2200);};
+
+  function handleLogout(){
+    unsubs.current.forEach(u=>u());unsubs.current=[];
+    setRc('');setReminders([]);setInventory([]);setWardrobe([]);setWiki([]);
+    localStorage.removeItem('last_room_hub');setShowSettings(false);
+  }
+
+  function openModule(name){
+    const map={提醒:'module-reminders.html',庫存:'module-inventory.html',衣櫥:'module-wardrobe.html',百科:'module-wiki.html'};
+    if(map[name])window.location.href=`${map[name]}?room=${encodeURIComponent(rc)}`;
+  }
+
+  const today=dayjs().format('YYYY-MM-DD');
+  const urgentReminders=reminders.filter(r=>{
+    if(r.status==='completed'||!r.dueDate)return false;
+    return dayjs(r.dueDate).diff(dayjs(today),'day')<=3;
+  }).sort((a,b)=>dayjs(a.dueDate).diff(dayjs(b.dueDate)));
+
+  const lowStock=inventory.filter(i=>i.threshold>0&&i.quantity<=i.threshold);
+
+  const thisMonth=dayjs().format('YYYY-MM');
+  const monthlyItems=reminders.filter(r=>['financial','subscription'].includes(r.type)&&r.dueDate&&dayjs(r.dueDate).format('YYYY-MM')===thisMonth&&r.amount);
+  const paidItems=monthlyItems.filter(r=>(r.completionHistory||[]).some(h=>dayjs(h.completedAt).format('YYYY-MM')===thisMonth));
+  const monthlyTotal=monthlyItems.reduce((s,r)=>s+Number(r.amount||0),0);
+
+  const greeting=getGreeting();
+  if(!rc)return <LoginPage onLogin={code=>setRc(code)}/>;
+
+  return(
+    <div className="app-wrap">
+
+      <div className="app-header">
+        <div className="header-inner">
+          <div className="header-logo">家庭數位管家</div>
+          <div className="header-right">
+            <div className={`sync-dot${online?'':' offline'}`}/>
+            <div className="room-badge" onClick={()=>setShowSettings(true)}>🏠 {rc} ⚙️</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="greeting-wrap">
+        <div className="greeting-date">{dayjs().format('YYYY年MM月DD日')} 星期{['日','一','二','三','四','五','六'][dayjs().day()]}</div>
+        <div className="greeting-text">{greeting.text}</div>
+        <div className="greeting-sub">{greeting.sub}</div>
+      </div>
+
+      <div className="stats-strip">
+        <div className="ss-card ss-urgent" onClick={()=>openModule('提醒')}>
+          <div className="ss-icon">📋</div>
+          <div className="ss-num">{urgentReminders.length}</div>
+          <div className="ss-label">急件提醒</div>
+        </div>
+        <div className="ss-card" onClick={()=>openModule('庫存')}>
+          <div className="ss-icon">📦</div>
+          <div className="ss-num" style={{color:lowStock.length>0?'var(--warning)':'var(--text)'}}>{lowStock.length}</div>
+          <div className="ss-label">低庫存</div>
+        </div>
+        <div className="ss-card" onClick={()=>openModule('衣櫥')}>
+          <div className="ss-icon">👗</div>
+          <div className="ss-num">{wardrobe.length}</div>
+          <div className="ss-label">衣物數</div>
+        </div>
+        <div className="ss-card" onClick={()=>openModule('百科')}>
+          <div className="ss-icon">📖</div>
+          <div className="ss-num">{wiki.length}</div>
+          <div className="ss-label">書籤</div>
+        </div>
+      </div>
+
+      {urgentReminders.length>0&&(
+        <>
+          <div className="section-header">
+            <div className="section-title">⚡ 急件提醒</div>
+            <div className="section-more" onClick={()=>openModule('提醒')}>全部 →</div>
+          </div>
+          <div className="urgent-list">
+            {urgentReminders.slice(0,4).map(r=>{
+              const diff=dayjs(r.dueDate).diff(dayjs(today),'day');
+              const label=diff<0?`逾期 ${Math.abs(diff)} 天`:diff===0?'今天到期':diff===1?'明天到期':`${diff} 天後`;
+              return(
+                <div key={r.id} className="urgent-card">
+                  <div className="urgent-dot" style={{background:diff<=1?'var(--urgent)':'var(--warning)'}}/>
+                  <div className="urgent-body">
+                    <div className="urgent-title">{r.title}</div>
+                    <div className="urgent-due">{label}</div>
+                  </div>
+                  <span className="urgent-type">{REMINDER_TYPE[r.type]||'📌'}</span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {monthlyItems.length>0&&(
+        <>
+          <div className="section-header" style={{marginTop:'.75rem'}}>
+            <div className="section-title">💰 本月費用</div>
+            <div className="monthly-month">{dayjs().format('MM月')}</div>
+          </div>
+          <div className="monthly-card">
+            {monthlyItems.slice(0,5).map(r=>{
+              const paid=paidItems.some(p=>p.id===r.id);
+              return(
+                <div key={r.id} className="monthly-row">
+                  <span className={`monthly-name${paid?' monthly-done':''}`}>{REMINDER_TYPE[r.type]||'💳'} {r.title}</span>
+                  <span className={`monthly-amount${paid?' monthly-done':''}`}>TWD {Number(r.amount).toLocaleString()}</span>
+                </div>
+              );
+            })}
+            {monthlyTotal>0&&(
+              <div className="monthly-total-row">
+                <span className="monthly-total-label">本月合計</span>
+                <span className="monthly-total-num">TWD {monthlyTotal.toLocaleString()}</span>
+              </div>
+            )}
+          </div>
+        </>
+      )}
+
+      {lowStock.length>0&&(
+        <>
+          <div className="section-header">
+            <div className="section-title">📦 庫存不足</div>
+            <div className="section-more" onClick={()=>openModule('庫存')}>前往補充 →</div>
+          </div>
+          <div className="lowstock-strip">
+            <div className="lowstock-title">⚠️ {lowStock.length} 個品項需要補充</div>
+            {lowStock.slice(0,4).map(i=>(
+              <div key={i.id} className="lowstock-row">
+                <span>{i.name}</span>
+                <span style={{color:'var(--warning)',fontWeight:500}}>{i.quantity}/{i.threshold} {i.unit}</span>
+              </div>
+            ))}
+            {lowStock.length>4&&<div style={{fontSize:'.68rem',color:'var(--warning)',opacity:.7,marginTop:'.2rem'}}>還有 {lowStock.length-4} 個…</div>}
+          </div>
+        </>
+      )}
+
+      {wiki.length>0&&(
+        <>
+          <div className="section-header" style={{marginTop:'.5rem'}}>
+            <div className="section-title">🔖 最近書籤</div>
+            <div className="section-more" onClick={()=>openModule('百科')}>全部 →</div>
+          </div>
+          <div className="bookmark-scroll">
+            {wiki.slice(0,5).map(a=><BmMini key={a.id} article={a} onClick={()=>openModule('百科')}/>)}
+          </div>
+        </>
+      )}
+
+      {urgentReminders.length===0&&lowStock.length===0&&reminders.length>0&&(
+        <div style={{textAlign:'center',padding:'2rem 1rem',color:'var(--text-light)'}}>
+          <div style={{fontSize:'1.5rem',marginBottom:'.5rem'}}>🌿</div>
+          <div style={{fontSize:'.85rem',lineHeight:1.8}}>一切正常，今天過得不錯！</div>
+        </div>
+      )}
+
+      {reminders.length===0&&inventory.length===0&&wiki.length===0&&(
+        <div style={{padding:'2rem 1.5rem',textAlign:'center',color:'var(--text-light)'}}>
+          <div style={{fontSize:'2rem',marginBottom:'1rem',opacity:.4}}>🏡</div>
+          <div style={{fontSize:'.85rem',lineHeight:1.9}}>歡迎使用家庭數位管家<br/>點擊下方導覽列開始記錄</div>
+        </div>
+      )}
+
+      <div className="bottom-nav">
+        {[{icon:'🏡',label:'首頁',active:true},{icon:'📋',label:'提醒',mod:'提醒'},{icon:'📦',label:'庫存',mod:'庫存'},{icon:'👗',label:'衣櫥',mod:'衣櫥'},{icon:'📖',label:'百科',mod:'百科'}].map((n,i)=>(
+          <div key={i} className={`nav-item${n.active?' active':''}`} onClick={()=>n.mod&&openModule(n.mod)}>
+            <div className="nav-item-icon">{n.icon}</div>
+            <div className="nav-item-label">{n.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {showSettings&&<SettingsModal roomCode={rc} onClose={()=>setShowSettings(false)} onLogout={handleLogout}/>}
+      {toast&&<div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
