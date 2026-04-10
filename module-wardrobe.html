@@ -283,8 +283,8 @@ function CsvImportModal({clothes, onImport, onClose}){
 @keyframes toastIn{from{transform:translateX(-50%) translateY(10px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}
 
 /* 底部導覽 */
-.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(253,252,250,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom,0px));z-index:100;}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:.2rem;opacity:.4;cursor:pointer;padding:.2rem .8rem;}
+.bottom-nav{position:fixed !important;bottom:0 !important;left:50% !important;transform:translateX(-50%) !important;width:100%;max-width:480px;background:rgba(253,252,250,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex !important;flex-direction:row !important;align-items:center;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom,0px));z-index:100;}
+.nav-item{display:flex !important;flex-direction:column !important;align-items:center;gap:.2rem;opacity:.4;cursor:pointer;padding:.2rem .8rem;}
 .nav-item.active{opacity:1;}
 .nav-item-icon{font-size:1.2rem;}
 .nav-item-label{font-size:.58rem;letter-spacing:.12em;color:var(--text-light);}
