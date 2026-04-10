@@ -139,7 +139,6 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .weather-city{font-size:.65rem;color:var(--text-light);letter-spacing:.08em;}
 .weather-advice{margin:.5rem 1rem .2rem;background:rgba(220,203,195,.25);border:1px solid var(--border);border-radius:1rem;padding:.6rem 1rem;font-size:.75rem;color:var(--text-light);line-height:1.6;}
 .weather-loading{margin:0 1rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1rem 1.25rem;font-size:.78rem;color:var(--text-light);text-align:center;}
-
 /* 設定 Modal */
 .settings-overlay{position:fixed;inset:0;background:rgba(88,75,66,.35);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
 .settings-sheet{background:var(--bg);border-radius:2rem 2rem 0 0;width:100%;max-width:480px;padding:1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom,0px));}
@@ -579,21 +578,6 @@ function App(){
       </div>
 
       {
-/* 天氣卡 */
-.weather-card{margin:0 1rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1rem 1.25rem;display:flex;align-items:center;gap:1rem;}
-.weather-left{flex:1;}
-.weather-temp-row{display:flex;align-items:baseline;gap:.5rem;margin-bottom:.2rem;}
-.weather-temp{font-family:'Noto Serif TC',serif;font-size:2.2rem;font-weight:300;line-height:1;color:var(--text);}
-.weather-unit{font-size:.8rem;color:var(--text-light);}
-.weather-desc{font-size:.8rem;color:var(--text-light);margin-bottom:.3rem;}
-.weather-range{font-size:.72rem;color:var(--text-light);}
-.weather-right{text-align:right;flex-shrink:0;}
-.weather-icon{font-size:2rem;margin-bottom:.3rem;}
-.weather-city{font-size:.65rem;color:var(--text-light);letter-spacing:.08em;}
-.weather-advice{margin:.5rem 1rem .2rem;background:rgba(220,203,195,.25);border:1px solid var(--border);border-radius:1rem;padding:.6rem 1rem;font-size:.75rem;color:var(--text-light);line-height:1.6;}
-.weather-loading{margin:0 1rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1rem 1.25rem;font-size:.78rem;color:var(--text-light);text-align:center;}
-
-/* 設定 Modal */}
       {showSettings&&<SettingsModal roomCode={rc} onClose={()=>setShowSettings(false)} onLogout={handleLogout}/>}
       {toast&&<div className="toast">{toast}</div>}
     </div>
