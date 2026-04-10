@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>家庭數位管家 — 小百科</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/dayjs@1.11.9/dayjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+<style>
+:root{
+  --bg:#FDFCFA;--card:#F6F2EE;--border:#EDE4E0;
+  --primary:#DCCBC3;--accent:#DDC7BF;
+  --text:#584B42;--text-light:#8B7D75;
+  --success:#8FB17A;--warning:#D4A574;--danger:#C9876B;--urgent:#E74C3C;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* 登入 */
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 20% 20%,rgba(220,203,195,.35) 0%,transparent 55%),var(--bg);}
+.login-logo{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:300;letter-spacing:.15em;margin-bottom:.4rem;text-align:center;}
+.login-sub{font-size:.8rem;color:var(--text-light);letter-spacing:.2em;margin-bottom:3rem;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:2rem;box-shadow:0 4px 24px rgba(88,75,66,.07);padding:2.5rem 2rem;width:100%;max-width:340px;}
+.login-label{font-size:.75rem;letter-spacing:.18em;color:var(--text-light);margin-bottom:.6rem;display:block;}
+.login-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:1rem;padding:.85rem 1.1rem;font-size:1.1rem;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--text);letter-spacing:.25em;text-align:center;outline:none;transition:border-color .2s;}
+.login-input:focus{border-color:var(--accent);}
+.login-input::placeholder{letter-spacing:.1em;font-size:.9rem;color:var(--primary);}
+.login-hint{font-size:.72rem;color:var(--text-light);text-align:center;margin:.6rem 0 1.8rem;}
+.btn-primary{width:100%;background:var(--primary);border:none;border-radius:1rem;padding:.9rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;font-weight:500;color:var(--text);letter-spacing:.15em;cursor:pointer;transition:background .2s;}
+.btn-primary:hover{background:var(--accent);}
+
+/* 框架 */
+.app-wrap{max-width:480px;margin:0 auto;padding-bottom:90px;}
+.app-header{position:sticky;top:0;z-index:100;background:rgba(253,252,250,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,0) 1.25rem 0;}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:56px;}
+.header-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:400;letter-spacing:.1em;}
+.header-right{display:flex;align-items:center;gap:.5rem;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 0 2px rgba(143,177,122,.3);}
+.sync-dot.offline{background:var(--text-light);box-shadow:none;}
+.header-room{font-size:.7rem;color:var(--text-light);background:var(--card);padding:.25rem .7rem;border-radius:.5rem;border:1px solid var(--border);cursor:pointer;}
+
+/* 搜尋 */
+.search-wrap{padding:.85rem 1rem .4rem;}
+.search-box{width:100%;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.65rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s;}
+.search-box:focus{border-color:var(--accent);}
+.search-box::placeholder{color:var(--primary);}
+
+/* 分類篩選 */
+.cat-scroll{display:flex;gap:.5rem;padding:.4rem 1rem .75rem;overflow-x:auto;scrollbar-width:none;}
+.cat-scroll::-webkit-scrollbar{display:none;}
+.cat-chip{white-space:nowrap;background:var(--card);border:1px solid var(--border);border-radius:2rem;padding:.3rem .85rem;font-size:.73rem;color:var(--text-light);cursor:pointer;transition:all .15s;}
+.cat-chip.active{background:var(--primary);border-color:var(--primary);color:var(--text);font-weight:500;}
+
+/* 最近查閱 */
+.recent-wrap{padding:0 1rem .85rem;}
+.section-title{font-size:.68rem;letter-spacing:.18em;color:var(--text-light);margin-bottom:.6rem;padding-left:.1rem;}
+.recent-scroll{display:flex;gap:.6rem;overflow-x:auto;scrollbar-width:none;}
+.recent-scroll::-webkit-scrollbar{display:none;}
+.recent-card{background:var(--card);border:1px solid var(--border);border-radius:1.1rem;padding:.65rem .85rem;min-width:130px;max-width:150px;flex-shrink:0;cursor:pointer;transition:box-shadow .15s;}
+.recent-card:hover{box-shadow:0 3px 12px rgba(88,75,66,.1);}
+.recent-title{font-size:.78rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.2rem;}
+.recent-cat{font-size:.62rem;color:var(--text-light);}
+
+/* 書籤卡片（雙欄網格）*/
+.grid-list{padding:0 1rem;display:grid;grid-template-columns:1fr 1fr;gap:.8rem;}
+
+/* 列表式瀏覽 */
+.list-view{padding:0 1rem;display:flex;flex-direction:column;gap:.55rem;}
+.lv-card{background:var(--card);border:1.5px solid var(--border);border-radius:1.35rem;overflow:hidden;cursor:pointer;display:flex;align-items:stretch;transition:box-shadow .2s,transform .15s;}
+.lv-card:hover{box-shadow:0 4px 16px rgba(88,75,66,.1);transform:translateY(-1px);}
+.lv-img{width:88px;flex-shrink:0;object-fit:cover;display:block;}
+.lv-img-placeholder{width:88px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:linear-gradient(135deg,var(--bg),var(--primary));}
+.lv-body{flex:1;min-width:0;padding:.7rem .85rem .7rem .75rem;display:flex;flex-direction:column;justify-content:center;gap:.25rem;}
+.lv-title{font-size:.84rem;font-weight:400;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.lv-meta{display:flex;align-items:center;gap:.35rem;flex-wrap:wrap;}
+.lv-domain{font-size:.62rem;color:var(--text-light);opacity:.8;}
+
+/* 切換按鈕 */
+.view-toggle{display:flex;gap:.3rem;}
+.vt-btn{width:30px;height:30px;border-radius:.65rem;border:1px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:.85rem;cursor:pointer;transition:all .15s;}
+.vt-btn.active{background:var(--text);border-color:var(--text);color:var(--bg);}
+
+.bk-card{background:var(--card);border:1.5px solid var(--border);border-radius:1.5rem;overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .15s;display:flex;flex-direction:column;}
+.bk-card:hover{box-shadow:0 6px 20px rgba(88,75,66,.11);transform:translateY(-2px);}
+
+/* OG 圖片區 */
+.bk-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;background:var(--bg);}
+.bk-img-placeholder{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--bg),var(--primary));font-size:1.8rem;}
+
+/* 卡片文字區 */
+.bk-body{padding:.6rem .7rem .75rem;display:flex;flex-direction:column;flex:1;}
+.bk-tag-row{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;margin-bottom:.35rem;}
+.bk-cat-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+.bk-cat-label{font-size:.58rem;color:var(--text-light);}
+.bk-title{font-size:.8rem;font-weight:400;line-height:1.4;margin-bottom:.3rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.bk-desc{font-size:.68rem;color:var(--text-light);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:.35rem;}
+.bk-domain{font-size:.6rem;color:var(--text-light);opacity:.7;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.bk-date{font-size:.6rem;color:var(--text-light);margin-top:auto;padding-top:.3rem;}
+
+/* 標籤 */
+.tag-pill{font-size:.58rem;padding:.08rem .38rem;border-radius:1rem;background:rgba(220,203,195,.4);color:var(--text-light);}
+
+/* 空狀態 */
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--text-light);}
+.empty-icon{font-size:2.5rem;margin-bottom:1rem;opacity:.5;}
+.empty-text{font-size:.85rem;line-height:1.8;}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));right:1.25rem;width:56px;height:56px;border-radius:50%;background:var(--text);border:none;color:var(--bg);font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(88,75,66,.3);transition:transform .2s;display:flex;align-items:center;justify-content:center;z-index:50;}
+.fab:hover{transform:scale(1.08);}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(88,75,66,.35);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-sheet{background:var(--bg);border-radius:2rem 2rem 0 0;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;padding:1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom,0px));animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.5rem;}
+.modal-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:400;letter-spacing:.1em;margin-bottom:1.5rem;text-align:center;}
+
+/* 表單 */
+.form-group{margin-bottom:1rem;}
+.form-label{display:block;font-size:.72rem;letter-spacing:.15em;color:var(--text-light);margin-bottom:.5rem;}
+.form-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.72rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--accent);}
+.form-select{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.72rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.88rem;color:var(--text);outline:none;appearance:none;cursor:pointer;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
+.modal-actions{display:flex;gap:.75rem;margin-top:1.5rem;}
+.btn-cancel{flex:1;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.82rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--text-light);cursor:pointer;}
+.btn-submit{flex:2;background:var(--text);border:none;border-radius:1rem;padding:.82rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;font-weight:500;color:var(--bg);cursor:pointer;}
+.btn-submit:disabled{opacity:.4;cursor:default;}
+.btn-danger-out{flex:1;background:rgba(201,135,107,.1);border:1px solid rgba(201,135,107,.3);border-radius:1rem;padding:.82rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--danger);cursor:pointer;}
+
+/* OG 預覽卡（表單內）*/
+.og-preview{border-radius:1.25rem;border:1px solid var(--border);overflow:hidden;margin-bottom:.75rem;background:var(--card);}
+.og-preview-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
+.og-preview-body{padding:.7rem .9rem;}
+.og-preview-title{font-size:.85rem;font-weight:500;color:var(--text);margin-bottom:.2rem;line-height:1.4;}
+.og-preview-desc{font-size:.72rem;color:var(--text-light);line-height:1.5;margin-bottom:.25rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.og-preview-domain{font-size:.65rem;color:var(--text-light);opacity:.7;}
+.og-loading{display:flex;align-items:center;justify-content:center;gap:.5rem;padding:1rem;font-size:.78rem;color:var(--text-light);}
+.og-error{padding:.65rem 1rem;font-size:.75rem;color:var(--danger);background:rgba(201,135,107,.08);border-radius:.75rem;margin-bottom:.75rem;}
+
+/* 連結輸入列（帶抓取按鈕）*/
+.url-row{display:flex;gap:.5rem;}
+.url-input{flex:1;background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.72rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.82rem;color:var(--text);outline:none;transition:border-color .2s;}
+.url-input:focus{border-color:var(--accent);}
+.fetch-btn{background:var(--text);border:none;border-radius:1rem;padding:.72rem 1rem;font-family:inherit;font-size:.78rem;color:var(--bg);cursor:pointer;white-space:nowrap;transition:opacity .15s;flex-shrink:0;}
+.fetch-btn:hover{opacity:.85;}
+.fetch-btn:disabled{opacity:.4;cursor:default;}
+
+/* Markdown 筆記 */
+.editor-tabs{display:flex;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:3px;gap:3px;margin-bottom:.65rem;}
+.editor-tab{flex:1;padding:.42rem;border:none;border-radius:.7rem;font-family:inherit;font-size:.75rem;cursor:pointer;transition:all .15s;background:transparent;color:var(--text-light);}
+.editor-tab.active{background:var(--bg);color:var(--text);font-weight:500;}
+.md-editor{width:100%;min-height:120px;background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.8rem 1rem;font-family:monospace;font-size:.8rem;color:var(--text);line-height:1.7;outline:none;resize:vertical;}
+.md-editor:focus{border-color:var(--accent);}
+.md-preview-box{min-height:80px;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.8rem 1rem;}
+
+/* Markdown body */
+.md-body{font-size:.88rem;line-height:1.85;color:var(--text);}
+.md-body h1,.md-body h2,.md-body h3{font-family:'Noto Serif TC',serif;font-weight:400;margin:1.2rem 0 .5rem;}
+.md-body h1{font-size:1.1rem;}.md-body h2{font-size:1rem;}.md-body h3{font-size:.92rem;}
+.md-body p{margin-bottom:.8rem;}
+.md-body ul,.md-body ol{margin:.4rem 0 .8rem 1.2rem;}
+.md-body li{margin-bottom:.25rem;}
+.md-body code{background:var(--card);border:1px solid var(--border);border-radius:.3rem;padding:.1rem .3rem;font-size:.8rem;font-family:monospace;}
+.md-body pre{background:var(--card);border:1px solid var(--border);border-radius:.9rem;padding:.9rem;overflow-x:auto;margin-bottom:.8rem;}
+.md-body pre code{background:none;border:none;padding:0;}
+.md-body blockquote{border-left:3px solid var(--primary);padding:.4rem .8rem;margin:.4rem 0 .8rem;color:var(--text-light);background:var(--card);border-radius:0 .65rem .65rem 0;}
+.md-body strong{font-weight:500;}
+.md-body hr{border:none;border-top:1px solid var(--border);margin:1rem 0;}
+.md-body a{color:var(--warning);text-decoration:underline;}
+
+/* 詳情頁（全頁）*/
+.detail-page{max-width:480px;margin:0 auto;padding-bottom:90px;}
+.detail-header{position:sticky;top:0;z-index:100;background:rgba(253,252,250,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,0) 1.25rem 0;}
+.detail-header-inner{display:flex;align-items:center;justify-content:space-between;height:56px;}
+.back-btn{display:flex;align-items:center;gap:.3rem;font-size:.82rem;color:var(--text-light);cursor:pointer;background:none;border:none;font-family:inherit;padding:0;}
+.back-btn:hover{color:var(--text);}
+.detail-acts{display:flex;gap:.45rem;}
+.act-btn{background:var(--card);border:1px solid var(--border);border-radius:.75rem;padding:.28rem .7rem;font-family:inherit;font-size:.73rem;color:var(--text-light);cursor:pointer;}
+.act-btn:hover{background:var(--primary);}
+.act-btn.danger{color:var(--danger);}
+.act-btn.danger:hover{background:rgba(201,135,107,.15);}
+.detail-body{padding:1.25rem 1.25rem 0;}
+
+/* OG card 大圖（詳情用）*/
+.og-card-lg{border-radius:1.5rem;border:1.5px solid var(--border);overflow:hidden;margin-bottom:1.25rem;cursor:pointer;transition:box-shadow .2s;}
+.og-card-lg:hover{box-shadow:0 4px 16px rgba(88,75,66,.12);}
+.og-card-lg-img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
+.og-card-lg-img-placeholder{width:100%;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;font-size:2.5rem;background:linear-gradient(135deg,var(--bg),var(--primary));}
+.og-card-lg-body{padding:.85rem 1rem;}
+.og-card-lg-source{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;}
+.og-source-badge{font-size:.62rem;padding:.1rem .5rem;border-radius:1rem;border:1px solid var(--border);color:var(--text-light);background:var(--bg);}
+.og-card-lg-title{font-size:.95rem;font-weight:500;color:var(--text);line-height:1.4;margin-bottom:.3rem;}
+.og-card-lg-desc{font-size:.75rem;color:var(--text-light);line-height:1.6;}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.65rem 1.4rem;border-radius:2rem;font-size:.8rem;z-index:500;white-space:nowrap;animation:toastIn .25s ease forwards;pointer-events:none;}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(10px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}
+
+/* 底部導覽 */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(253,252,250,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom,0px));z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:.2rem;opacity:.4;cursor:pointer;padding:.2rem .8rem;}
+.nav-item.active{opacity:1;}
+.nav-item-icon{font-size:1.2rem;}
+.nav-item-label{font-size:.58rem;letter-spacing:.12em;color:var(--text-light);}
+.nav-item.active .nav-item-label{color:var(--text);font-weight:500;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const FIREBASE_CONFIG={apiKey:"AIzaSyAFGSQOvAp1thZkWBZ-nLHe-uR8llDQDI8",authDomain:"home-hub-be41f.firebaseapp.com",projectId:"home-hub-be41f",storageBucket:"home-hub-be41f.firebasestorage.app",messagingSenderId:"286497032414",appId:"1:286497032414:web:16d3f0242a400d0de85a4f"};
+let db=null,fbOk=false;
+try{if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();db.enablePersistence({synchronizeTabs:true}).catch(()=>{});fbOk=true;}catch(e){}
+const aRef=rc=>db&&fbOk?db.collection('wiki').doc(rc).collection('articles'):null;
+
+const DEFAULT_CATS=[
+  {key:'recipe',  label:'食譜',   icon:'🍳', color:'#E67E22'},
+  {key:'health',  label:'健康',   icon:'💊', color:'#E74C3C'},
+  {key:'baby',    label:'育兒',   icon:'🍼', color:'#F39C12'},
+  {key:'home',    label:'居家',   icon:'🏠', color:'#2ECC71'},
+  {key:'finance', label:'財務',   icon:'💰', color:'#3498DB'},
+  {key:'travel',  label:'旅遊',   icon:'✈️', color:'#9B59B6'},
+  {key:'tool',    label:'工具',   icon:'🔧', color:'#16A085'},
+  {key:'memo',    label:'備忘',   icon:'📝', color:'#95A5A6'},
+  {key:'other',   label:'其他',   icon:'📌', color:'#7F8C8D'},
+];
+const CAT=Object.fromEntries(DEFAULT_CATS.map(c=>[c.key,c]));
+
+const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const LL=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch{return null;}};
+const SL=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+
+function renderMd(text){
+  if(!text)return'';
+  try{marked.setOptions({breaks:true,gfm:true});const raw=marked.parse(text);return typeof DOMPurify!=='undefined'?DOMPurify.sanitize(raw):raw;}catch{return text;}
+}
+
+function getDomain(url){
+  try{return new URL(url).hostname.replace('www.','');}catch{return url;}
+}
+
+/* ── OG 抓取（多代理備援）── */
+async function fetchOG(url){
+  // 方法1：jsonlink（免費 OG API，最穩定）
+  try{
+    const res=await fetch(`https://jsonlink.io/api/extract?url=${encodeURIComponent(url)}`,
+      {signal:AbortSignal.timeout(8000)});
+    if(res.ok){
+      const d=await res.json();
+      if(d.title||d.images?.[0]){
+        return{
+          ogTitle: d.title||'',
+          ogDesc:  d.description||'',
+          ogImage: d.images?.[0]||'',
+          ogUrl:   d.url||url,
+        };
+      }
+    }
+  }catch(e){}
+
+  // 方法2：microlink（另一個可靠的 OG API）
+  try{
+    const res=await fetch(`https://api.microlink.io/?url=${encodeURIComponent(url)}&screenshot=false`,
+      {signal:AbortSignal.timeout(8000)});
+    if(res.ok){
+      const d=await res.json();
+      if(d.status==='success'&&(d.data?.title||d.data?.image?.url)){
+        return{
+          ogTitle: d.data.title||'',
+          ogDesc:  d.data.description||'',
+          ogImage: d.data.image?.url||d.data.logo?.url||'',
+          ogUrl:   d.data.url||url,
+        };
+      }
+    }
+  }catch(e){}
+
+  // 方法3：allorigins 解析 HTML（最後備援）
+  try{
+    const proxy=`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+    const res=await fetch(proxy,{signal:AbortSignal.timeout(10000)});
+    if(res.ok){
+      const json=await res.json();
+      const html=json.contents||'';
+      const doc=new DOMParser().parseFromString(html,'text/html');
+      function meta(prop){
+        return doc.querySelector(`meta[property="${prop}"]`)?.content
+            || doc.querySelector(`meta[name="${prop}"]`)?.content||'';
+      }
+      const ogTitle=meta('og:title')||meta('twitter:title')||doc.title||'';
+      const ogDesc=meta('og:description')||meta('twitter:description')||meta('description')||'';
+      const ogImage=meta('og:image')||meta('twitter:image')||'';
+      if(ogTitle||ogImage){
+        return{ogTitle,ogDesc,ogImage,ogUrl:meta('og:url')||url};
+      }
+    }
+  }catch(e){}
+
+  throw new Error('所有代理均無法抓取，請手動填寫');
+}
+
+/* ── 登入 ── */
+function LoginPage({onLogin}){
+  const[code,setCode]=React.useState('');const[err,setErr]=React.useState('');
+  function go(){const t=code.trim();if(!t){setErr('請輸入房間碼');return;}if(t.length<4){setErr('至少4位');return;}onLogin(t);}
+  return(<div className="login-wrap"><div className="login-logo">家庭數位管家</div><div className="login-sub">WIKI</div><div className="login-card"><label className="login-label">房間碼 ROOM CODE</label><input className="login-input" placeholder="輸入你的房間碼" value={code} maxLength={12} onChange={e=>{setCode(e.target.value);setErr('');}} onKeyDown={e=>e.key==='Enter'&&go()}/>{err&&<div style={{fontSize:'.72rem',color:'var(--danger)',textAlign:'center',marginTop:'.4rem'}}>{err}</div>}<div className="login-hint">與家人共用相同房間碼</div><button className="btn-primary" onClick={go}>進入小百科 →</button></div></div>);
+}
+
+/* ── Markdown 編輯器 ── */
+function MdEditor({value,onChange,minHeight=120}){
+  const[tab,setTab]=React.useState('edit');
+  return(<div>
+    <div className="editor-tabs">
+      <button className={`editor-tab${tab==='edit'?' active':''}`} onClick={()=>setTab('edit')}>✏️ 筆記</button>
+      <button className={`editor-tab${tab==='preview'?' active':''}`} onClick={()=>setTab('preview')}>👁 預覽</button>
+    </div>
+    {tab==='edit'
+      ?<textarea className="md-editor" style={{minHeight}} value={value} onChange={e=>onChange(e.target.value)} placeholder={'支援 Markdown\n# 標題  **粗體**  - 清單  > 引用'}/>
+      :<div className="md-preview-box md-body" style={{minHeight}} dangerouslySetInnerHTML={{__html:renderMd(value)||'<span style="color:var(--text-light);font-size:.8rem">（尚無筆記）</span>'}}/>
+    }
+  </div>);
+}
+
+/* ── 新增/編輯 Modal ── */
+function ArticleFormModal({initial,onSave,onClose}){
+  const isEdit=!!initial?.id;
+  const[f,setF]=React.useState({
+    title:   initial?.title   ||'',
+    url:     initial?.url     ||'',
+    imageUrl:initial?.imageUrl||'',
+    category:initial?.category||'memo',
+    tags:    initial?.tags?.join(' ')||'',
+    note:    initial?.note    ||'',
+  });
+  const[og,setOg]       =React.useState(initial?.og||null);
+  const[fetching,setFetching]=React.useState(false);
+  const[fetchErr,setFetchErr]=React.useState('');
+  const s=(k,v)=>setF(x=>({...x,[k]:v}));
+
+  async function handleFetch(){
+    if(!f.url.trim())return;
+    setFetching(true);setFetchErr('');setOg(null);
+    try{
+      const data=await fetchOG(f.url.trim());
+      setOg(data);
+      if(!f.title&&data.ogTitle) s('title',data.ogTitle);
+      if(!f.imageUrl&&data.ogImage) s('imageUrl',data.ogImage);
+    }catch(e){
+      setFetchErr('自動抓取失敗（部分網站有防爬限制），請手動填寫標題與封面圖片網址');
+    }
+    setFetching(false);
+  }
+
+  // 顯示的預覽圖：手動填的優先，否則用 OG
+  const previewImg=f.imageUrl||(og?.ogImage)||'';
+  const previewTitle=f.title||(og?.ogTitle)||'';
+  const previewDesc=og?.ogDesc||'';
+
+  function save(){
+    if(!previewTitle.trim())return;
+    const tags=f.tags.split(/[\s,，]+/).map(t=>t.trim()).filter(Boolean);
+    onSave({...(initial||{}),id:initial?.id||gid(),
+      title:previewTitle, url:f.url, imageUrl:f.imageUrl||(og?.ogImage)||'',
+      category:f.category, tags, note:f.note,
+      og:{ogTitle:og?.ogTitle||'',ogDesc:og?.ogDesc||'',ogImage:og?.ogImage||'',ogUrl:og?.ogUrl||f.url},
+      domain:getDomain(f.url),
+      createdAt:initial?.createdAt||Date.now(), updatedAt:Date.now(),
+    });
+  }
+
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="modal-title">{isEdit?'編輯書籤':'新增書籤'}</div>
+
+        {/* 網址 + 抓取 */}
+        <div className="form-group">
+          <label className="form-label">網址連結</label>
+          <div className="url-row">
+            <input className="url-input" placeholder="https://..." value={f.url}
+              onChange={e=>{s('url',e.target.value);setOg(null);setFetchErr('');}}
+              onKeyDown={e=>e.key==='Enter'&&handleFetch()}/>
+            <button className="fetch-btn" onClick={handleFetch} disabled={fetching||!f.url.trim()}>
+              {fetching?'抓取中…':'抓取預覽'}
+            </button>
+          </div>
+          {fetchErr&&<div className="og-error">{fetchErr}</div>}
+        </div>
+
+        {/* OG 預覽卡 */}
+        {fetching&&(
+          <div className="og-preview">
+            <div className="og-loading">⏳ 正在抓取網站資訊…</div>
+          </div>
+        )}
+        {!fetching&&(previewImg||previewTitle||previewDesc)&&(
+          <div className="og-preview">
+            {previewImg&&<img className="og-preview-img" src={previewImg} alt="" onError={e=>e.target.style.display='none'}/>}
+            <div className="og-preview-body">
+              {previewTitle&&<div className="og-preview-title">{previewTitle}</div>}
+              {previewDesc&&<div className="og-preview-desc">{previewDesc}</div>}
+              {f.url&&<div className="og-preview-domain">{getDomain(f.url)}</div>}
+            </div>
+          </div>
+        )}
+
+        {/* 標題 */}
+        <div className="form-group">
+          <label className="form-label">標題 *</label>
+          <input className="form-input" placeholder="書籤標題（抓取後自動填入）"
+            value={f.title||(og?.ogTitle)||''} onChange={e=>s('title',e.target.value)}/>
+        </div>
+
+        {/* 圖片網址（手動覆蓋）*/}
+        <div className="form-group">
+          <label className="form-label">封面圖片網址（選填，可覆蓋抓取的圖）</label>
+          <input className="form-input" placeholder="https://... （留空使用抓取的 OG 圖片）"
+            value={f.imageUrl} onChange={e=>s('imageUrl',e.target.value)}/>
+        </div>
+
+        {/* 分類 + 標籤 */}
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label">分類</label>
+            <select className="form-select" value={f.category} onChange={e=>s('category',e.target.value)}>
+              {DEFAULT_CATS.map(c=><option key={c.key} value={c.key}>{c.icon} {c.label}</option>)}
+            </select>
+          </div>
+          <div className="form-group">
+            <label className="form-label">標籤（空格分隔）</label>
+            <input className="form-input" placeholder="例：工具 推薦" value={f.tags} onChange={e=>s('tags',e.target.value)}/>
+          </div>
+        </div>
+
+        {/* 筆記（Markdown）*/}
+        <div className="form-group">
+          <label className="form-label">筆記內容（選填）</label>
+          <MdEditor value={f.note} onChange={v=>s('note',v)}/>
+        </div>
+
+        <div className="modal-actions">
+          <button className="btn-cancel" onClick={onClose}>取消</button>
+          <button className="btn-submit" onClick={save} disabled={!previewTitle.trim()&&!f.title.trim()}>
+            {isEdit?'儲存修改':'新增'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── 詳情頁（全頁）── */
+function DetailPage({article,onBack,onEdit,onDelete}){
+  const[confirmDel,setConfirmDel]=React.useState(false);
+  const[imgErr,setImgErr]=React.useState(false);
+  const cat=CAT[article.category]||CAT.other;
+  const img=article.imageUrl||(article.og?.ogImage)||'';
+  const desc=article.og?.ogDesc||'';
+
+  if(confirmDel)return(
+    <div className="detail-page">
+      <div className="detail-header"><div className="detail-header-inner">
+        <button className="back-btn" onClick={()=>setConfirmDel(false)}>← 取消</button>
+      </div></div>
+      <div style={{textAlign:'center',padding:'4rem 2rem'}}>
+        <div style={{fontSize:'2rem',marginBottom:'1rem'}}>🗑️</div>
+        <div style={{fontFamily:'Noto Serif TC',fontSize:'1.1rem',marginBottom:'.5rem'}}>確認刪除？</div>
+        <div style={{fontSize:'.82rem',color:'var(--text-light)',lineHeight:1.7,marginBottom:'2rem'}}>「{article.title}」將被永久刪除</div>
+        <div style={{display:'flex',gap:'.75rem',maxWidth:280,margin:'0 auto'}}>
+          <button className="btn-cancel" onClick={()=>setConfirmDel(false)}>取消</button>
+          <button className="btn-danger-out" style={{background:'var(--danger)',color:'#fff',border:'none',flex:2}} onClick={onDelete}>確認刪除</button>
+        </div>
+      </div>
+    </div>
+  );
+
+  return(
+    <div className="detail-page">
+      <div className="detail-header">
+        <div className="detail-header-inner">
+          <button className="back-btn" onClick={onBack}>← 返回</button>
+          <div className="detail-acts">
+            <button className="act-btn" onClick={onEdit}>編輯</button>
+            <button className="act-btn danger" onClick={()=>setConfirmDel(true)}>刪除</button>
+          </div>
+        </div>
+      </div>
+      <div className="detail-body">
+
+        {/* OG 大卡 */}
+        {(img||article.title)&&(
+          <div className="og-card-lg" onClick={()=>article.url&&window.open(article.url,'_blank')}>
+            {img&&!imgErr
+              ?<img className="og-card-lg-img" src={img} alt={article.title} onError={()=>setImgErr(true)}/>
+              :<div className="og-card-lg-img-placeholder">{cat.icon}</div>}
+            <div className="og-card-lg-body">
+              <div className="og-card-lg-source">
+                {article.domain&&<span className="og-source-badge">🔗 {article.domain}</span>}
+                <span className="og-source-badge" style={{background:cat.color+'18',borderColor:cat.color+'40',color:cat.color}}>{cat.icon} {cat.label}</span>
+                {(article.tags||[]).map(t=><span key={t} className="tag-pill">{t}</span>)}
+              </div>
+              <div className="og-card-lg-title">{article.title}</div>
+              {desc&&<div className="og-card-lg-desc">{desc}</div>}
+            </div>
+          </div>
+        )}
+
+        {/* 更新日期 */}
+        <div style={{fontSize:'.7rem',color:'var(--text-light)',marginBottom:'1.25rem'}}>
+          更新：{dayjs(article.updatedAt).format('YYYY/MM/DD HH:mm')}
+        </div>
+
+        {/* 筆記 */}
+        {article.note&&(
+          <div>
+            <div style={{fontSize:'.68rem',letterSpacing:'.18em',color:'var(--text-light)',marginBottom:'.6rem'}}>筆記</div>
+            <div className="md-body" dangerouslySetInnerHTML={{__html:renderMd(article.note)}}/>
+          </div>
+        )}
+        {!article.note&&(
+          <div style={{textAlign:'center',padding:'2rem',color:'var(--text-light)',fontSize:'.82rem'}}>（無筆記）</div>
+        )}
+      </div>
+
+      <div className="bottom-nav">
+        {[{icon:'🏡',label:'首頁',href:'index.html'},{icon:'📋',label:'提醒',href:'module-reminders.html'},{icon:'📦',label:'庫存',href:'module-inventory.html'},{icon:'👗',label:'衣櫥',href:'module-wardrobe.html'},{icon:'📖',label:'百科',active:true}].map((n,i)=>(
+          <div key={i} className={`nav-item${n.active?' active':''}`} onClick={()=>n.href&&(window.location.href=n.href+'?room='+(new URLSearchParams(window.location.search).get('room')||''))}><div className="nav-item-icon">{n.icon}</div><div className="nav-item-label">{n.label}</div></div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── 書籤卡片 ── */
+function BookmarkCard({article,onClick}){
+  const[imgErr,setImgErr]=React.useState(false);
+  const cat=CAT[article.category]||CAT.other;
+  const img=article.imageUrl||(article.og?.ogImage)||'';
+  return(
+    <div className="bk-card" onClick={onClick}>
+      {img&&!imgErr
+        ?<img className="bk-img" src={img} alt={article.title} onError={()=>setImgErr(true)}/>
+        :<div className="bk-img-placeholder">{cat.icon}</div>}
+      <div className="bk-body">
+        <div className="bk-tag-row">
+          <div className="bk-cat-dot" style={{background:cat.color}}/>
+          <span className="bk-cat-label">{cat.label}</span>
+          {(article.tags||[]).slice(0,1).map(t=><span key={t} className="tag-pill">{t}</span>)}
+        </div>
+        <div className="bk-title">{article.title}</div>
+        {article.og?.ogDesc&&<div className="bk-desc">{article.og.ogDesc}</div>}
+        {article.domain&&<div className="bk-domain">{article.domain}</div>}
+        <div className="bk-date">{dayjs(article.updatedAt).format('MM/DD')}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── 列表式卡片 ── */
+function ListCard({article,onClick}){
+  const[imgErr,setImgErr]=React.useState(false);
+  const cat=CAT[article.category]||CAT.other;
+  const img=article.imageUrl||(article.og?.ogImage)||'';
+  return(
+    <div className="lv-card" onClick={onClick}>
+      {img&&!imgErr
+        ?<img className="lv-img" src={img} alt={article.title} onError={()=>setImgErr(true)}/>
+        :<div className="lv-img-placeholder">{cat.icon}</div>}
+      <div className="lv-body">
+        <div className="lv-title">{article.title}</div>
+        <div className="lv-meta">
+          <span className="bk-cat-dot" style={{background:cat.color,width:6,height:6,borderRadius:'50%',flexShrink:0}}/>
+          <span className="bk-cat-label">{cat.label}</span>
+          {(article.tags||[]).slice(0,2).map(t=><span key={t} className="tag-pill">{t}</span>)}
+        </div>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          {article.domain&&<div className="lv-domain">{article.domain}</div>}
+          <div className="bk-date" style={{marginLeft:'auto'}}>{dayjs(article.updatedAt).format('MM/DD')}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+function App(){
+  const[rc,setRc]=React.useState(()=>{
+    const urlRoom=new URLSearchParams(window.location.search).get('room');
+    if(urlRoom){localStorage.setItem('last_room_wiki',urlRoom);return urlRoom;}
+    return localStorage.getItem('last_room_wiki')||'';
+  });
+  const[articles,setArticles]=React.useState([]);
+  const[search,setSearch]    =React.useState('');
+  const[fCat,setFCat]        =React.useState('all');
+  const[showForm,setShowForm]=React.useState(false);
+  const[editItem,setEditItem]=React.useState(null);
+  const[viewItem,setViewItem]=React.useState(null);
+  const[recent,setRecent]    =React.useState([]);
+  const[toast,setToast]      =React.useState(null);
+  const[online,setOnline]    =React.useState(fbOk);
+  const[syncing,setSyncing]  =React.useState(false);
+  const[viewMode,setViewMode]=React.useState('grid'); // 'grid' | 'list'
+  const unsub=React.useRef(null);
+
+  React.useEffect(()=>{
+    if(!rc)return;
+    localStorage.setItem('last_room_wiki',rc);
+    const ref=aRef(rc);
+    if(ref){
+      setSyncing(true);
+      unsub.current=ref.orderBy('updatedAt','desc').onSnapshot(
+        s=>{const d=s.docs.map(doc=>({id:doc.id,...doc.data()}));setArticles(d);SL(`wiki_${rc}`,d);setSyncing(false);setOnline(true);},
+        ()=>{setArticles(LL(`wiki_${rc}`)||[]);setSyncing(false);setOnline(false);}
+      );
+    }else{setArticles(LL(`wiki_${rc}`)||[]);setOnline(false);}
+    setRecent(LL(`wiki_recent_${rc}`)||[]);
+    return()=>{if(unsub.current)unsub.current();};
+  },[rc]);
+
+  const t2=msg=>{setToast(msg);setTimeout(()=>setToast(null),2200);};
+
+  function addRecent(id){
+    const nr=[id,...(LL(`wiki_recent_${rc}`)||[]).filter(x=>x!==id)].slice(0,6);
+    SL(`wiki_recent_${rc}`,nr);setRecent(nr);
+  }
+
+  async function persist(list,action){
+    const ref=aRef(rc);
+    if(!ref){setArticles(list);SL(`wiki_${rc}`,list);return;}
+    try{
+      if(action?.type==='add'){const{id,...d}=action.item;await ref.doc(id).set(d);}
+      else if(action?.type==='update'){const{id,...d}=action.item;await ref.doc(id).set(d,{merge:true});}
+      else if(action?.type==='delete'){await ref.doc(action.id).delete();}
+    }catch{t2('⚠️ 同步失敗');setArticles(list);SL(`wiki_${rc}`,list);}
+  }
+
+  async function saveFn(item){
+    const upd=!!(item.id&&articles.find(a=>a.id===item.id));
+    const list=upd?articles.map(a=>a.id===item.id?item:a):[item,...articles];
+    await persist(list,{type:upd?'update':'add',item});
+    t2(upd?'✓ 已儲存':'✓ 已新增');setShowForm(false);setEditItem(null);
+    if(viewItem?.id===item.id)setViewItem(item);
+  }
+
+  async function delFn(id){
+    await persist(articles.filter(a=>a.id!==id),{type:'delete',id});
+    setViewItem(null);t2('已刪除');
+  }
+
+  const filtered=articles.filter(a=>{
+    if(fCat!=='all'&&a.category!==fCat)return false;
+    if(search){const q=search.toLowerCase();return a.title.toLowerCase().includes(q)||(a.note||'').toLowerCase().includes(q)||(a.tags||[]).some(t=>t.toLowerCase().includes(q))||(a.domain||'').toLowerCase().includes(q);}
+    return true;
+  });
+
+  const recentArticles=recent.map(id=>articles.find(a=>a.id===id)).filter(Boolean).slice(0,5);
+  const usedCats=DEFAULT_CATS.filter(c=>articles.some(a=>a.category===c.key));
+
+  if(!rc)return <LoginPage onLogin={code=>setRc(code)}/>;
+
+  if(viewItem){
+    const cur=articles.find(a=>a.id===viewItem.id)||viewItem;
+    return(<>
+      <DetailPage article={cur} onBack={()=>setViewItem(null)}
+        onEdit={()=>{setEditItem(cur);setViewItem(null);}}
+        onDelete={()=>delFn(cur.id)}/>
+      {(showForm||editItem)&&<ArticleFormModal initial={editItem} onSave={saveFn} onClose={()=>{setShowForm(false);setEditItem(null);}}/>}
+      {toast&&<div className="toast">{toast}</div>}
+    </>);
+  }
+
+  return(
+    <div className="app-wrap">
+      <div className="app-header">
+        <div className="header-inner">
+          <div style={{display:'flex',alignItems:'center',gap:'.6rem'}}>
+            <div className="header-title">小百科</div>
+            {syncing&&<div style={{fontSize:'.65rem',color:'var(--text-light)'}}>同步中…</div>}
+          </div>
+          <div className="header-right">
+            <div className={`sync-dot${online?'':' offline'}`}/>
+            <div className="view-toggle">
+              <button className={`vt-btn${viewMode==='grid'?' active':''}`} onClick={()=>setViewMode('grid')} title="網格">⊞</button>
+              <button className={`vt-btn${viewMode==='list'?' active':''}`} onClick={()=>setViewMode('list')} title="列表">☰</button>
+            </div>
+            <div className="header-room" onClick={()=>{if(window.confirm('確定登出？')){if(unsub.current)unsub.current();setRc('');setArticles([]);localStorage.removeItem('last_room_wiki');}}}>登出</div>
+          </div>
+        </div>
+      </div>
+
+      <div className="search-wrap">
+        <input className="search-box" placeholder="🔍 搜尋標題、標籤、網域…" value={search} onChange={e=>setSearch(e.target.value)}/>
+      </div>
+
+      <div className="cat-scroll">
+        <button className={`cat-chip${fCat==='all'?' active':''}`} onClick={()=>setFCat('all')}>全部（{articles.length}）</button>
+        {usedCats.map(c=>(
+          <button key={c.key} className={`cat-chip${fCat===c.key?' active':''}`} onClick={()=>setFCat(c.key)}>
+            {c.icon} {c.label}（{articles.filter(a=>a.category===c.key).length}）
+          </button>
+        ))}
+      </div>
+
+      {!search&&fCat==='all'&&recentArticles.length>0&&(
+        <div className="recent-wrap">
+          <div className="section-title">最近查閱</div>
+          <div className="recent-scroll">
+            {recentArticles.map(a=>{
+              const cat=CAT[a.category]||CAT.other;
+              return(<div key={a.id} className="recent-card" onClick={()=>{addRecent(a.id);setViewItem(a);}}>
+                <div className="recent-title">{a.title}</div>
+                <div className="recent-cat">{cat.icon} {cat.label}</div>
+              </div>);
+            })}
+          </div>
+        </div>
+      )}
+
+      {articles.length===0?(
+        <div className="empty-state"><div className="empty-icon">🔖</div><div className="empty-text">還沒有書籤<br/>點 ＋ 貼上網址，自動抓取預覽！</div></div>
+      ):filtered.length===0?(
+        <div className="empty-state"><div className="empty-icon">🔍</div><div className="empty-text">找不到符合條件的書籤</div></div>
+      ):viewMode==='grid'?(
+        <div className="grid-list">
+          {filtered.map(a=><BookmarkCard key={a.id} article={a} onClick={()=>{addRecent(a.id);setViewItem(a);}}/>)}
+        </div>
+      ):(
+        <div className="list-view">
+          {filtered.map(a=><ListCard key={a.id} article={a} onClick={()=>{addRecent(a.id);setViewItem(a);}}/>)}
+        </div>
+      )}
+
+      <button className="fab" onClick={()=>{setEditItem(null);setShowForm(true);}}>＋</button>
+
+      <div className="bottom-nav">
+        {[{icon:'🏡',label:'首頁',href:'index.html'},{icon:'📋',label:'提醒',href:'module-reminders.html'},{icon:'📦',label:'庫存',href:'module-inventory.html'},{icon:'👗',label:'衣櫥',href:'module-wardrobe.html'},{icon:'📖',label:'百科',active:true}].map((n,i)=>(
+          <div key={i} className={`nav-item${n.active?' active':''}`} onClick={()=>n.href&&(window.location.href=n.href+'?room='+rc)}><div className="nav-item-icon">{n.icon}</div><div className="nav-item-label">{n.label}</div></div>
+        ))}
+      </div>
+
+      {(showForm||editItem)&&<ArticleFormModal initial={editItem} onSave={saveFn} onClose={()=>{setShowForm(false);setEditItem(null);}}/>}
+      {toast&&<div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

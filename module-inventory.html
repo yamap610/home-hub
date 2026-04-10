@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>家庭數位管家 — 庫存管理</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/dayjs@1.11.9/dayjs.min.js"></script>
+<script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
+
+<style>
+:root {
+  --bg:#FDFCFA; --card:#F6F2EE; --border:#EDE4E0;
+  --primary:#DCCBC3; --accent:#DDC7BF;
+  --text:#584B42; --text-light:#8B7D75;
+  --success:#8FB17A; --warning:#D4A574; --danger:#C9876B; --urgent:#E74C3C;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;}
+
+/* 登入 */
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 20% 20%,rgba(220,203,195,.35) 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(221,199,191,.25) 0%,transparent 55%),var(--bg);}
+.login-logo{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:300;letter-spacing:.15em;margin-bottom:.4rem;text-align:center;}
+.login-sub{font-size:.8rem;color:var(--text-light);letter-spacing:.2em;margin-bottom:3rem;}
+.login-card{background:var(--card);border:1px solid var(--border);border-radius:2rem;box-shadow:0 4px 24px rgba(88,75,66,.07);padding:2.5rem 2rem;width:100%;max-width:340px;}
+.login-label{font-size:.75rem;letter-spacing:.18em;color:var(--text-light);margin-bottom:.6rem;display:block;}
+.login-input{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:1rem;padding:.85rem 1.1rem;font-size:1.1rem;font-family:'Zen Kaku Gothic New',sans-serif;color:var(--text);letter-spacing:.25em;text-align:center;outline:none;transition:border-color .2s;}
+.login-input:focus{border-color:var(--accent);}
+.login-input::placeholder{letter-spacing:.1em;font-size:.9rem;color:var(--primary);}
+.login-hint{font-size:.72rem;color:var(--text-light);text-align:center;margin:.6rem 0 1.8rem;}
+.btn-primary{width:100%;background:var(--primary);border:none;border-radius:1rem;padding:.9rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;font-weight:500;color:var(--text);letter-spacing:.15em;cursor:pointer;transition:background .2s,transform .1s;}
+.btn-primary:hover{background:var(--accent);transform:translateY(-1px);}
+
+/* 框架 */
+.app-wrap{max-width:480px;margin:0 auto;padding-bottom:90px;}
+
+/* Header */
+.app-header{position:sticky;top:0;z-index:100;background:rgba(253,252,250,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,0) 1.25rem 0;}
+.header-inner{display:flex;align-items:center;justify-content:space-between;height:56px;}
+.header-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:400;letter-spacing:.1em;}
+.header-right{display:flex;align-items:center;gap:.5rem;}
+.sync-dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 0 2px rgba(143,177,122,.3);}
+.sync-dot.offline{background:var(--text-light);box-shadow:none;}
+.header-room{font-size:.7rem;color:var(--text-light);letter-spacing:.1em;background:var(--card);padding:.25rem .7rem;border-radius:.5rem;border:1px solid var(--border);cursor:pointer;}
+.header-more{width:30px;height:30px;border-radius:50%;background:var(--card);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--text-light);position:relative;}
+.more-menu{position:absolute;top:36px;right:0;background:var(--bg);border:1px solid var(--border);border-radius:1rem;box-shadow:0 4px 20px rgba(88,75,66,.12);min-width:160px;z-index:300;overflow:hidden;}
+.more-menu-item{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;font-size:.82rem;color:var(--text);cursor:pointer;transition:background .15s;}
+.more-menu-item:hover{background:var(--card);}
+
+/* 統計 */
+.stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;padding:1.25rem 1rem .75rem;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:1.25rem;padding:1rem .75rem;text-align:center;box-shadow:0 2px 8px rgba(88,75,66,.05);transition:transform .15s;}
+.stat-card.clickable{cursor:pointer;}
+.stat-card.clickable:hover{transform:translateY(-2px);}
+.stat-num{font-family:'Noto Serif TC',serif;font-size:1.6rem;font-weight:300;line-height:1;margin-bottom:.3rem;}
+.stat-label{font-size:.65rem;color:var(--text-light);letter-spacing:.1em;}
+.stat-low .stat-num{color:var(--urgent);}
+
+/* 雙分頁 */
+.tabs-wrap{padding:0 1rem .75rem;}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--card);border:1px solid var(--border);border-radius:1.25rem;padding:4px;gap:4px;}
+.tab-btn{border:none;border-radius:1rem;padding:.6rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.82rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:.4rem;background:transparent;color:var(--text-light);}
+.tab-btn.active{background:var(--bg);color:var(--text);font-weight:500;box-shadow:0 1px 6px rgba(88,75,66,.1);}
+.tab-badge{background:var(--urgent);color:#fff;border-radius:1rem;font-size:.6rem;padding:.05rem .4rem;font-weight:500;min-width:16px;text-align:center;}
+
+/* 搜尋 */
+.search-wrap{padding:0 1rem .5rem;}
+.search-box{width:100%;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.65rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s;}
+.search-box:focus{border-color:var(--accent);}
+.search-box::placeholder{color:var(--primary);}
+
+/* 篩選 chips */
+.filter-scroll{display:flex;gap:.5rem;padding:0 1rem .75rem;overflow-x:auto;scrollbar-width:none;}
+.filter-scroll::-webkit-scrollbar{display:none;}
+.filter-chip{white-space:nowrap;background:var(--card);border:1px solid var(--border);border-radius:2rem;padding:.32rem .85rem;font-size:.73rem;color:var(--text-light);cursor:pointer;transition:all .15s;}
+.filter-chip.active{background:var(--primary);border-color:var(--primary);color:var(--text);font-weight:500;}
+
+/* Accordion */
+.acc-group{margin-bottom:.2rem;}
+.acc-header{display:flex;align-items:center;gap:.6rem;padding:.65rem 1rem;cursor:pointer;user-select:none;border-radius:1rem;margin:0 .25rem;transition:background .15s;}
+.acc-header:hover{background:var(--card);}
+.acc-arrow{font-size:.65rem;color:var(--text-light);transition:transform .2s;flex-shrink:0;}
+.acc-arrow.open{transform:rotate(90deg);}
+.acc-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.acc-title{font-size:.73rem;letter-spacing:.15em;color:var(--text-light);font-weight:500;flex:1;}
+.acc-count{font-size:.65rem;color:var(--primary);background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.08rem .45rem;}
+.acc-body{padding:0 .5rem .4rem;display:flex;flex-direction:column;gap:.45rem;}
+
+/* 庫存卡片（緊湊）*/
+.item-card{background:var(--card);border:1px solid var(--border);border-radius:1.35rem;padding:.65rem .95rem .65rem .85rem;box-shadow:0 1px 5px rgba(88,75,66,.05);display:flex;align-items:center;gap:.65rem;cursor:pointer;transition:box-shadow .2s,transform .15s;position:relative;overflow:hidden;}
+.item-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:1.35rem 0 0 1.35rem;background:var(--card-accent,var(--primary));}
+.item-card:hover{box-shadow:0 4px 14px rgba(88,75,66,.1);transform:translateY(-1px);}
+.item-icon{width:32px;height:32px;border-radius:.7rem;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:var(--bg);border:1px solid var(--border);}
+.item-body{flex:1;min-width:0;}
+.item-name{font-size:.87rem;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.12rem;}
+.item-meta{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;}
+.item-loc{font-size:.61rem;color:var(--text-light);}
+.low-badge{font-size:.59rem;color:var(--urgent);background:rgba(231,76,60,.1);border-radius:1rem;padding:.07rem .38rem;font-weight:500;}
+.item-right{display:flex;flex-direction:column;align-items:flex-end;gap:.28rem;flex-shrink:0;}
+.qty-display{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:300;line-height:1;}
+.qty-unit{font-size:.58rem;color:var(--text-light);}
+.qty-controls{display:flex;align-items:center;gap:.28rem;}
+.qty-btn{width:23px;height:23px;border-radius:50%;border:1px solid var(--border);background:var(--bg);font-size:.9rem;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0;line-height:1;}
+.qty-btn:hover{background:var(--primary);border-color:var(--primary);}
+.qty-btn:disabled{opacity:.32;cursor:default;}
+
+/* 待買清單 */
+.shopping-wrap{padding:0 1rem;}
+.shopping-hint{font-size:.75rem;color:var(--text-light);line-height:1.7;margin-bottom:.85rem;padding:.7rem 1rem;background:var(--card);border:1px solid var(--border);border-radius:1.1rem;}
+.shopping-item{display:flex;align-items:center;gap:.7rem;padding:.6rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:1.2rem;margin-bottom:.45rem;transition:opacity .2s;}
+.shopping-item.bought{opacity:.4;}
+.s-check{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.s-check:hover,.s-check.checked{background:var(--success);border-color:var(--success);}
+.s-check.checked::after{content:'✓';color:#fff;font-size:.7rem;}
+.s-body{flex:1;min-width:0;}
+.s-name{font-size:.84rem;color:var(--text);margin-bottom:.08rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.s-name.checked{text-decoration:line-through;color:var(--text-light);}
+.s-loc{font-size:.63rem;color:var(--text-light);}
+.s-qty{font-size:.7rem;color:var(--urgent);font-weight:500;white-space:nowrap;flex-shrink:0;}
+.shopping-copy-btn{width:100%;margin-top:.5rem;padding:.62rem;background:var(--bg);border:1px solid var(--border);border-radius:1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.78rem;color:var(--text-light);cursor:pointer;transition:background .15s;}
+.shopping-copy-btn:hover{background:var(--card);}
+.shopping-empty{text-align:center;padding:3rem 2rem;color:var(--text-light);}
+
+/* 空狀態 */
+.empty-state{text-align:center;padding:4rem 2rem;color:var(--text-light);}
+.empty-icon{font-size:2.5rem;margin-bottom:1rem;opacity:.5;}
+.empty-text{font-size:.85rem;letter-spacing:.05em;line-height:1.8;}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));right:1.25rem;width:56px;height:56px;border-radius:50%;background:var(--text);border:none;color:var(--bg);font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(88,75,66,.3);transition:transform .2s;display:flex;align-items:center;justify-content:center;z-index:50;}
+.fab:hover{transform:scale(1.08);}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(88,75,66,.35);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+.modal-sheet{background:var(--bg);border-radius:2rem 2rem 0 0;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;padding:1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom,0px));animation:slideUp .25s ease;}
+@keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.5rem;}
+.modal-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:400;letter-spacing:.1em;margin-bottom:1.5rem;text-align:center;}
+
+/* 表單 */
+.form-group{margin-bottom:1.1rem;}
+.form-label{display:block;font-size:.72rem;letter-spacing:.15em;color:var(--text-light);margin-bottom:.5rem;}
+.form-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.75rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s;}
+.form-input:focus{border-color:var(--accent);}
+.form-select{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.75rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;color:var(--text);outline:none;appearance:none;cursor:pointer;}
+.form-row-3{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.75rem;}
+.modal-actions{display:flex;gap:.75rem;margin-top:1.5rem;}
+.btn-cancel{flex:1;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.85rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--text-light);cursor:pointer;transition:background .15s;}
+.btn-cancel:hover{background:var(--border);}
+.btn-submit{flex:2;background:var(--text);border:none;border-radius:1rem;padding:.85rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;font-weight:500;color:var(--bg);cursor:pointer;letter-spacing:.1em;transition:opacity .15s;}
+.btn-submit:hover{opacity:.85;}
+.btn-submit:disabled{opacity:.4;cursor:default;}
+.btn-danger-out{flex:1;background:rgba(201,135,107,.1);border:1px solid rgba(201,135,107,.3);border-radius:1rem;padding:.85rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--danger);cursor:pointer;transition:background .15s;}
+.btn-danger-out:hover{background:rgba(201,135,107,.2);}
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;}
+.cat-btn{background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.6rem .3rem;text-align:center;cursor:pointer;transition:all .15s;}
+.cat-btn-icon{font-size:1.05rem;display:block;margin-bottom:.15rem;}
+.cat-btn-text{font-size:.6rem;color:var(--text-light);}
+.cat-btn.selected{background:var(--primary);border-color:var(--primary);}
+.cat-btn.selected .cat-btn-text{color:var(--text);font-weight:500;}
+
+/* 詳情 */
+.detail-header{display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;}
+.detail-icon{width:52px;height:52px;border-radius:1.2rem;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.detail-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:400;}
+.detail-sub{font-size:.7rem;color:var(--text-light);margin-top:.2rem;}
+.detail-qty-card{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1.1rem 1.25rem;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;}
+.detail-qty-label{font-size:.68rem;color:var(--text-light);letter-spacing:.12em;margin-bottom:.35rem;}
+.detail-qty-num{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:300;line-height:1;}
+.detail-qty-unit{font-size:.78rem;color:var(--text-light);margin-left:.3rem;}
+.detail-qty-controls{display:flex;gap:.5rem;}
+.qty-btn-lg{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);font-size:1.2rem;color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;}
+.qty-btn-lg:hover{background:var(--primary);border-color:var(--primary);}
+.qty-btn-lg:disabled{opacity:.35;cursor:default;}
+.detail-info-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem;}
+.detail-info-item{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.7rem .85rem;}
+.detail-info-label{font-size:.63rem;color:var(--text-light);letter-spacing:.12em;margin-bottom:.25rem;}
+.detail-info-value{font-size:.85rem;color:var(--text);}
+.delete-confirm{text-align:center;padding:1rem 0;}
+.delete-icon{font-size:2rem;margin-bottom:1rem;}
+.delete-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;margin-bottom:.5rem;}
+.delete-sub{font-size:.82rem;color:var(--text-light);line-height:1.7;}
+.csv-format{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.75rem 1rem;font-size:.72rem;color:var(--text-light);font-family:monospace;line-height:1.6;margin-bottom:.6rem;}
+
+/* Toast */
+.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.65rem 1.4rem;border-radius:2rem;font-size:.8rem;z-index:500;white-space:nowrap;animation:toastIn .25s ease forwards;pointer-events:none;}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(10px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}
+
+/* 底部導覽 */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:rgba(253,252,250,.95);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom,0px));z-index:100;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:.2rem;opacity:.4;cursor:pointer;padding:.2rem .8rem;border-radius:1rem;}
+.nav-item.active{opacity:1;}
+.nav-item-icon{font-size:1.2rem;}
+.nav-item-label{font-size:.58rem;letter-spacing:.12em;color:var(--text-light);}
+.nav-item.active .nav-item-label{color:var(--text);font-weight:500;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyAFGSQOvAp1thZkWBZ-nLHe-uR8llDQDI8",
+  authDomain:        "home-hub-be41f.firebaseapp.com",
+  projectId:         "home-hub-be41f",
+  storageBucket:     "home-hub-be41f.firebasestorage.app",
+  messagingSenderId: "286497032414",
+  appId:             "1:286497032414:web:16d3f0242a400d0de85a4f",
+};
+let db=null, firebaseReady=false;
+try {
+  if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  db=firebase.firestore();
+  db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+  firebaseReady=FIREBASE_CONFIG.apiKey!=='YOUR_API_KEY';
+} catch(e){}
+function invRef(rc){ return db&&firebaseReady ? db.collection('inventory').doc(rc).collection('items') : null; }
+
+const CATS=[
+  {key:'food',   label:'食品',   icon:'🥫',color:'#E67E22'},
+  {key:'drink',  label:'飲料',   icon:'🧃',color:'#3498DB'},
+  {key:'frozen', label:'冷凍',   icon:'🧊',color:'#5DADE2'},
+  {key:'clean',  label:'清潔',   icon:'🧹',color:'#2ECC71'},
+  {key:'bath',   label:'浴室',   icon:'🧴',color:'#9B59B6'},
+  {key:'medical',label:'藥品',   icon:'💊',color:'#E74C3C'},
+  {key:'baby',   label:'嬰幼兒', icon:'🍼',color:'#F39C12'},
+  {key:'kitchen',label:'廚房',   icon:'🍳',color:'#E91E63'},
+  {key:'pet',    label:'寵物',   icon:'🐾',color:'#795548'},
+  {key:'office', label:'文具',   icon:'✏️',color:'#607D8B'},
+  {key:'other',  label:'其他',   icon:'📦',color:'#95A5A6'},
+];
+const CAT=Object.fromEntries(CATS.map(c=>[c.key,c]));
+const UNITS=['個','盒','包','袋','瓶','罐','條','片','顆','kg','g','L','ml','捲','組','雙','件','份'];
+const genId=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const isLow=item=>item.threshold>0&&item.quantity<=item.threshold;
+const loadL=rc=>{try{return JSON.parse(localStorage.getItem(`inv_${rc}`)||'[]');}catch{return[];}};
+const saveL=(rc,d)=>{try{localStorage.setItem(`inv_${rc}`,JSON.stringify(d));}catch{}};
+
+/* ── 登入 ── */
+function LoginPage({onLogin}){
+  const[code,setCode]=React.useState('');
+  const[err,setErr]=React.useState('');
+  function go(){const t=code.trim();if(!t){setErr('請輸入房間碼');return;}if(t.length<4){setErr('至少 4 位');return;}onLogin(t);}
+  return(
+    <div className="login-wrap">
+      <div className="login-logo">家庭數位管家</div>
+      <div className="login-sub">INVENTORY</div>
+      <div className="login-card">
+        <label className="login-label">房間碼 ROOM CODE</label>
+        <input className="login-input" placeholder="輸入你的房間碼" value={code} maxLength={12}
+          onChange={e=>{setCode(e.target.value);setErr('');}} onKeyDown={e=>e.key==='Enter'&&go()}/>
+        {err&&<div style={{fontSize:'.72rem',color:'var(--danger)',textAlign:'center',marginTop:'.4rem'}}>{err}</div>}
+        <div className="login-hint">與家人共用相同房間碼</div>
+        <button className="btn-primary" onClick={go}>進入庫存 →</button>
+      </div>
+    </div>
+  );
+}
+
+/* ── 表單 Modal ── */
+function FormModal({initial,onSave,onClose}){
+  const isEdit=!!initial?.id;
+  const[f,setF]=React.useState({name:initial?.name||'',category:initial?.category||'food',quantity:initial?.quantity??1,unit:initial?.unit||'個',threshold:initial?.threshold??1,barcode:initial?.barcode||'',location:initial?.location||'',note:initial?.note||''});
+  const s=(k,v)=>setF(p=>({...p,[k]:v}));
+  function save(){
+    if(!f.name.trim())return;
+    onSave({...(initial||{}),id:initial?.id||genId(),...f,quantity:Number(f.quantity)||0,threshold:Number(f.threshold)||0,updatedAt:Date.now(),createdAt:initial?.createdAt||Date.now()});
+  }
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="modal-title">{isEdit?'編輯庫存':'新增庫存'}</div>
+        <div className="form-group">
+          <label className="form-label">分類</label>
+          <div className="cat-grid">{CATS.map(c=>(
+            <button key={c.key} className={`cat-btn${f.category===c.key?' selected':''}`} onClick={()=>s('category',c.key)}>
+              <span className="cat-btn-icon">{c.icon}</span><span className="cat-btn-text">{c.label}</span>
+            </button>
+          ))}</div>
+        </div>
+        <div className="form-group">
+          <label className="form-label">品項名稱 *</label>
+          <input className="form-input" placeholder="例：衛生紙、雞蛋、洗碗精" value={f.name} onChange={e=>s('name',e.target.value)}/>
+        </div>
+        <div className="form-row-3">
+          <div className="form-group"><label className="form-label">目前數量</label><input type="number" className="form-input" min="0" value={f.quantity} onChange={e=>s('quantity',e.target.value)}/></div>
+          <div className="form-group"><label className="form-label">單位</label><select className="form-select" value={f.unit} onChange={e=>s('unit',e.target.value)}>{UNITS.map(u=><option key={u} value={u}>{u}</option>)}</select></div>
+          <div className="form-group"><label className="form-label">警告值</label><input type="number" className="form-input" min="0" value={f.threshold} onChange={e=>s('threshold',e.target.value)}/></div>
+        </div>
+        <div className="form-group"><label className="form-label">擺放位置（選填）</label><input className="form-input" placeholder="例：廚房下層、浴室鏡櫃" value={f.location} onChange={e=>s('location',e.target.value)}/></div>
+        <div className="form-group"><label className="form-label">條碼（選填）</label><input className="form-input" placeholder="掃描後貼上" value={f.barcode} onChange={e=>s('barcode',e.target.value)}/></div>
+        <div className="form-group"><label className="form-label">備註（選填）</label><input className="form-input" value={f.note} onChange={e=>s('note',e.target.value)}/></div>
+        <div className="modal-actions">
+          <button className="btn-cancel" onClick={onClose}>取消</button>
+          <button className="btn-submit" onClick={save} disabled={!f.name.trim()}>{isEdit?'儲存修改':'新增'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── 詳情 Modal ── */
+function DetailModal({item,onClose,onEdit,onDelete,onQty}){
+  const[del,setDel]=React.useState(false);
+  const cat=CAT[item.category]||CAT.other;
+  const low=isLow(item);
+  if(del)return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setDel(false)}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="delete-confirm">
+          <div className="delete-icon">🗑️</div>
+          <div className="delete-title">確認刪除？</div>
+          <div className="delete-sub">「{item.name}」將被永久刪除<br/>此操作無法復原</div>
+        </div>
+        <div className="modal-actions">
+          <button className="btn-cancel" onClick={()=>setDel(false)}>取消</button>
+          <button className="btn-danger-out" style={{background:'var(--danger)',color:'#fff',border:'none'}} onClick={onDelete}>確認刪除</button>
+        </div>
+      </div>
+    </div>
+  );
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="detail-header">
+          <div className="detail-icon">{cat.icon}</div>
+          <div>
+            <div className="detail-title">{item.name}</div>
+            <div className="detail-sub">{cat.label}{item.location&&<span style={{marginLeft:'.5rem'}}>📍 {item.location}</span>}</div>
+          </div>
+        </div>
+        <div className="detail-qty-card" style={{borderColor:low?'rgba(231,76,60,.3)':'var(--border)'}}>
+          <div>
+            <div className="detail-qty-label">{low?'⚠️ 庫存不足':'目前庫存'}</div>
+            <div><span className="detail-qty-num" style={{color:low?'var(--urgent)':'var(--text)'}}>{item.quantity}</span><span className="detail-qty-unit">{item.unit}</span></div>
+            {item.threshold>0&&<div style={{fontSize:'.65rem',color:'var(--text-light)',marginTop:'.2rem'}}>警告值：{item.threshold} {item.unit}</div>}
+          </div>
+          <div className="detail-qty-controls">
+            <button className="qty-btn-lg" disabled={item.quantity<=0} onClick={()=>onQty(item,-1)}>－</button>
+            <button className="qty-btn-lg" onClick={()=>onQty(item,1)}>＋</button>
+          </div>
+        </div>
+        <div className="detail-info-grid">
+          <div className="detail-info-item"><div className="detail-info-label">分類</div><div className="detail-info-value">{cat.icon} {cat.label}</div></div>
+          <div className="detail-info-item"><div className="detail-info-label">單位</div><div className="detail-info-value">{item.unit}</div></div>
+          {item.location&&<div className="detail-info-item" style={{gridColumn:'1/-1'}}><div className="detail-info-label">擺放位置</div><div className="detail-info-value">📍 {item.location}</div></div>}
+          {item.barcode&&<div className="detail-info-item"><div className="detail-info-label">條碼</div><div className="detail-info-value" style={{fontFamily:'monospace',fontSize:'.8rem'}}>{item.barcode}</div></div>}
+          {item.note&&<div className="detail-info-item"><div className="detail-info-label">備註</div><div className="detail-info-value">{item.note}</div></div>}
+          <div className="detail-info-item"><div className="detail-info-label">最後更新</div><div className="detail-info-value">{dayjs(item.updatedAt).format('MM/DD HH:mm')}</div></div>
+        </div>
+        <div className="modal-actions">
+          <button className="btn-danger-out" onClick={()=>setDel(true)}>刪除</button>
+          <button className="btn-cancel" onClick={onEdit}>編輯</button>
+          <button className="btn-submit" onClick={onClose}>關閉</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── CSV Modal ── */
+function CsvModal({items,roomCode,onImport,onClose}){
+  const[tab,setTab]=React.useState('export');
+  const[csv,setCsv]=React.useState('');
+  const[preview,setPreview]=React.useState(null);
+  function doExport(){
+    const h='name,category,quantity,unit,threshold,barcode,location,note';
+    const rows=items.map(i=>[i.name,i.category,i.quantity,i.unit,i.threshold||0,i.barcode||'',i.location||'',i.note||''].map(v=>`"${String(v).replace(/"/g,'""')}"`).join(','));
+    const blob=new Blob(['\uFEFF'+[h,...rows].join('\n')],{type:'text/csv;charset=utf-8;'});
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`inventory_${roomCode}_${dayjs().format('YYYYMMDD')}.csv`;a.click();
+  }
+  function doParse(){
+    const r=Papa.parse(csv.trim(),{header:true,skipEmptyLines:true});
+    setPreview(r.data.filter(row=>row.name?.trim()).map(row=>({id:genId(),name:row.name.trim(),category:CATS.find(c=>c.key===row.category?.trim())?row.category.trim():'other',quantity:Number(row.quantity)||0,unit:row.unit?.trim()||'個',threshold:Number(row.threshold)||0,barcode:row.barcode?.trim()||'',location:row.location?.trim()||'',note:row.note?.trim()||'',createdAt:Date.now(),updatedAt:Date.now()})));
+  }
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="modal-title">CSV 匯入 / 匯出</div>
+        <div style={{display:'flex',gap:'.5rem',marginBottom:'1.25rem'}}>
+          {['export','import'].map(t=>(
+            <button key={t} onClick={()=>setTab(t)} style={{flex:1,padding:'.6rem',borderRadius:'1rem',border:`1.5px solid ${tab===t?'var(--text)':'var(--border)'}`,background:tab===t?'var(--text)':'var(--card)',color:tab===t?'var(--bg)':'var(--text-light)',fontFamily:'inherit',fontSize:'.82rem',cursor:'pointer'}}>
+              {t==='export'?'📤 匯出':'📥 匯入'}
+            </button>
+          ))}
+        </div>
+        {tab==='export'?(
+          <>
+            <div style={{fontSize:'.8rem',color:'var(--text-light)',lineHeight:1.7,marginBottom:'1rem'}}>共 {items.length} 筆，下載後可用 Excel 編輯再匯入。</div>
+            <button className="btn-submit" style={{width:'100%'}} onClick={doExport}>下載 CSV</button>
+          </>
+        ):(
+          <>
+            <div className="csv-format">name,category,quantity,unit,threshold,barcode,location,note<br/>衛生紙,clean,3,包,2,,浴室,</div>
+            <textarea className="form-input" rows={5} style={{resize:'vertical',marginTop:'.5rem',fontFamily:'monospace',fontSize:'.78rem'}} placeholder="把 CSV 內容貼在這裡..." value={csv} onChange={e=>setCsv(e.target.value)}/>
+            {preview&&<div style={{margin:'.75rem 0',padding:'.65rem 1rem',background:'var(--card)',borderRadius:'1rem',border:'1px solid var(--border)',fontSize:'.78rem',color:'var(--text-light)'}}>解析到 {preview.length} 筆，確認後點「匯入」</div>}
+            <div className="modal-actions" style={{marginTop:'.75rem'}}>
+              <button className="btn-cancel" onClick={()=>{setCsv('');setPreview(null);}}>清除</button>
+              {!preview?<button className="btn-submit" onClick={doParse} disabled={!csv.trim()}>解析預覽</button>
+                :<button className="btn-submit" onClick={()=>{onImport(preview);onClose();}}>確認匯入 {preview.length} 筆</button>}
+            </div>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── Accordion 分類群組 ── */
+function AccGroup({cat,items,onClick,onQty}){
+  const[open,setOpen]=React.useState(true);
+  return(
+    <div className="acc-group">
+      <div className="acc-header" onClick={()=>setOpen(o=>!o)}>
+        <span className={`acc-arrow${open?' open':''}`}>▶</span>
+        <div className="acc-dot" style={{background:cat.color}}/>
+        <div className="acc-title">{cat.icon} {cat.label}</div>
+        <div className="acc-count">{items.length}</div>
+      </div>
+      {open&&(
+        <div className="acc-body">
+          {items.map(item=>(
+            <div key={item.id} className="item-card"
+              style={{'--card-accent':isLow(item)?'var(--urgent)':cat.color}}
+              onClick={()=>onClick(item)}>
+              <div className="item-icon">{cat.icon}</div>
+              <div className="item-body">
+                <div className="item-name">{item.name}</div>
+                <div className="item-meta">
+                  {item.location&&<span className="item-loc">📍 {item.location}</span>}
+                  {isLow(item)&&<span className="low-badge">庫存不足</span>}
+                </div>
+              </div>
+              <div className="item-right">
+                <div><span className="qty-display" style={{color:isLow(item)?'var(--urgent)':'var(--text)'}}>{item.quantity}</span><span className="qty-unit"> {item.unit}</span></div>
+                <div className="qty-controls" onClick={e=>e.stopPropagation()}>
+                  <button className="qty-btn" disabled={item.quantity<=0} onClick={()=>onQty(item,-1)}>－</button>
+                  <button className="qty-btn" onClick={()=>onQty(item,1)}>＋</button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── 待買清單 Tab ── */
+function ShoppingTab({items}){
+  const low=items.filter(isLow);
+  const[checked,setChecked]=React.useState({});
+  const toggle=id=>setChecked(c=>({...c,[id]:!c[id]}));
+  const unchecked=low.filter(i=>!checked[i.id]);
+  function copy(){
+    const t=unchecked.map(i=>`☐ ${i.name}${i.location?` (${i.location})`:''} — 剩 ${i.quantity}/${i.threshold} ${i.unit}`).join('\n');
+    navigator.clipboard?.writeText(t).catch(()=>{});
+    if(!navigator.clipboard)window.prompt('複製：',t);
+  }
+  if(low.length===0)return(
+    <div className="shopping-empty">
+      <div style={{fontSize:'2rem',marginBottom:'.75rem',opacity:.4}}>🛒</div>
+      <div style={{fontSize:'.85rem',lineHeight:1.8}}>目前庫存充足<br/>沒有需要補充的品項 ✓</div>
+    </div>
+  );
+  return(
+    <div className="shopping-wrap">
+      <div className="shopping-hint">共 {low.length} 個品項需要補充，勾選已買到的項目</div>
+      {low.map(item=>{
+        const cat=CAT[item.category]||CAT.other;
+        const isChecked=!!checked[item.id];
+        return(
+          <div key={item.id} className={`shopping-item${isChecked?' bought':''}`}>
+            <div className={`s-check${isChecked?' checked':''}`} onClick={()=>toggle(item.id)}/>
+            <span style={{fontSize:'1.05rem',flexShrink:0}}>{cat.icon}</span>
+            <div className="s-body">
+              <div className={`s-name${isChecked?' checked':''}`}>{item.name}</div>
+              {item.location&&<div className="s-loc">📍 {item.location}</div>}
+            </div>
+            <div className="s-qty">剩 {item.quantity}/{item.threshold} {item.unit}</div>
+          </div>
+        );
+      })}
+      {unchecked.length>0&&<button className="shopping-copy-btn" onClick={copy}>📋 複製清單到剪貼簿（{unchecked.length} 項）</button>}
+    </div>
+  );
+}
+
+/* ── 主應用 ── */
+function App(){
+  const[roomCode,setRoomCode]=React.useState(()=>{
+    const urlRoom=new URLSearchParams(window.location.search).get('room');
+    if(urlRoom){localStorage.setItem('last_room_inv',urlRoom);return urlRoom;}
+    return localStorage.getItem('last_room_inv')||'';
+  });
+  const[items,setItems]=React.useState([]);
+  const[tab,setTab]=React.useState('stock');
+  const[showForm,setShowForm]=React.useState(false);
+  const[editItem,setEditItem]=React.useState(null);
+  const[detailItem,setDetailItem]=React.useState(null);
+  const[showCsv,setShowCsv]=React.useState(false);
+  const[showMore,setShowMore]=React.useState(false);
+  const[search,setSearch]=React.useState('');
+  const[filterCat,setFilterCat]=React.useState('all');
+  const[toast,setToast]=React.useState(null);
+  const[online,setOnline]=React.useState(firebaseReady);
+  const[syncing,setSyncing]=React.useState(false);
+  const unsub=React.useRef(null);
+
+  React.useEffect(()=>{
+    if(!roomCode)return;
+    localStorage.setItem('last_room_inv',roomCode);
+    const ref=invRef(roomCode);
+    if(ref){
+      setSyncing(true);
+      unsub.current=ref.orderBy('createdAt','asc').onSnapshot(
+        snap=>{const d=snap.docs.map(doc=>({id:doc.id,...doc.data()}));setItems(d);saveL(roomCode,d);setSyncing(false);setOnline(true);},
+        ()=>{setItems(loadL(roomCode));setSyncing(false);setOnline(false);}
+      );
+    }else{setItems(loadL(roomCode));setOnline(false);}
+    return()=>{if(unsub.current)unsub.current();};
+  },[roomCode]);
+
+  const toast2=(msg)=>{setToast(msg);setTimeout(()=>setToast(null),2200);};
+
+  async function persist(newItems,action){
+    const ref=invRef(roomCode);
+    if(!ref){setItems(newItems);saveL(roomCode,newItems);return;}
+    try{
+      if(action?.type==='add'){const{id,...d}=action.item;await ref.doc(id).set(d);}
+      else if(action?.type==='update'){const{id,...d}=action.item;await ref.doc(id).set(d,{merge:true});}
+      else if(action?.type==='delete'){await ref.doc(action.id).delete();}
+      else if(action?.type==='batch'){const b=db.batch();action.items.forEach(item=>{const{id,...d}=item;b.set(ref.doc(id),d);});await b.commit();}
+    }catch{toast2('⚠️ 同步失敗');setItems(newItems);saveL(roomCode,newItems);}
+  }
+
+  async function handleSave(item){
+    const upd=!!(item.id&&items.find(i=>i.id===item.id));
+    const list=upd?items.map(i=>i.id===item.id?item:i):[...items,item];
+    await persist(list,{type:upd?'update':'add',item});
+    toast2(upd?'✓ 已儲存':'✓ 已新增');
+    setShowForm(false);setEditItem(null);
+  }
+  async function handleDelete(id){
+    await persist(items.filter(i=>i.id!==id),{type:'delete',id});
+    setDetailItem(null);toast2('已刪除');
+  }
+  async function handleQty(item,delta){
+    const updated={...item,quantity:Math.max(0,item.quantity+delta),updatedAt:Date.now()};
+    const list=items.map(i=>i.id===item.id?updated:i);
+    await persist(list,{type:'update',item:updated});
+    if(detailItem?.id===item.id)setDetailItem(updated);
+  }
+  async function handleImport(newItems){
+    const merged=[...items,...newItems.filter(n=>!items.find(i=>i.name===n.name))];
+    await persist(merged,{type:'batch',items:newItems});
+    toast2(`✓ 匯入 ${newItems.length} 筆`);
+  }
+
+  const lowCount=items.filter(isLow).length;
+  const catCount=new Set(items.map(i=>i.category)).size;
+  const filtered=items.filter(item=>{
+    if(filterCat!=='all'&&item.category!==filterCat)return false;
+    if(search){const q=search.toLowerCase();return item.name.toLowerCase().includes(q)||(item.barcode||'').includes(q)||(item.location||'').toLowerCase().includes(q);}
+    return true;
+  });
+  const grouped=CATS.map(cat=>({cat,items:filtered.filter(i=>i.category===cat.key)})).filter(g=>g.items.length>0);
+
+  if(!roomCode)return <LoginPage onLogin={code=>setRoomCode(code)}/>;
+
+  return(
+    <div className="app-wrap" onClick={()=>setShowMore(false)}>
+
+      {/* Header */}
+      <div className="app-header">
+        <div className="header-inner">
+          <div style={{display:'flex',alignItems:'center',gap:'.6rem'}}>
+            <div className="header-title">庫存管理</div>
+            {syncing&&<div style={{fontSize:'.65rem',color:'var(--text-light)'}}>同步中…</div>}
+          </div>
+          <div className="header-right">
+            <div className={`sync-dot${online?'':' offline'}`}/>
+            <div className="header-room" onClick={e=>{e.stopPropagation();if(window.confirm('確定要登出？')){if(unsub.current)unsub.current();setRoomCode('');setItems([]);localStorage.removeItem('last_room_inv');}}}>登出</div>
+            <div className="header-more" onClick={e=>{e.stopPropagation();setShowMore(m=>!m);}}>
+              ⋮
+              {showMore&&(
+                <div className="more-menu" onClick={e=>e.stopPropagation()}>
+                  <div className="more-menu-item" onClick={()=>{setShowCsv(true);setShowMore(false);}}>📊 CSV 匯入／匯出</div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 統計卡 */}
+      <div className="stats-row">
+        <div className="stat-card"><div className="stat-num">{items.length}</div><div className="stat-label">品項數</div></div>
+        <div className="stat-card stat-low clickable" onClick={()=>setTab('shopping')}>
+          <div className="stat-num">{lowCount}</div><div className="stat-label">庫存不足 ↗</div>
+        </div>
+        <div className="stat-card"><div className="stat-num">{catCount}</div><div className="stat-label">分類數</div></div>
+      </div>
+
+      {/* 雙分頁 Tabs */}
+      <div className="tabs-wrap">
+        <div className="tabs">
+          <button className={`tab-btn${tab==='stock'?' active':''}`} onClick={()=>setTab('stock')}>📦 庫存總覽</button>
+          <button className={`tab-btn${tab==='shopping'?' active':''}`} onClick={()=>setTab('shopping')}>
+            🛒 待買清單{lowCount>0&&<span className="tab-badge">{lowCount}</span>}
+          </button>
+        </div>
+      </div>
+
+      {/* 庫存總覽 */}
+      {tab==='stock'&&(
+        <>
+          <div className="search-wrap">
+            <input className="search-box" placeholder="🔍 搜尋品項、條碼、位置..." value={search} onChange={e=>setSearch(e.target.value)}/>
+          </div>
+          <div className="filter-scroll">
+            <button className={`filter-chip${filterCat==='all'?' active':''}`} onClick={()=>setFilterCat('all')}>全部 ({items.length})</button>
+            {CATS.map(cat=>{const count=items.filter(i=>i.category===cat.key).length;if(!count)return null;return(
+              <button key={cat.key} className={`filter-chip${filterCat===cat.key?' active':''}`} onClick={()=>setFilterCat(cat.key)}>
+                {cat.icon} {cat.label} ({count})
+              </button>
+            );})}
+          </div>
+          {items.length===0?(
+            <div className="empty-state"><div className="empty-icon">📦</div><div className="empty-text">還沒有任何庫存<br/>點擊右下角 ＋ 開始新增吧！</div></div>
+          ):filtered.length===0?(
+            <div className="empty-state"><div className="empty-icon">🔍</div><div className="empty-text">找不到符合條件的品項</div></div>
+          ):(
+            grouped.map(({cat,items:ci})=><AccGroup key={cat.key} cat={cat} items={ci} onClick={item=>setDetailItem(item)} onQty={handleQty}/>)
+          )}
+        </>
+      )}
+
+      {/* 待買清單 */}
+      {tab==='shopping'&&<ShoppingTab items={items}/>}
+
+      {/* FAB */}
+      {tab==='stock'&&<button className="fab" onClick={()=>{setEditItem(null);setShowForm(true);}}>＋</button>}
+
+      {/* 底部導覽 */}
+      <div className="bottom-nav">
+        {[{icon:'🏡',label:'首頁',href:'index.html'},{icon:'📋',label:'提醒',href:'module-reminders.html'},{icon:'📦',label:'庫存',active:true},{icon:'👗',label:'衣櫥',href:'module-wardrobe.html'},{icon:'📖',label:'百科',href:'module-wiki.html'}].map((n,i)=>(
+          <div key={i} className={`nav-item${n.active?' active':''}`} onClick={()=>n.href&&(window.location.href=`${n.href}?room=${roomCode}`)}>
+            <div className="nav-item-icon">{n.icon}</div>
+            <div className="nav-item-label">{n.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modals */}
+      {(showForm||editItem)&&<FormModal initial={editItem} onSave={handleSave} onClose={()=>{setShowForm(false);setEditItem(null);}}/>}
+      {detailItem&&<DetailModal item={items.find(i=>i.id===detailItem.id)||detailItem} onClose={()=>setDetailItem(null)} onEdit={()=>{setEditItem(items.find(i=>i.id===detailItem.id)||detailItem);setDetailItem(null);}} onDelete={()=>handleDelete(detailItem.id)} onQty={handleQty}/>}
+      {showCsv&&<CsvModal items={items} roomCode={roomCode} onImport={handleImport} onClose={()=>setShowCsv(false)}/>}
+      {toast&&<div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

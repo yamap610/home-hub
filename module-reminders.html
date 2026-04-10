@@ -1,0 +1,1863 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>家庭數位管家 — 提醒系統</title>
+
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;500&family=Zen+Kaku+Gothic+New:wght@300;400;500&display=swap" rel="stylesheet">
+
+<!-- React 18 -->
+<script src="https://unpkg.com/react@18.2.0/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<!-- Firebase (compat) -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<!-- Day.js -->
+<script src="https://unpkg.com/dayjs@1.11.9/dayjs.min.js"></script>
+
+<style>
+  :root {
+    --home-bg: #FDFCFA;
+    --home-card: #F6F2EE;
+    --home-border: #EDE4E0;
+    --home-primary: #DCCBC3;
+    --home-accent: #DDC7BF;
+    --home-text: #584B42;
+    --home-text-light: #8B7D75;
+    --urgent: #E74C3C;
+    --high: #F39C12;
+    --medium: #F1C40F;
+    --low: #BDC3C7;
+    --success: #8FB17A;
+    --warning: #D4A574;
+    --danger: #C9876B;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--home-bg);
+    color: var(--home-text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── 登入頁 ── */
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(220,203,195,.35) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 80%, rgba(221,199,191,.25) 0%, transparent 55%),
+      var(--home-bg);
+  }
+
+  .login-logo {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    letter-spacing: .15em;
+    color: var(--home-text);
+    margin-bottom: .4rem;
+    text-align: center;
+  }
+
+  .login-sub {
+    font-size: .8rem;
+    color: var(--home-text-light);
+    letter-spacing: .2em;
+    margin-bottom: 3rem;
+  }
+
+  .login-card {
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 2rem;
+    box-shadow: 0 4px 24px rgba(88,75,66,.07);
+    padding: 2.5rem 2rem;
+    width: 100%;
+    max-width: 340px;
+  }
+
+  .login-label {
+    font-size: .75rem;
+    letter-spacing: .18em;
+    color: var(--home-text-light);
+    margin-bottom: .6rem;
+    display: block;
+  }
+
+  .login-input {
+    width: 100%;
+    background: var(--home-bg);
+    border: 1.5px solid var(--home-border);
+    border-radius: 1rem;
+    padding: .85rem 1.1rem;
+    font-size: 1.1rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-weight: 400;
+    color: var(--home-text);
+    letter-spacing: .25em;
+    text-align: center;
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  .login-input:focus { border-color: var(--home-accent); }
+  .login-input::placeholder { letter-spacing: .1em; font-size: .9rem; color: var(--home-primary); }
+
+  .login-hint {
+    font-size: .72rem;
+    color: var(--home-text-light);
+    text-align: center;
+    margin-top: .6rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .btn-primary {
+    width: 100%;
+    background: var(--home-primary);
+    border: none;
+    border-radius: 1rem;
+    padding: .9rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .9rem;
+    font-weight: 500;
+    color: var(--home-text);
+    letter-spacing: .15em;
+    cursor: pointer;
+    transition: background .2s, transform .1s;
+  }
+
+  .btn-primary:hover { background: var(--home-accent); transform: translateY(-1px); }
+  .btn-primary:active { transform: translateY(0); }
+
+  .login-quick {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .login-quick-label {
+    font-size: .7rem;
+    color: var(--home-text-light);
+    letter-spacing: .1em;
+    margin-bottom: .6rem;
+  }
+
+  .quick-codes {
+    display: flex;
+    gap: .5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .quick-code-btn {
+    background: var(--home-bg);
+    border: 1px solid var(--home-border);
+    border-radius: .6rem;
+    padding: .35rem .75rem;
+    font-size: .8rem;
+    color: var(--home-text);
+    cursor: pointer;
+    transition: background .15s;
+    letter-spacing: .1em;
+  }
+
+  .quick-code-btn:hover { background: var(--home-primary); color: #fff; }
+
+  /* ── 主畫面 ── */
+  .app-wrap {
+    max-width: 480px;
+    margin: 0 auto;
+    padding-bottom: 90px;
+  }
+
+  /* ── 頂部 Header ── */
+  .app-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(253,252,250,.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--home-border);
+    padding: env(safe-area-inset-top, 0) 1.25rem 0;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+  }
+
+  .header-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    letter-spacing: .1em;
+  }
+
+  .header-room {
+    font-size: .7rem;
+    color: var(--home-text-light);
+    letter-spacing: .1em;
+    background: var(--home-card);
+    padding: .25rem .7rem;
+    border-radius: .5rem;
+    border: 1px solid var(--home-border);
+    cursor: pointer;
+  }
+
+  /* ── 統計卡 ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .75rem;
+    padding: 1.25rem 1rem .75rem;
+  }
+
+  .stat-card {
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 1.25rem;
+    padding: 1rem .75rem;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(88,75,66,.05);
+  }
+
+  .stat-num {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    line-height: 1;
+    margin-bottom: .3rem;
+  }
+
+  .stat-label {
+    font-size: .65rem;
+    color: var(--home-text-light);
+    letter-spacing: .1em;
+  }
+
+  .stat-urgent .stat-num { color: var(--urgent); }
+  .stat-pending .stat-num { color: var(--warning); }
+  .stat-done .stat-num { color: var(--success); }
+
+  /* ── 搜尋 + 篩選 ── */
+  .search-filter-row {
+    padding: 0 1rem .75rem;
+    display: flex;
+    gap: .6rem;
+  }
+
+  .search-box {
+    flex: 1;
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 1rem;
+    padding: .6rem 1rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .85rem;
+    color: var(--home-text);
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  .search-box:focus { border-color: var(--home-accent); }
+  .search-box::placeholder { color: var(--home-primary); }
+
+  .filter-scroll {
+    display: flex;
+    gap: .5rem;
+    padding: 0 1rem .5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .filter-scroll::-webkit-scrollbar { display: none; }
+
+  .filter-chip {
+    white-space: nowrap;
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 2rem;
+    padding: .35rem .9rem;
+    font-size: .75rem;
+    color: var(--home-text-light);
+    cursor: pointer;
+    transition: all .15s;
+    letter-spacing: .05em;
+  }
+
+  .filter-chip.active {
+    background: var(--home-primary);
+    border-color: var(--home-primary);
+    color: var(--home-text);
+    font-weight: 500;
+  }
+
+  /* ── 分組標題 ── */
+  .group-label {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    padding: .9rem 1rem .4rem;
+  }
+
+  .group-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .group-title {
+    font-size: .72rem;
+    letter-spacing: .18em;
+    color: var(--home-text-light);
+    font-weight: 500;
+  }
+
+  .group-count {
+    font-size: .68rem;
+    color: var(--home-primary);
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 1rem;
+    padding: .1rem .5rem;
+  }
+
+  /* ── 提醒卡片 ── */
+  .reminder-list { padding: 0 1rem; display: flex; flex-direction: column; gap: .75rem; }
+
+  .reminder-card {
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 2rem;
+    padding: 1.1rem 1.25rem;
+    box-shadow: 0 2px 8px rgba(88,75,66,.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    cursor: pointer;
+    transition: box-shadow .2s, transform .15s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .reminder-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 4px;
+    border-radius: 2rem 0 0 2rem;
+    background: var(--card-accent, var(--home-primary));
+  }
+
+  .reminder-card:hover { box-shadow: 0 6px 20px rgba(88,75,66,.12); transform: translateY(-2px); }
+
+  .card-check {
+    width: 28px;
+    height: 28px;
+    border: 1.5px solid var(--home-primary);
+    border-radius: 50%;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .2s;
+    margin-top: 2px;
+    background: var(--home-bg);
+  }
+
+  .card-check:hover { background: var(--success); border-color: var(--success); }
+  .card-check.done { background: var(--success); border-color: var(--success); }
+  .card-check.done::after { content: '✓'; color: #fff; font-size: .85rem; }
+
+  .card-body { flex: 1; min-width: 0; }
+
+  .card-title {
+    font-size: .95rem;
+    font-weight: 400;
+    color: var(--home-text);
+    margin-bottom: .25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .card-title.done-title {
+    text-decoration: line-through;
+    color: var(--home-text-light);
+  }
+
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: .5rem;
+    flex-wrap: wrap;
+  }
+
+  .type-badge {
+    font-size: .65rem;
+    letter-spacing: .08em;
+    padding: .15rem .55rem;
+    border-radius: 1rem;
+    background: var(--home-primary);
+    color: var(--home-text);
+    font-weight: 500;
+  }
+
+  .due-badge {
+    font-size: .7rem;
+    color: var(--home-text-light);
+  }
+
+  .due-badge.overdue { color: var(--urgent); font-weight: 500; }
+  .due-badge.soon { color: var(--warning); font-weight: 500; }
+
+  .amount-badge {
+    font-size: .7rem;
+    color: var(--home-text-light);
+    font-family: 'Noto Serif TC', serif;
+  }
+
+  .recur-badge {
+    font-size: .63rem;
+    color: var(--home-text-light);
+    background: var(--home-bg);
+    border: 1px solid var(--home-border);
+    border-radius: 1rem;
+    padding: .1rem .45rem;
+  }
+
+  /* ── 空狀態 ── */
+  .empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--home-text-light);
+  }
+
+  .empty-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: .5;
+  }
+
+  .empty-text {
+    font-size: .85rem;
+    letter-spacing: .05em;
+    line-height: 1.8;
+  }
+
+  /* ── FAB ── */
+  .fab {
+    position: fixed;
+    bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    right: 1.25rem;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--home-text);
+    border: none;
+    color: var(--home-bg);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 16px rgba(88,75,66,.3);
+    transition: transform .2s, box-shadow .2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 50;
+  }
+
+  .fab:hover { transform: scale(1.08); box-shadow: 0 6px 24px rgba(88,75,66,.4); }
+
+  /* ── Modal 底抽屜 ── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(88,75,66,.35);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    animation: fadeIn .2s ease;
+  }
+
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal-sheet {
+    background: var(--home-bg);
+    border-radius: 2rem 2rem 0 0;
+    width: 100%;
+    max-width: 480px;
+    max-height: 92vh;
+    overflow-y: auto;
+    padding: 1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    animation: slideUp .25s ease;
+  }
+
+  @keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .modal-handle {
+    width: 36px;
+    height: 4px;
+    background: var(--home-border);
+    border-radius: 2px;
+    margin: 0 auto 1.5rem;
+  }
+
+  .modal-title {
+    font-family: 'Noto Serif TC', serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: .1em;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  /* ── 表單 ── */
+  .form-group { margin-bottom: 1.1rem; }
+
+  .form-label {
+    display: block;
+    font-size: .72rem;
+    letter-spacing: .15em;
+    color: var(--home-text-light);
+    margin-bottom: .5rem;
+  }
+
+  .form-input {
+    width: 100%;
+    background: var(--home-card);
+    border: 1.5px solid var(--home-border);
+    border-radius: 1rem;
+    padding: .75rem 1rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .9rem;
+    color: var(--home-text);
+    outline: none;
+    transition: border-color .2s;
+  }
+
+  .form-input:focus { border-color: var(--home-accent); }
+
+  .form-select {
+    width: 100%;
+    background: var(--home-card);
+    border: 1.5px solid var(--home-border);
+    border-radius: 1rem;
+    padding: .75rem 1rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .9rem;
+    color: var(--home-text);
+    outline: none;
+    appearance: none;
+    cursor: pointer;
+  }
+
+  .type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: .5rem;
+  }
+
+  .type-btn {
+    background: var(--home-card);
+    border: 1.5px solid var(--home-border);
+    border-radius: 1rem;
+    padding: .65rem .4rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+  }
+
+  .type-btn-icon { font-size: 1.1rem; display: block; margin-bottom: .2rem; }
+  .type-btn-text { font-size: .68rem; color: var(--home-text-light); letter-spacing: .05em; }
+
+  .type-btn.selected {
+    background: var(--home-primary);
+    border-color: var(--home-primary);
+  }
+
+  .type-btn.selected .type-btn-text { color: var(--home-text); font-weight: 500; }
+
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }
+
+  .modal-actions { display: flex; gap: .75rem; margin-top: 1.5rem; }
+
+  .btn-cancel {
+    flex: 1;
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 1rem;
+    padding: .85rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .85rem;
+    color: var(--home-text-light);
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .btn-cancel:hover { background: var(--home-border); }
+
+  .btn-submit {
+    flex: 2;
+    background: var(--home-text);
+    border: none;
+    border-radius: 1rem;
+    padding: .85rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .85rem;
+    font-weight: 500;
+    color: var(--home-bg);
+    cursor: pointer;
+    letter-spacing: .1em;
+    transition: opacity .15s;
+  }
+
+  .btn-submit:hover { opacity: .85; }
+
+  /* ── 詳情頁 ── */
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .detail-icon-wrap {
+    width: 52px;
+    height: 52px;
+    border-radius: 1.25rem;
+    background: var(--home-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    flex-shrink: 0;
+  }
+
+  .detail-title-group {}
+  .detail-title { font-family: 'Noto Serif TC', serif; font-size: 1.15rem; font-weight: 400; }
+  .detail-type { font-size: .72rem; color: var(--home-text-light); letter-spacing: .1em; margin-top: .2rem; }
+
+  .detail-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: .75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .detail-info-item {
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 1.25rem;
+    padding: .85rem 1rem;
+  }
+
+  .detail-info-label { font-size: .65rem; color: var(--home-text-light); letter-spacing: .12em; margin-bottom: .3rem; }
+  .detail-info-value { font-size: .9rem; color: var(--home-text); font-weight: 400; }
+
+  .detail-desc {
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 1.25rem;
+    padding: 1rem;
+    font-size: .85rem;
+    line-height: 1.7;
+    color: var(--home-text);
+    margin-bottom: 1rem;
+  }
+
+  .detail-actions { display: flex; gap: .6rem; margin-top: 1.5rem; }
+
+  .btn-danger {
+    flex: 1;
+    background: rgba(201,135,107,.12);
+    border: 1px solid rgba(201,135,107,.3);
+    border-radius: 1rem;
+    padding: .85rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .85rem;
+    color: var(--danger);
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .btn-danger:hover { background: rgba(201,135,107,.22); }
+
+  .btn-edit {
+    flex: 1;
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 1rem;
+    padding: .85rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .85rem;
+    color: var(--home-text);
+    cursor: pointer;
+    transition: background .15s;
+  }
+
+  .btn-edit:hover { background: var(--home-primary); }
+
+  .btn-done-big {
+    flex: 2;
+    background: var(--success);
+    border: none;
+    border-radius: 1rem;
+    padding: .85rem;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: .85rem;
+    font-weight: 500;
+    color: #fff;
+    cursor: pointer;
+    letter-spacing: .1em;
+    transition: opacity .15s;
+  }
+
+  .btn-done-big:disabled { opacity: .5; cursor: default; }
+
+  /* ── 刪除確認 ── */
+  .delete-confirm {
+    text-align: center;
+    padding: 1rem 0;
+  }
+
+  .delete-icon { font-size: 2rem; margin-bottom: 1rem; }
+  .delete-title { font-family: 'Noto Serif TC', serif; font-size: 1.1rem; margin-bottom: .5rem; }
+  .delete-sub { font-size: .82rem; color: var(--home-text-light); line-height: 1.7; }
+  .delete-actions { display: flex; gap: .75rem; margin-top: 1.5rem; }
+
+  /* ── 本月統計橫幅 ── */
+  .monthly-banner {
+    margin: 0 1rem .75rem;
+    background: var(--home-card);
+    border: 1px solid var(--home-border);
+    border-radius: 1.5rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 2px 8px rgba(88,75,66,.05);
+  }
+
+  .monthly-banner-title {
+    font-size: .68rem;
+    letter-spacing: .18em;
+    color: var(--home-text-light);
+    margin-bottom: .75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .monthly-banner-month {
+    font-size: .7rem;
+    color: var(--home-primary);
+    background: var(--home-bg);
+    border: 1px solid var(--home-border);
+    border-radius: .5rem;
+    padding: .15rem .6rem;
+  }
+
+  .monthly-items {
+    display: flex;
+    flex-direction: column;
+    gap: .4rem;
+  }
+
+  .monthly-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: .82rem;
+  }
+
+  .monthly-item-left { display: flex; align-items: center; gap: .5rem; color: var(--home-text); }
+  .monthly-item-icon { font-size: .9rem; }
+  .monthly-item-amount { font-weight: 500; color: var(--home-text); font-family: 'Noto Serif TC', serif; }
+
+  .monthly-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: .75rem;
+    padding-top: .75rem;
+    border-top: 1px solid var(--home-border);
+  }
+
+  .monthly-total-label { font-size: .72rem; color: var(--home-text-light); letter-spacing: .1em; }
+  .monthly-total-amount { font-family: 'Noto Serif TC', serif; font-size: 1.1rem; color: var(--home-text); font-weight: 400; }
+
+  /* ── Firebase 設定提示 ── */
+  .firebase-banner {
+    margin: 0 1rem .75rem;
+    background: rgba(241,196,15,.08);
+    border: 1px solid rgba(241,196,15,.3);
+    border-radius: 1.25rem;
+    padding: .85rem 1.1rem;
+    font-size: .75rem;
+    color: var(--home-text);
+    line-height: 1.6;
+    cursor: pointer;
+  }
+
+  .firebase-banner-title {
+    font-weight: 500;
+    color: #b8860b;
+    margin-bottom: .25rem;
+    display: flex;
+    align-items: center;
+    gap: .4rem;
+  }
+
+  .sync-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--success);
+    display: inline-block;
+    box-shadow: 0 0 0 2px rgba(143,177,122,.3);
+  }
+
+  .sync-dot.offline { background: var(--home-text-light); box-shadow: none; }
+  .toast {
+    position: fixed;
+    bottom: calc(90px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%) translateY(0);
+    background: var(--home-text);
+    color: var(--home-bg);
+    padding: .65rem 1.4rem;
+    border-radius: 2rem;
+    font-size: .8rem;
+    letter-spacing: .08em;
+    z-index: 500;
+    white-space: nowrap;
+    animation: toastIn .25s ease forwards;
+    pointer-events: none;
+  }
+
+  @keyframes toastIn {
+    from { transform: translateX(-50%) translateY(10px); opacity: 0; }
+    to { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+
+  /* ── 底部導覽（預留） ── */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 480px;
+    background: rgba(253,252,250,.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid var(--home-border);
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    padding: .6rem 0 calc(.6rem + env(safe-area-inset-bottom, 0px));
+    z-index: 100;
+  }
+
+  .nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: .2rem;
+    opacity: .4;
+    cursor: pointer;
+    padding: .2rem .8rem;
+    border-radius: 1rem;
+    transition: opacity .15s;
+  }
+
+  .nav-item.active { opacity: 1; }
+  .nav-item-icon { font-size: 1.2rem; }
+  .nav-item-label { font-size: .58rem; letter-spacing: .12em; color: var(--home-text-light); }
+  .nav-item.active .nav-item-label { color: var(--home-text); font-weight: 500; }
+</style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+
+// ════════════════════════════════════════
+//  Firebase 設定
+//  請將下方 firebaseConfig 換成你自己的設定
+//  Firebase Console → 專案設定 → 你的應用程式
+// ════════════════════════════════════════
+const FIREBASE_CONFIG = {
+  apiKey:            "AIzaSyAFGSQOvAp1thZkWBZ-nLHe-uR8llDQDI8",
+  authDomain:        "home-hub-be41f.firebaseapp.com",
+  projectId:         "home-hub-be41f",
+  storageBucket:     "home-hub-be41f.firebasestorage.app",
+  messagingSenderId: "286497032414",
+  appId:             "1:286497032414:web:16d3f0242a400d0de85a4f",
+};
+
+// Firebase 初始化（只初始化一次）
+let db = null;
+let firebaseReady = false;
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp(FIREBASE_CONFIG);
+  }
+  db = firebase.firestore();
+  // 啟用離線持久化
+  db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+  firebaseReady = FIREBASE_CONFIG.apiKey !== 'YOUR_API_KEY';
+} catch(e) {
+  firebaseReady = false;
+}
+
+// Firestore 集合路徑
+function remindersRef(roomCode) {
+  return db && firebaseReady
+    ? db.collection('reminders').doc(roomCode).collection('items')
+    : null;
+}
+
+// ── 常數 ──
+const TYPE_CONFIG = {
+  financial:    { label: '財務', icon: '💳', color: '#F39C12' },
+  subscription: { label: '訂閱', icon: '📱', color: '#9B59B6' },
+  consumable:   { label: '耗材', icon: '🔄', color: '#3498DB' },
+  chore:        { label: '家務', icon: '🏠', color: '#2ECC71' },
+  health:       { label: '健康', icon: '💊', color: '#E74C3C' },
+  other:        { label: '其他', icon: '📌', color: '#95A5A6' },
+};
+
+const RECURRENCE_LABELS = {
+  once:        '一次性',
+  daily:       '每天',
+  weekly:      '每週',
+  biweekly:    '每兩週',
+  monthly:     '每月',
+  bimonthly:   '每兩個月',
+  quarterly:   '每季（三個月）',
+  semiannual:  '每半年',
+  yearly:      '每年',
+};
+
+const PRIORITY_COLORS = {
+  urgent: 'var(--urgent)',
+  high:   'var(--high)',
+  medium: 'var(--medium)',
+  low:    'var(--low)',
+};
+
+// ── localStorage 備援工具 ──
+function loadLocal(roomCode) {
+  try {
+    const raw = localStorage.getItem(`reminders_${roomCode}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveLocal(roomCode, data) {
+  try { localStorage.setItem(`reminders_${roomCode}`, JSON.stringify(data)); } catch {}
+}
+
+// ── 日期優先級（純日期比較，避免時區問題）──
+function getDuePriority(dueDateStr) {
+  if (!dueDateStr) return 'low';
+  const today = dayjs().format('YYYY-MM-DD');
+  const diff = dayjs(dueDateStr).diff(dayjs(today), 'day');
+  if (diff < 0)   return 'urgent';
+  if (diff <= 3)  return 'urgent';
+  if (diff <= 7)  return 'high';
+  if (diff <= 14) return 'medium';
+  return 'low';
+}
+
+function getDueLabel(dueDateStr) {
+  if (!dueDateStr) return '';
+  const today = dayjs().format('YYYY-MM-DD');
+  const diff = dayjs(dueDateStr).diff(dayjs(today), 'day');
+  if (diff < 0)  return `逾期 ${Math.abs(diff)} 天`;
+  if (diff === 0) return '今天到期';
+  if (diff === 1) return '明天到期';
+  if (diff <= 7)  return `${diff} 天後到期`;
+  return dayjs(dueDateStr).format('MM/DD');
+}
+
+// ── 計算下次到期日 ──
+function calcNextDue(dueDateStr, recurrence) {
+  if (recurrence === 'once' || !dueDateStr) return dueDateStr;
+  const base = dayjs(dueDateStr);
+  const map = {
+    daily:       [1, 'day'],
+    weekly:      [1, 'week'],
+    biweekly:    [2, 'week'],
+    monthly:     [1, 'month'],
+    bimonthly:   [2, 'month'],
+    quarterly:   [3, 'month'],
+    semiannual:  [6, 'month'],
+    yearly:      [1, 'year'],
+  };
+  const [n, unit] = map[recurrence] || [1, 'month'];
+  return base.add(n, unit).format('YYYY-MM-DD');
+}
+
+// ── uuid 簡易版 ──
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+// ──────────────────────────
+//  登入頁
+// ──────────────────────────
+function LoginPage({ onLogin }) {
+  const [code, setCode] = React.useState('');
+  const [error, setError] = React.useState('');
+
+  function handleLogin() {
+    const trimmed = code.trim();
+    if (!trimmed) { setError('請輸入房間碼'); return; }
+    if (trimmed.length < 4) { setError('房間碼至少 4 位'); return; }
+    onLogin(trimmed);
+  }
+
+  return (
+    <div className="login-wrap">
+      <div className="login-logo">家庭數位管家</div>
+      <div className="login-sub">FAMILY DIGITAL BUTLER</div>
+
+      <div className="login-card">
+        <label className="login-label">房間碼 ROOM CODE</label>
+        <input
+          className="login-input"
+          placeholder="輸入你的房間碼"
+          value={code}
+          maxLength={12}
+          onChange={e => { setCode(e.target.value); setError(''); }}
+          onKeyDown={e => e.key === 'Enter' && handleLogin()}
+        />
+        {error && <div style={{ fontSize:'.72rem', color:'var(--danger)', textAlign:'center', marginTop:'.4rem' }}>{error}</div>}
+        <div className="login-hint">房間碼為家庭成員共用，相同碼可共享資料</div>
+        <button className="btn-primary" onClick={handleLogin}>進入管家 →</button>
+      </div>
+
+      <div className="login-quick">
+        <div className="login-quick-label">快速試用</div>
+        <div className="quick-codes">
+          {['DEMO', 'HOME', 'FAMILY'].map(c => (
+            <button key={c} className="quick-code-btn" onClick={() => { setCode(c); setError(''); }}>
+              {c}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────
+//  新增/編輯 Modal
+// ──────────────────────────
+function ReminderFormModal({ initial, onSave, onClose }) {
+  const isEdit = !!initial?.id;
+  const [form, setForm] = React.useState({
+    title: initial?.title || '',
+    type:  initial?.type  || 'financial',
+    description: initial?.description || '',
+    dueDate: initial?.dueDate || dayjs().add(1,'month').format('YYYY-MM-DD'),
+    recurrence: initial?.recurrence || 'monthly',
+    amount: initial?.amount || '',
+  });
+
+  function set(key, val) { setForm(f => ({ ...f, [key]: val })); }
+
+  function handleSave() {
+    if (!form.title.trim()) return;
+    const priority = getDuePriority(form.dueDate);
+    if (isEdit) {
+      onSave({ ...initial, ...form, priority, updatedAt: Date.now() });
+    } else {
+      onSave({
+        id: genId(),
+        ...form,
+        priority,
+        status: 'pending',
+        completionHistory: [],
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+  }
+
+  const showAmount = ['financial','subscription'].includes(form.type);
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        <div className="modal-title">{isEdit ? '編輯提醒' : '新增提醒'}</div>
+
+        {/* 類型選擇 */}
+        <div className="form-group">
+          <label className="form-label">提醒類型</label>
+          <div className="type-grid">
+            {Object.entries(TYPE_CONFIG).map(([k, v]) => (
+              <button key={k}
+                className={`type-btn${form.type===k?' selected':''}`}
+                onClick={() => set('type', k)}>
+                <span className="type-btn-icon">{v.icon}</span>
+                <span className="type-btn-text">{v.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 名稱 */}
+        <div className="form-group">
+          <label className="form-label">提醒名稱 *</label>
+          <input className="form-input" placeholder="例：繳水費、換濾芯"
+            value={form.title} onChange={e => set('title', e.target.value)} />
+        </div>
+
+        {/* 說明 */}
+        <div className="form-group">
+          <label className="form-label">備註說明</label>
+          <input className="form-input" placeholder="選填"
+            value={form.description} onChange={e => set('description', e.target.value)} />
+        </div>
+
+        {/* 到期日 + 週期 */}
+        <div className="form-row">
+          <div className="form-group">
+            <label className="form-label">到期日</label>
+            <input type="date" className="form-input"
+              value={form.dueDate} onChange={e => set('dueDate', e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label className="form-label">重複週期</label>
+            <select className="form-select"
+              value={form.recurrence} onChange={e => set('recurrence', e.target.value)}>
+              {Object.entries(RECURRENCE_LABELS).map(([k,v]) => (
+                <option key={k} value={k}>{v}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* 金額（財務/訂閱） */}
+        {showAmount && (
+          <div className="form-group">
+            <label className="form-label">金額（TWD）</label>
+            <input type="number" className="form-input" placeholder="0"
+              value={form.amount} onChange={e => set('amount', e.target.value)} />
+          </div>
+        )}
+
+        <div className="modal-actions">
+          <button className="btn-cancel" onClick={onClose}>取消</button>
+          <button className="btn-submit"
+            onClick={handleSave}
+            disabled={!form.title.trim()}>
+            {isEdit ? '儲存修改' : '新增提醒'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── 依類型決定「到期日」欄位的標籤 ──
+function getDueDateLabel(type) {
+  if (['financial', 'subscription'].includes(type)) return '繳費日';
+  if (type === 'health') return '預定日期';
+  if (type === 'chore')  return '執行日期';
+  return '到期日';
+}
+
+// ── 依類型決定「狀態」欄位要顯示什麼 ──
+function getStatusDisplay(reminder) {
+  const isDone = reminder.status === 'completed';
+  if (isDone) return { text: '✓ 已完成', color: 'var(--success)' };
+
+  const priority = getDuePriority(reminder.dueDate);
+  const label = getDueLabel(reminder.dueDate);
+
+  if (!reminder.dueDate) return { text: '待處理', color: 'var(--home-text-light)' };
+
+  // 財務/訂閱：顯示距離幾天
+  if (['financial', 'subscription'].includes(reminder.type)) {
+    return { text: label || '待繳費', color: PRIORITY_COLORS[priority] };
+  }
+  // 健康/家務/其他：顯示「待執行」或距離天數，不說「到期」
+  const today = dayjs().format('YYYY-MM-DD');
+  const diff = dayjs(reminder.dueDate).diff(dayjs(today), 'day');
+  if (diff < 0)  return { text: `逾期 ${Math.abs(diff)} 天`, color: 'var(--urgent)' };
+  if (diff === 0) return { text: '今天執行', color: 'var(--urgent)' };
+  if (diff === 1) return { text: '明天執行', color: 'var(--high)' };
+  if (diff <= 7)  return { text: `${diff} 天後`, color: 'var(--high)' };
+  return { text: '待執行', color: 'var(--home-text-light)' };
+}
+
+// ──────────────────────────
+//  完成時輸入金額的小 Modal（財務/訂閱用）
+// ──────────────────────────
+function CompleteWithAmountModal({ reminder, onConfirm, onClose }) {
+  const [amount, setAmount] = React.useState(reminder.amount || '');
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+        <div className="modal-title">完成確認</div>
+        <div style={{ textAlign:'center', marginBottom:'1.5rem' }}>
+          <div style={{ fontSize:'1.3rem', marginBottom:'.4rem' }}>
+            {TYPE_CONFIG[reminder.type]?.icon} {reminder.title}
+          </div>
+          <div style={{ fontSize:'.8rem', color:'var(--home-text-light)' }}>
+            {dayjs(reminder.dueDate).format('YYYY/MM/DD')} 完成
+          </div>
+        </div>
+        <div className="form-group">
+          <label className="form-label">本次實際金額（TWD）</label>
+          <input type="number" className="form-input"
+            placeholder={reminder.amount ? `預設 ${reminder.amount}` : '輸入金額'}
+            value={amount}
+            onChange={e => setAmount(e.target.value)}
+            autoFocus
+          />
+          <div style={{ fontSize:'.7rem', color:'var(--home-text-light)', marginTop:'.4rem' }}>
+            若與預設金額不同可在此修改
+          </div>
+        </div>
+        <div className="modal-actions">
+          <button className="btn-cancel" onClick={onClose}>取消</button>
+          <button className="btn-submit" onClick={() => onConfirm(amount)}>確認完成</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────
+//  詳情 Modal
+// ──────────────────────────
+function DetailModal({ reminder, onClose, onComplete, onEdit, onDelete }) {
+  const [confirmDelete, setConfirmDelete] = React.useState(false);
+  const [showAmountInput, setShowAmountInput] = React.useState(false);
+  const cfg = TYPE_CONFIG[reminder.type] || TYPE_CONFIG.other;
+  const isDone = reminder.status === 'completed';
+  const priority = getDuePriority(reminder.dueDate);
+  const statusDisplay = getStatusDisplay(reminder);
+  const dueDateLabel = getDueDateLabel(reminder.type);
+  // 財務/訂閱類型，完成時需記錄金額
+  const needsAmount = ['financial', 'subscription'].includes(reminder.type);
+
+  function handleCompleteClick() {
+    if (needsAmount) {
+      setShowAmountInput(true);
+    } else {
+      onComplete(null); // 不需要金額
+    }
+  }
+
+  if (showAmountInput) {
+    return <CompleteWithAmountModal
+      reminder={reminder}
+      onConfirm={(amount) => { setShowAmountInput(false); onComplete(amount); }}
+      onClose={() => setShowAmountInput(false)}
+    />;
+  }
+
+  if (confirmDelete) {
+    return (
+      <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setConfirmDelete(false)}>
+        <div className="modal-sheet">
+          <div className="modal-handle" />
+          <div className="delete-confirm">
+            <div className="delete-icon">🗑️</div>
+            <div className="delete-title">確認刪除？</div>
+            <div className="delete-sub">「{reminder.title}」將被永久刪除<br/>此操作無法復原</div>
+          </div>
+          <div className="delete-actions">
+            <button className="btn-cancel" onClick={() => setConfirmDelete(false)}>取消</button>
+            <button className="btn-danger" style={{ background:'var(--danger)', color:'#fff', border:'none' }}
+              onClick={onDelete}>確認刪除</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle" />
+
+        <div className="detail-header">
+          <div className="detail-icon-wrap" style={{ background: cfg.color + '33' }}>
+            <span style={{ fontSize:'1.5rem' }}>{cfg.icon}</span>
+          </div>
+          <div className="detail-title-group">
+            <div className="detail-title">{reminder.title}</div>
+            <div className="detail-type">{cfg.label} · {RECURRENCE_LABELS[reminder.recurrence] || ''}</div>
+          </div>
+        </div>
+
+        <div className="detail-info-grid">
+          {/* 到期日欄位，依類型顯示不同標籤 */}
+          {reminder.dueDate && (
+            <div className="detail-info-item">
+              <div className="detail-info-label">{dueDateLabel}</div>
+              <div className="detail-info-value" style={{ color: isDone ? 'var(--home-text)' : PRIORITY_COLORS[priority] }}>
+                {dayjs(reminder.dueDate).format('YYYY/MM/DD')}
+              </div>
+            </div>
+          )}
+          {/* 狀態 */}
+          <div className="detail-info-item">
+            <div className="detail-info-label">狀態</div>
+            <div className="detail-info-value" style={{ color: statusDisplay.color }}>
+              {statusDisplay.text}
+            </div>
+          </div>
+          {/* 金額（財務/訂閱才顯示預設金額） */}
+          {reminder.amount && needsAmount && (
+            <div className="detail-info-item">
+              <div className="detail-info-label">預設金額</div>
+              <div className="detail-info-value">TWD {Number(reminder.amount).toLocaleString()}</div>
+            </div>
+          )}
+          {reminder.recurrence !== 'once' && (
+            <div className="detail-info-item">
+              <div className="detail-info-label">重複週期</div>
+              <div className="detail-info-value">{RECURRENCE_LABELS[reminder.recurrence] || '—'}</div>
+            </div>
+          )}
+        </div>
+
+        {reminder.description && (
+          <div className="detail-desc">{reminder.description}</div>
+        )}
+
+        {/* 完成紀錄 */}
+        {(reminder.completionHistory||[]).length > 0 && (
+          <div style={{ marginBottom:'1rem' }}>
+            <div className="form-label" style={{ marginBottom:'.5rem' }}>完成紀錄</div>
+            <div style={{ display:'flex', flexDirection:'column', gap:'.4rem' }}>
+              {[...(reminder.completionHistory||[])].reverse().slice(0,5).map((h,i) => (
+                <div key={i} style={{
+                  background:'var(--home-card)', border:'1px solid var(--home-border)',
+                  borderRadius:'1rem', padding:'.6rem 1rem',
+                  fontSize:'.78rem', color:'var(--home-text-light)',
+                  display:'flex', justifyContent:'space-between', alignItems:'center', gap:'.5rem'
+                }}>
+                  <span style={{ color:'var(--success)', flexShrink:0 }}>✓</span>
+                  <span style={{ flex:1 }}>{dayjs(h.completedAt).format('YYYY/MM/DD')}</span>
+                  {/* 財務/訂閱顯示金額 */}
+                  {needsAmount && h.amount != null && (
+                    <span style={{ color:'var(--home-text)', fontWeight:500 }}>
+                      TWD {Number(h.amount).toLocaleString()}
+                    </span>
+                  )}
+                  {needsAmount && h.amount == null && reminder.amount && (
+                    <span style={{ color:'var(--home-text-light)' }}>
+                      TWD {Number(reminder.amount).toLocaleString()}
+                    </span>
+                  )}
+                </div>
+              ))}
+              {(reminder.completionHistory||[]).length > 5 && (
+                <div style={{ fontSize:'.7rem', color:'var(--home-text-light)', textAlign:'center' }}>
+                  共 {reminder.completionHistory.length} 筆紀錄
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        <div className="detail-actions">
+          <button className="btn-danger" onClick={() => setConfirmDelete(true)}>刪除</button>
+          <button className="btn-edit" onClick={onEdit}>編輯</button>
+          <button className="btn-done-big" disabled={isDone} onClick={handleCompleteClick}>
+            {isDone ? '已完成 ✓' : '完成'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────
+//  提醒卡片
+// ──────────────────────────
+function ReminderCard({ reminder, onCheck, onClick }) {
+  const cfg = TYPE_CONFIG[reminder.type] || TYPE_CONFIG.other;
+  const priority = getDuePriority(reminder.dueDate);
+  const isDone = reminder.status === 'completed';
+  const dueLabel = getDueLabel(reminder.dueDate);
+  const today = dayjs().format('YYYY-MM-DD');
+  const isOverdue = reminder.dueDate && dayjs(reminder.dueDate).isBefore(dayjs(today), 'day');
+
+  return (
+    <div className="reminder-card"
+      style={{ '--card-accent': isDone ? 'var(--success)' : PRIORITY_COLORS[priority] }}
+      onClick={onClick}>
+      <div className={`card-check${isDone?' done':''}`}
+        onClick={e => { e.stopPropagation(); onCheck(); }} />
+      <div className="card-body">
+        <div className={`card-title${isDone?' done-title':''}`}>{reminder.title}</div>
+        <div className="card-meta">
+          <span className="type-badge" style={{ background: cfg.color + '33', color: cfg.color }}>
+            {cfg.icon} {cfg.label}
+          </span>
+          {dueLabel && (
+            <span className={`due-badge${isOverdue?' overdue':priority==='high'?' soon':''}`}>
+              {dueLabel}
+            </span>
+          )}
+          {reminder.amount && (
+            <span className="amount-badge">TWD {Number(reminder.amount).toLocaleString()}</span>
+          )}
+          <span className="recur-badge">{RECURRENCE_LABELS[reminder.recurrence]||''}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────
+//  本月統計橫幅
+// ──────────────────────────
+function MonthlyBanner({ reminders }) {
+  const thisMonth = dayjs().format('YYYY-MM');
+
+  // 本月已完成的財務/訂閱項目
+  const monthlyItems = [];
+  reminders.forEach(r => {
+    if (!['financial','subscription'].includes(r.type)) return;
+    (r.completionHistory || []).forEach(h => {
+      if (dayjs(h.completedAt).format('YYYY-MM') === thisMonth) {
+        monthlyItems.push({ title: r.title, type: r.type, amount: h.amount ?? (r.amount ? Number(r.amount) : null) });
+      }
+    });
+  });
+
+  // 本月待繳（尚未完成，到期在本月）
+  const upcoming = reminders.filter(r =>
+    ['financial','subscription'].includes(r.type) &&
+    r.status !== 'completed' &&
+    r.dueDate &&
+    dayjs(r.dueDate).format('YYYY-MM') === thisMonth &&
+    r.amount
+  );
+
+  const paidTotal = monthlyItems.reduce((s, i) => s + (i.amount || 0), 0);
+  const upcomingTotal = upcoming.reduce((s, r) => s + Number(r.amount || 0), 0);
+  const grandTotal = paidTotal + upcomingTotal;
+
+  if (grandTotal === 0 && monthlyItems.length === 0 && upcoming.length === 0) return null;
+
+  return (
+    <div className="monthly-banner">
+      <div className="monthly-banner-title">
+        <span>本月支出概覽</span>
+        <span className="monthly-banner-month">{dayjs().format('YYYY年MM月')}</span>
+      </div>
+
+      <div className="monthly-items">
+        {monthlyItems.map((item, i) => (
+          <div key={`paid-${i}`} className="monthly-item">
+            <div className="monthly-item-left">
+              <span className="monthly-item-icon">{TYPE_CONFIG[item.type]?.icon}</span>
+              <span style={{ textDecoration:'line-through', opacity:.6 }}>{item.title}</span>
+              <span style={{ fontSize:'.65rem', color:'var(--success)', marginLeft:'.2rem' }}>✓</span>
+            </div>
+            <span className="monthly-item-amount" style={{ opacity:.6 }}>
+              {item.amount ? `TWD ${Number(item.amount).toLocaleString()}` : '—'}
+            </span>
+          </div>
+        ))}
+        {upcoming.map((r, i) => (
+          <div key={`up-${i}`} className="monthly-item">
+            <div className="monthly-item-left">
+              <span className="monthly-item-icon">{TYPE_CONFIG[r.type]?.icon}</span>
+              <span>{r.title}</span>
+            </div>
+            <span className="monthly-item-amount">TWD {Number(r.amount).toLocaleString()}</span>
+          </div>
+        ))}
+      </div>
+
+      {grandTotal > 0 && (
+        <div className="monthly-total">
+          <span className="monthly-total-label">
+            本月合計
+            {paidTotal > 0 && upcomingTotal > 0 && (
+              <span style={{ fontSize:'.65rem', marginLeft:'.4rem', color:'var(--success)' }}>
+                （已付 {paidTotal.toLocaleString()}）
+              </span>
+            )}
+          </span>
+          <span className="monthly-total-amount">TWD {grandTotal.toLocaleString()}</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ──────────────────────────
+//  主應用
+// ──────────────────────────
+function App() {
+  const [roomCode, setRoomCode]     = React.useState(() => {
+    const urlRoom = new URLSearchParams(window.location.search).get('room');
+    if(urlRoom) { localStorage.setItem('last_room', urlRoom); return urlRoom; }
+    return localStorage.getItem('last_room') || '';
+  });
+  const [reminders, setReminders]   = React.useState([]);
+  const [showForm, setShowForm]     = React.useState(false);
+  const [editItem, setEditItem]     = React.useState(null);
+  const [detailItem, setDetailItem] = React.useState(null);
+  const [search, setSearch]         = React.useState('');
+  const [filterType, setFilterType] = React.useState('all');
+  const [toast, setToast]           = React.useState(null);
+  const [syncing, setSyncing]       = React.useState(false);
+  const [isOnline, setIsOnline]     = React.useState(firebaseReady);
+  const [showFirebaseTip, setShowFirebaseTip] = React.useState(!firebaseReady);
+  const unsubRef = React.useRef(null);
+
+  // ── Firebase 即時監聽 or localStorage ──
+  React.useEffect(() => {
+    if (!roomCode) return;
+    localStorage.setItem('last_room', roomCode);
+
+    const ref = remindersRef(roomCode);
+
+    if (ref) {
+      // Firebase 模式：即時監聽
+      setSyncing(true);
+      unsubRef.current = ref.orderBy('createdAt', 'desc').onSnapshot(
+        snap => {
+          const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+          setReminders(data);
+          saveLocal(roomCode, data); // 同步備份到 localStorage
+          setSyncing(false);
+          setIsOnline(true);
+        },
+        err => {
+          console.warn('Firebase 監聽失敗，切換 localStorage', err);
+          setReminders(loadLocal(roomCode));
+          setSyncing(false);
+          setIsOnline(false);
+        }
+      );
+    } else {
+      // localStorage 模式
+      setReminders(loadLocal(roomCode));
+      setIsOnline(false);
+    }
+
+    return () => { if (unsubRef.current) unsubRef.current(); };
+  }, [roomCode]);
+
+  function showToast(msg) {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2200);
+  }
+
+  function handleLogin(code) { setRoomCode(code); }
+
+  function handleLogout() {
+    if (window.confirm('確定要登出嗎？')) {
+      if (unsubRef.current) unsubRef.current();
+      setRoomCode('');
+      setReminders([]);
+      localStorage.removeItem('last_room');
+    }
+  }
+
+  // ── 統一寫入：Firebase 優先，fallback localStorage ──
+  async function persist(newList, action) {
+    const ref = remindersRef(roomCode);
+    if (!ref) {
+      // localStorage only
+      setReminders(newList);
+      saveLocal(roomCode, newList);
+      return;
+    }
+    // Firebase：只針對變動的項目操作
+    try {
+      if (action?.type === 'add') {
+        const { id, ...data } = action.item;
+        await ref.doc(id).set({ ...data, createdAt: Date.now() });
+      } else if (action?.type === 'update') {
+        const { id, ...data } = action.item;
+        await ref.doc(id).set(data, { merge: true });
+      } else if (action?.type === 'delete') {
+        await ref.doc(action.id).delete();
+      } else if (action?.type === 'batch') {
+        const batch = db.batch();
+        action.items.forEach(item => {
+          const { id, ...data } = item;
+          batch.set(ref.doc(id), data, { merge: true });
+        });
+        await batch.commit();
+      }
+    } catch (err) {
+      console.error('Firebase 寫入失敗', err);
+      showToast('⚠️ 同步失敗，資料已存本機');
+      setReminders(newList);
+      saveLocal(roomCode, newList);
+    }
+  }
+
+  async function handleSave(item) {
+    const isUpdate = !!(item.id && reminders.find(r => r.id === item.id));
+    const newList = isUpdate
+      ? reminders.map(r => r.id === item.id ? item : r)
+      : [item, ...reminders];
+
+    await persist(newList, { type: isUpdate ? 'update' : 'add', item });
+    if (!remindersRef(roomCode)) setReminders(newList);
+    showToast(isUpdate ? '✓ 已儲存修改' : '✓ 提醒已新增');
+    setShowForm(false);
+    setEditItem(null);
+  }
+
+  async function handleComplete(reminder, amount) {
+    const nextDue = calcNextDue(reminder.dueDate, reminder.recurrence);
+    const historyEntry = { completedAt: Date.now() };
+    if (amount !== null && amount !== '' && amount !== undefined) {
+      historyEntry.amount = Number(amount);
+    }
+    const updated = {
+      ...reminder,
+      status: reminder.recurrence === 'once' ? 'completed' : 'pending',
+      dueDate: reminder.recurrence === 'once' ? reminder.dueDate : nextDue,
+      completionHistory: [...(reminder.completionHistory || []), historyEntry],
+      updatedAt: Date.now(),
+    };
+    const newList = reminders.map(r => r.id === reminder.id ? updated : r);
+    await persist(newList, { type: 'update', item: updated });
+    if (!remindersRef(roomCode)) setReminders(newList);
+    setDetailItem(null);
+    showToast('✓ 完成！');
+  }
+
+  async function handleDelete(id) {
+    const newList = reminders.filter(r => r.id !== id);
+    await persist(newList, { type: 'delete', id });
+    if (!remindersRef(roomCode)) setReminders(newList);
+    setDetailItem(null);
+    showToast('已刪除');
+  }
+
+  function handleQuickCheck(reminder) {
+    if (reminder.status === 'completed') return;
+    // 財務/訂閱快速打卡不詢問金額（可從卡片快速完成）
+    handleComplete(reminder, null);
+  }
+
+  // ── 篩選 + 搜尋 ──
+  const filtered = reminders.filter(r => {
+    if (filterType !== 'all' && r.type !== filterType) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return r.title.toLowerCase().includes(q) || (r.description||'').toLowerCase().includes(q);
+    }
+    return true;
+  });
+
+  // ── 分組 ──
+  const today = dayjs().format('YYYY-MM-DD');
+  const groups = [
+    { key: 'overdue', label: '逾期', color: 'var(--urgent)',
+      items: filtered.filter(r => r.status!=='completed' && r.dueDate && dayjs(r.dueDate).isBefore(dayjs(today),'day')) },
+    { key: 'soon', label: '7天內', color: 'var(--high)',
+      items: filtered.filter(r => r.status!=='completed' && r.dueDate
+        && !dayjs(r.dueDate).isBefore(dayjs(today),'day')
+        && dayjs(r.dueDate).diff(dayjs(today),'day') <= 7) },
+    { key: 'pending', label: '待處理', color: 'var(--medium)',
+      items: filtered.filter(r => r.status!=='completed' && r.dueDate
+        && dayjs(r.dueDate).diff(dayjs(today),'day') > 7) },
+    { key: 'no-date', label: '無日期', color: 'var(--low)',
+      items: filtered.filter(r => r.status!=='completed' && !r.dueDate) },
+    { key: 'done', label: '已完成', color: 'var(--success)',
+      items: filtered.filter(r => r.status==='completed') },
+  ].filter(g => g.items.length > 0);
+
+  // ── 統計 ──
+  const urgentCount  = reminders.filter(r => r.status!=='completed' && getDuePriority(r.dueDate)==='urgent').length;
+  const pendingCount = reminders.filter(r => r.status!=='completed').length;
+  const doneCount    = reminders.filter(r => r.status==='completed').length;
+
+  if (!roomCode) return <LoginPage onLogin={handleLogin} />;
+
+  return (
+    <div className="app-wrap">
+      {/* Header */}
+      <div className="app-header">
+        <div className="header-inner">
+          <div style={{ display:'flex', alignItems:'center', gap:'.6rem' }}>
+            <div className="header-title">提醒系統</div>
+            {syncing && <div style={{ fontSize:'.65rem', color:'var(--home-text-light)' }}>同步中…</div>}
+          </div>
+          <div style={{ display:'flex', alignItems:'center', gap:'.6rem' }}>
+            <div className={`sync-dot${isOnline?'':' offline'}`} title={isOnline?'已連線 Firebase':'本機模式'} />
+            <div className="header-room" onClick={handleLogout}>登出</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Firebase 未設定提示 */}
+      {showFirebaseTip && (
+        <div className="firebase-banner" onClick={() => setShowFirebaseTip(false)}>
+          <div className="firebase-banner-title">⚡ 目前使用本機儲存</div>
+          <div style={{ fontSize:'.72rem', color:'var(--home-text-light)' }}>
+            填入 Firebase 設定後可啟用多裝置即時同步。點擊關閉此提示。
+          </div>
+        </div>
+      )}
+
+      {/* 統計 */}
+      <div className="stats-row">
+        <div className="stat-card stat-urgent">
+          <div className="stat-num">{urgentCount}</div>
+          <div className="stat-label">緊急</div>
+        </div>
+        <div className="stat-card stat-pending">
+          <div className="stat-num">{pendingCount}</div>
+          <div className="stat-label">待處理</div>
+        </div>
+        <div className="stat-card stat-done">
+          <div className="stat-num">{doneCount}</div>
+          <div className="stat-label">已完成</div>
+        </div>
+      </div>
+
+      {/* 本月統計 */}
+      <MonthlyBanner reminders={reminders} />
+
+      {/* 搜尋 */}
+      <div className="search-filter-row">
+        <input className="search-box" placeholder="🔍 搜尋提醒..."
+          value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
+
+      {/* 類型篩選 */}
+      <div className="filter-scroll">
+        <button className={`filter-chip${filterType==='all'?' active':''}`}
+          onClick={() => setFilterType('all')}>全部 ({reminders.length})</button>
+        {Object.entries(TYPE_CONFIG).map(([k,v]) => {
+          const count = reminders.filter(r => r.type===k).length;
+          if (!count) return null;
+          return (
+            <button key={k} className={`filter-chip${filterType===k?' active':''}`}
+              onClick={() => setFilterType(k)}>
+              {v.icon} {v.label} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      {/* 提醒列表 */}
+      {reminders.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🌿</div>
+          <div className="empty-text">還沒有任何提醒<br/>點擊右下角 ＋ 開始新增吧！</div>
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="empty-state">
+          <div className="empty-icon">🔍</div>
+          <div className="empty-text">找不到符合條件的提醒</div>
+        </div>
+      ) : (
+        groups.map(g => (
+          <div key={g.key}>
+            <div className="group-label">
+              <div className="group-dot" style={{ background: g.color }} />
+              <div className="group-title">{g.label}</div>
+              <div className="group-count">{g.items.length}</div>
+            </div>
+            <div className="reminder-list">
+              {g.items.map(r => (
+                <ReminderCard key={r.id} reminder={r}
+                  onCheck={() => handleQuickCheck(r)}
+                  onClick={() => setDetailItem(r)} />
+              ))}
+            </div>
+          </div>
+        ))
+      )}
+
+      {/* FAB */}
+      <button className="fab" onClick={() => { setEditItem(null); setShowForm(true); }}>＋</button>
+
+      {/* 底部導覽 */}
+      <div className="bottom-nav">
+        {[
+          { icon:'🏡', label:'首頁',  href:'index.html' },
+          { icon:'📋', label:'提醒',  active:true },
+          { icon:'📦', label:'庫存',  href:'module-inventory.html' },
+          { icon:'👗', label:'衣櫥',  href:'module-wardrobe.html' },
+          { icon:'📖', label:'百科',  href:'module-wiki.html' },
+        ].map((n,i) => (
+          <div key={i} className={`nav-item${n.active?' active':''}`}
+            onClick={() => n.href && (window.location.href = `${n.href}?room=${roomCode}`)}>
+            <div className="nav-item-icon">{n.icon}</div>
+            <div className="nav-item-label">{n.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Modal：新增/編輯 */}
+      {(showForm || editItem) && (
+        <ReminderFormModal
+          initial={editItem}
+          onSave={handleSave}
+          onClose={() => { setShowForm(false); setEditItem(null); }}
+        />
+      )}
+
+      {/* Modal：詳情 */}
+      {detailItem && (
+        <DetailModal
+          reminder={reminders.find(r => r.id === detailItem.id) || detailItem}
+          onClose={() => setDetailItem(null)}
+          onComplete={(amount) => handleComplete(reminders.find(r => r.id === detailItem.id) || detailItem, amount)}
+          onEdit={() => {
+            setEditItem(reminders.find(r => r.id === detailItem.id) || detailItem);
+            setDetailItem(null);
+          }}
+          onDelete={() => handleDelete(detailItem.id)}
+        />
+      )}
+
+      {/* Toast */}
+      {toast && <div className="toast">{toast}</div>}
+    </div>
+  );
+}
+
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
