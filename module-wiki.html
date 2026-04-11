@@ -20,15 +20,15 @@
 :root{
   --bg:#FDFCFA;--card:#F6F2EE;--border:#EDE4E0;
   --primary:#DCCBC3;--accent:#DDC7BF;
-  --text:#584B42;--text-light:#8B7D75;
+  --text:#4A3F38;--text-light:#766A63;
   --success:#8FB17A;--warning:#D4A574;--danger:#C9876B;--urgent:#E74C3C;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:350;min-height:100vh;-webkit-font-smoothing:antialiased;}
 
 /* 登入 */
 .login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 20% 20%,rgba(220,203,195,.35) 0%,transparent 55%),var(--bg);}
-.login-logo{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:300;letter-spacing:.15em;margin-bottom:.4rem;text-align:center;}
+.login-logo{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:350;letter-spacing:.15em;margin-bottom:.4rem;text-align:center;}
 .login-sub{font-size:.8rem;color:var(--text-light);letter-spacing:.2em;margin-bottom:3rem;}
 .login-card{background:var(--card);border:1px solid var(--border);border-radius:2rem;box-shadow:0 4px 24px rgba(88,75,66,.07);padding:2.5rem 2rem;width:100%;max-width:340px;}
 .login-label{font-size:.75rem;letter-spacing:.18em;color:var(--text-light);margin-bottom:.6rem;display:block;}
@@ -43,7 +43,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .app-wrap{max-width:480px;margin:0 auto;padding-bottom:90px;}
 .app-header{position:sticky;top:0;z-index:100;background:rgba(253,252,250,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,0) 1.25rem 0;}
 .header-inner{display:flex;align-items:center;justify-content:space-between;height:56px;}
-.header-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:400;letter-spacing:.1em;}
+.header-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:450;letter-spacing:.1em;}
 .header-right{display:flex;align-items:center;gap:.5rem;}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 0 2px rgba(143,177,122,.3);}
 .sync-dot.offline{background:var(--text-light);box-shadow:none;}
@@ -125,7 +125,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .modal-sheet{background:var(--bg);border-radius:2rem 2rem 0 0;width:100%;max-width:480px;max-height:calc(100vh - 80px);overflow-y:auto;padding:1.5rem 1.5rem calc(5rem + env(safe-area-inset-bottom,0px));animation:slideUp .25s ease;}
 @keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.5rem;}
-.modal-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:400;letter-spacing:.1em;margin-bottom:1.5rem;text-align:center;}
+.modal-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:450;letter-spacing:.1em;margin-bottom:1.5rem;text-align:center;}
 
 /* 表單 */
 .form-group{margin-bottom:1rem;}
@@ -692,8 +692,8 @@ function ListCard({article,onClick}){
 function App(){
   const[rc,setRc]=React.useState(()=>{
     const urlRoom=new URLSearchParams(window.location.search).get('room');
-    if(urlRoom){localStorage.setItem('last_room_wiki',urlRoom);return urlRoom;}
-    return localStorage.getItem('last_room_wiki')||'';
+    if(urlRoom){localStorage.setItem('last_room_hub',urlRoom);return urlRoom;}
+    return localStorage.getItem('last_room_hub')||'';
   });
   const[articles,setArticles]=React.useState([]);
   const[search,setSearch]    =React.useState('');
@@ -711,7 +711,7 @@ function App(){
 
   React.useEffect(()=>{
     if(!rc)return;
-    localStorage.setItem('last_room_wiki',rc);
+    localStorage.setItem('last_room_hub',rc);
     const ref=aRef(rc);
     if(ref){
       setSyncing(true);

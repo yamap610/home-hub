@@ -31,8 +31,8 @@
     --home-border: #EDE4E0;
     --home-primary: #DCCBC3;
     --home-accent: #DDC7BF;
-    --home-text: #584B42;
-    --home-text-light: #8B7D75;
+    --home-text: #4A3F38;
+    --home-text-light: #766A63;
     --urgent: #E74C3C;
     --high: #F39C12;
     --medium: #F1C40F;
@@ -70,7 +70,7 @@
   .login-logo {
     font-family: 'Noto Serif TC', serif;
     font-size: 2rem;
-    font-weight: 300;
+    font-weight: 350;
     letter-spacing: .15em;
     color: var(--home-text);
     margin-bottom: .4rem;
@@ -244,7 +244,7 @@
   .stat-num {
     font-family: 'Noto Serif TC', serif;
     font-size: 1.6rem;
-    font-weight: 300;
+    font-weight: 350;
     line-height: 1;
     margin-bottom: .3rem;
   }
@@ -1683,8 +1683,8 @@ function MonthlyBanner({ reminders }) {
 function App() {
   const [roomCode, setRoomCode]     = React.useState(() => {
     const urlRoom = new URLSearchParams(window.location.search).get('room');
-    if(urlRoom) { localStorage.setItem('last_room', urlRoom); return urlRoom; }
-    return localStorage.getItem('last_room') || '';
+    if(urlRoom) { localStorage.setItem('last_room_hub', urlRoom); return urlRoom; }
+    return localStorage.getItem('last_room_hub') || '';
   });
   const [reminders, setReminders]   = React.useState([]);
   const [showForm, setShowForm]     = React.useState(false);
@@ -1702,7 +1702,7 @@ function App() {
   // ── Firebase 即時監聽 or localStorage ──
   React.useEffect(() => {
     if (!roomCode) return;
-    localStorage.setItem('last_room', roomCode);
+    localStorage.setItem('last_room_hub', roomCode);
 
     const ref = remindersRef(roomCode);
 
@@ -1745,7 +1745,7 @@ function App() {
       if (unsubRef.current) unsubRef.current();
       setRoomCode('');
       setReminders([]);
-      localStorage.removeItem('last_room');
+      localStorage.removeItem('last_room_hub');
     }
   }
 

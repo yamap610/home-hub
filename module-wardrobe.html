@@ -15,11 +15,11 @@
 <script src="https://unpkg.com/dayjs@1.11.9/dayjs.min.js"></script>
 <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
-:root{--bg:#FDFCFA;--card:#F6F2EE;--border:#EDE4E0;--primary:#DCCBC3;--accent:#DDC7BF;--text:#584B42;--text-light:#8B7D75;--success:#8FB17A;--warning:#D4A574;--danger:#C9876B;}
+:root{--bg:#FDFCFA;--card:#F6F2EE;--border:#EDE4E0;--primary:#DCCBC3;--accent:#DDC7BF;--text:#4A3F38;--text-light:#766A63;--success:#8FB17A;--warning:#D4A574;--danger:#C9876B;}
 *{box-sizing:border-box;margin:0;padding:0;}
-body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;}
+body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:350;min-height:100vh;-webkit-font-smoothing:antialiased;}
 .login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 20% 20%,rgba(220,203,195,.35) 0%,transparent 55%),var(--bg);}
-.login-logo{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:300;letter-spacing:.15em;margin-bottom:.4rem;text-align:center;}
+.login-logo{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:350;letter-spacing:.15em;margin-bottom:.4rem;text-align:center;}
 .login-sub{font-size:.8rem;color:var(--text-light);letter-spacing:.2em;margin-bottom:3rem;}
 .login-card{background:var(--card);border:1px solid var(--border);border-radius:2rem;box-shadow:0 4px 24px rgba(88,75,66,.07);padding:2.5rem 2rem;width:100%;max-width:340px;}
 .login-label{font-size:.75rem;letter-spacing:.18em;color:var(--text-light);margin-bottom:.6rem;display:block;}
@@ -30,14 +30,14 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .app-wrap{max-width:480px;margin:0 auto;padding-bottom:90px;}
 .app-header{position:sticky;top:0;z-index:100;background:rgba(253,252,250,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,0) 1.25rem 0;}
 .header-inner{display:flex;align-items:center;justify-content:space-between;height:56px;}
-.header-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:400;letter-spacing:.1em;}
+.header-title{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:450;letter-spacing:.1em;}
 .header-right{display:flex;align-items:center;gap:.5rem;}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 0 2px rgba(143,177,122,.3);}
 .sync-dot.offline{background:var(--text-light);box-shadow:none;}
 .hbtn{font-size:.78rem;color:var(--text-light);background:var(--card);padding:.25rem .7rem;border-radius:.5rem;border:1px solid var(--border);cursor:pointer;}
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;padding:.75rem 1rem .65rem;}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:1.1rem;padding:.65rem .4rem;text-align:center;}
-.stat-num{font-family:'Noto Serif TC',serif;font-size:1.3rem;font-weight:300;line-height:1;margin-bottom:.2rem;}
+.stat-num{font-family:'Noto Serif TC',serif;font-size:1.3rem;font-weight:350;line-height:1;margin-bottom:.2rem;}
 .stat-label{font-size:.68rem;color:var(--text-light);}
 .batch-bar{background:var(--text);color:var(--bg);padding:.65rem 1.25rem;display:flex;align-items:center;justify-content:space-between;font-size:.82rem;}
 .batch-actions{display:flex;gap:.6rem;}
@@ -56,7 +56,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .cloth-img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
 .cloth-placeholder{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:2.8rem;background:linear-gradient(135deg,var(--bg),var(--primary));}
 .cloth-body{padding:.6rem .7rem .7rem;}
-.cloth-name{font-size:.82rem;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.3rem;}
+.cloth-name{font-size:.82rem;font-weight:450;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.3rem;}
 .cloth-row{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;}
 .cloth-type{font-size:.6rem;padding:.1rem .42rem;border-radius:1rem;background:var(--primary);color:var(--text);}
 .cloth-size{font-size:.6rem;padding:.1rem .42rem;border-radius:1rem;background:var(--bg);border:1px solid var(--border);color:var(--text-light);}
@@ -75,7 +75,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .modal-overlay{position:fixed;inset:0;background:rgba(88,75,66,.35);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
 .modal-sheet{background:var(--bg);border-radius:2rem 2rem 0 0;width:100%;max-width:480px;max-height:calc(100vh - 80px);overflow-y:auto;padding:1.5rem 1.5rem calc(5rem + env(safe-area-inset-bottom,0px));}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.5rem;}
-.modal-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:400;letter-spacing:.1em;margin-bottom:1.5rem;text-align:center;}
+.modal-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:450;letter-spacing:.1em;margin-bottom:1.5rem;text-align:center;}
 .form-group{margin-bottom:1rem;}
 .form-label{display:block;font-size:.78rem;letter-spacing:.15em;color:var(--text-light);margin-bottom:.5rem;}
 .form-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.72rem 1rem;font-family:inherit;font-size:.9rem;color:var(--text);outline:none;}
@@ -139,7 +139,7 @@ function Login({onLogin}){
 }
 
 function SettingsModal({rc,onCsv,onClose}){
-  const logout=()=>{if(window.confirm('確定登出？')){localStorage.removeItem('last_room_ward2');window.location.href='index.html';}};
+  const logout=()=>{if(window.confirm('確定登出？')){localStorage.removeItem('last_room_hub');window.location.href='index.html';}};
   return(<div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}><div className="modal-sheet"><div className="modal-handle"/><div className="modal-title">⚙️ 設定</div>
     <div className="si-row" onClick={()=>{onCsv();onClose();}}><span className="si-lbl">📊 Google Sheet 批量匯入 / 匯出</span><span style={{color:'var(--primary)'}}>→</span></div>
     <div style={{fontSize:'.72rem',color:'var(--text-light)',padding:'.65rem 0',borderBottom:'1px solid var(--border)'}}>房間碼：{rc}</div>
@@ -260,7 +260,7 @@ function ClothCard({cloth,onClick,batchMode,selected,onSelect}){
 }
 
 function App(){
-  const[rc,setRc]=React.useState(()=>{const u=new URLSearchParams(window.location.search).get('room');if(u){localStorage.setItem('last_room_ward2',u);return u;}return localStorage.getItem('last_room_ward2')||'';});
+  const[rc,setRc]=React.useState(()=>{const u=new URLSearchParams(window.location.search).get('room');if(u){localStorage.setItem('last_room_hub',u);return u;}return localStorage.getItem('last_room_hub')||'';});
   const[clothes,setClothes]=React.useState([]);
   const[search,setSearch]=React.useState('');
   const[fType,setFType]=React.useState('all');
@@ -281,7 +281,7 @@ function App(){
 
   React.useEffect(()=>{
     if(!rc)return;
-    localStorage.setItem('last_room_ward2',rc);
+    localStorage.setItem('last_room_hub',rc);
     const ref=wRef(rc);
     if(ref){setSyncing(true);unsub.current=ref.orderBy('createdAt','asc').onSnapshot(s=>{const d=s.docs.map(doc=>({id:doc.id,...doc.data()}));setClothes(d);SL(`ward2_${rc}`,d);setSyncing(false);setOnline(true);},()=>{setClothes(LL(`ward2_${rc}`)||[]);setSyncing(false);setOnline(false);});}
     else{setClothes(LL(`ward2_${rc}`)||[]);setOnline(false);}
