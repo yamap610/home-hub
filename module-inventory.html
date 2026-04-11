@@ -392,8 +392,7 @@ function App(){
           <div className="header-right">
             <div className={`sync-dot${online?'':' offline'}`}/>
             <div className="header-room" onClick={()=>window.location.href='index.html'} style={{cursor:'pointer'}}>🏡</div>
-            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>CSV</div>
-            <div className="header-room" onClick={()=>{if(window.confirm('確定要登出？')){if(unsub.current)unsub.current();setRoomCode('');setItems([]);localStorage.removeItem('last_room_inv');}}}>登出</div>
+            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>⚙️</div>
           </div>
         </div>
       </div>

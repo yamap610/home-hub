@@ -16,7 +16,8 @@
 :root{--bg:#FDFCFA;--card:#F6F2EE;--border:#EDE4E0;--primary:#DCCBC3;--accent:#DDC7BF;--text:#584B42;--text-light:#8B7D75;--success:#8FB17A;--warning:#D4A574;--danger:#C9876B;--urgent:#E74C3C;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;}
-.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 20% 20%,rgba(220,203,195,.35) 0%,transparent 55%),radial-gradient(ellipse at 80% 80%,rgba(221,199,191,.25) 0%,transparent 55%),var(--bg);}
+/* 登入 */
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 20% 20%,rgba(220,203,195,.35) 0%,transparent 55%),var(--bg);}
 .login-logo{font-family:'Noto Serif TC',serif;font-size:2.2rem;font-weight:300;letter-spacing:.15em;margin-bottom:.4rem;text-align:center;}
 .login-sub{font-size:.78rem;color:var(--text-light);letter-spacing:.2em;margin-bottom:3rem;}
 .login-card{background:var(--card);border:1px solid var(--border);border-radius:2rem;box-shadow:0 4px 24px rgba(88,75,66,.07);padding:2.5rem 2rem;width:100%;max-width:340px;}
@@ -27,21 +28,35 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .login-hint{font-size:.72rem;color:var(--text-light);text-align:center;margin:.6rem 0 1.8rem;}
 .btn-login{width:100%;background:var(--primary);border:none;border-radius:1rem;padding:.9rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;font-weight:500;color:var(--text);letter-spacing:.15em;cursor:pointer;transition:background .2s;}
 .btn-login:hover{background:var(--accent);}
-.quick-codes{display:flex;gap:.5rem;justify-content:center;flex-wrap:wrap;margin-top:1rem;}
-.quick-btn{background:var(--bg);border:1px solid var(--border);border-radius:.6rem;padding:.3rem .7rem;font-size:.78rem;color:var(--text);cursor:pointer;letter-spacing:.1em;}
-.quick-btn:hover{background:var(--primary);}
+/* App */
 .app-wrap{max-width:480px;margin:0 auto;padding-bottom:90px;}
 .app-header{position:sticky;top:0;z-index:100;background:rgba(253,252,250,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,0) 1.25rem 0;}
 .header-inner{display:flex;align-items:center;justify-content:space-between;height:56px;}
 .header-logo{font-family:'Noto Serif TC',serif;font-size:1.05rem;font-weight:400;letter-spacing:.1em;}
-.header-right{display:flex;align-items:center;gap:.6rem;}
+.header-right{display:flex;align-items:center;gap:.5rem;}
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 0 2px rgba(143,177,122,.3);}
 .sync-dot.offline{background:var(--text-light);box-shadow:none;}
-.room-badge{font-size:.7rem;color:var(--text-light);background:var(--card);padding:.25rem .7rem;border-radius:.5rem;border:1px solid var(--border);cursor:pointer;letter-spacing:.08em;}
+.room-badge{font-size:.7rem;color:var(--text-light);background:var(--card);padding:.25rem .7rem;border-radius:.5rem;border:1px solid var(--border);cursor:pointer;}
+/* 問候 */
 .greeting-wrap{padding:1.5rem 1.25rem .75rem;}
 .greeting-date{font-size:.72rem;color:var(--text-light);letter-spacing:.12em;margin-bottom:.3rem;}
-.greeting-text{font-family:'Noto Serif TC',serif;font-size:1.45rem;font-weight:300;letter-spacing:.05em;line-height:1.4;}
+.greeting-text{font-family:'Noto Serif TC',serif;font-size:1.45rem;font-weight:300;line-height:1.4;}
 .greeting-sub{font-size:.78rem;color:var(--text-light);margin-top:.35rem;}
+/* 天氣卡 */
+.weather-card{margin:0 1rem .85rem;background:linear-gradient(135deg,rgba(220,203,195,.3),rgba(221,199,191,.15));border:1px solid var(--border);border-radius:1.5rem;padding:1rem 1.25rem;}
+.weather-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem;}
+.weather-left{}
+.weather-temp-row{display:flex;align-items:baseline;gap:.3rem;}
+.weather-temp{font-family:'Noto Serif TC',serif;font-size:2.4rem;font-weight:300;line-height:1;color:var(--text);}
+.weather-unit{font-size:.85rem;color:var(--text-light);}
+.weather-desc{font-size:.75rem;color:var(--text-light);margin-top:.15rem;}
+.weather-range{font-size:.7rem;color:var(--text-light);margin-top:.1rem;}
+.weather-right{text-align:right;}
+.weather-icon{font-size:2.2rem;line-height:1;margin-bottom:.2rem;}
+.weather-city{font-size:.62rem;color:var(--text-light);letter-spacing:.08em;}
+.weather-advice{font-size:.75rem;color:var(--text-light);background:rgba(255,255,255,.5);border-radius:.85rem;padding:.5rem .85rem;line-height:1.6;}
+.weather-loading{margin:0 1rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1.1rem 1.25rem;font-size:.78rem;color:var(--text-light);text-align:center;}
+/* 統計 */
 .stats-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;padding:0 1rem .85rem;}
 .ss-card{background:var(--card);border:1px solid var(--border);border-radius:1.25rem;padding:.85rem .6rem;text-align:center;cursor:pointer;transition:transform .15s,box-shadow .15s;}
 .ss-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(88,75,66,.1);}
@@ -49,9 +64,11 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .ss-num{font-family:'Noto Serif TC',serif;font-size:1.35rem;font-weight:300;line-height:1;margin-bottom:.2rem;}
 .ss-label{font-size:.58rem;color:var(--text-light);letter-spacing:.06em;}
 .ss-urgent .ss-num{color:var(--urgent);}
+/* 區塊標題 */
 .section-header{display:flex;align-items:center;justify-content:space-between;padding:.1rem 1.25rem .55rem;}
 .section-title{font-size:.68rem;letter-spacing:.2em;color:var(--text-light);font-weight:500;}
 .section-more{font-size:.68rem;color:var(--primary);cursor:pointer;letter-spacing:.06em;}
+/* 急件 */
 .urgent-list{padding:0 1rem;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.25rem;}
 .urgent-card{background:var(--card);border:1.5px solid rgba(231,76,60,.2);border-radius:1.35rem;padding:.7rem 1rem;display:flex;align-items:center;gap:.75rem;position:relative;overflow:hidden;}
 .urgent-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--urgent);border-radius:1.35rem 0 0 1.35rem;}
@@ -60,9 +77,11 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .urgent-title{font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .urgent-due{font-size:.68rem;color:var(--urgent);margin-top:.1rem;}
 .urgent-type{font-size:.62rem;padding:.08rem .4rem;border-radius:1rem;background:rgba(231,76,60,.1);color:var(--urgent);}
+/* 低庫存 */
 .lowstock-strip{margin:0 1rem .25rem;background:rgba(212,165,116,.1);border:1px solid rgba(212,165,116,.3);border-radius:1.25rem;padding:.75rem 1rem;}
 .lowstock-title{font-size:.7rem;font-weight:500;color:var(--warning);margin-bottom:.4rem;}
 .lowstock-row{display:flex;justify-content:space-between;font-size:.75rem;padding:.1rem 0;}
+/* 書籤 */
 .bookmark-scroll{display:flex;gap:.65rem;padding:0 1rem .85rem;overflow-x:auto;scrollbar-width:none;}
 .bookmark-scroll::-webkit-scrollbar{display:none;}
 .bm-mini{background:var(--card);border:1px solid var(--border);border-radius:1.2rem;overflow:hidden;width:130px;flex-shrink:0;cursor:pointer;transition:box-shadow .15s;}
@@ -72,93 +91,133 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .bm-mini-body{padding:.45rem .6rem .55rem;}
 .bm-mini-title{font-size:.72rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.15rem;}
 .bm-mini-domain{font-size:.6rem;color:var(--text-light);opacity:.75;}
+/* 本月費用 */
 .monthly-card{margin:0 1rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:1.1rem 1.25rem;}
 .monthly-row{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;margin-bottom:.4rem;}
-.monthly-name{display:flex;align-items:center;gap:.4rem;color:var(--text);}
 .monthly-done{opacity:.55;text-decoration:line-through;}
-.monthly-amount{font-weight:400;color:var(--text);font-family:'Noto Serif TC',serif;}
 .monthly-total-row{display:flex;justify-content:space-between;align-items:baseline;margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--border);}
 .monthly-total-label{font-size:.7rem;color:var(--text-light);letter-spacing:.1em;}
 .monthly-total-num{font-family:'Noto Serif TC',serif;font-size:1.15rem;font-weight:300;}
-.monthly-month{font-size:.68rem;color:var(--primary);background:var(--bg);border:1px solid var(--border);border-radius:.45rem;padding:.12rem .5rem;}
-.settings-overlay{position:fixed;inset:0;background:rgba(88,75,66,.35);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
-.settings-sheet{background:var(--bg);border-radius:2rem 2rem 0 0;width:100%;max-width:480px;padding:1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom,0px));}
-.settings-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.5rem;}
-.settings-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:400;letter-spacing:.1em;margin-bottom:1.5rem;text-align:center;}
+/* 備忘/待辦/待買區塊 */
+.quick-section{margin:0 1rem .85rem;background:var(--card);border:1px solid var(--border);border-radius:1.5rem;overflow:hidden;}
+.quick-tabs{display:flex;border-bottom:1px solid var(--border);}
+.quick-tab{flex:1;padding:.65rem .5rem;border:none;background:transparent;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.75rem;color:var(--text-light);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;}
+.quick-tab.active{color:var(--text);border-bottom-color:var(--text);font-weight:500;}
+.quick-body{padding:.85rem 1rem;}
+.memo-textarea{width:100%;min-height:90px;background:transparent;border:none;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--text);outline:none;resize:none;line-height:1.7;}
+.memo-save-btn{display:block;margin-top:.4rem;font-size:.7rem;color:var(--text-light);background:none;border:none;cursor:pointer;letter-spacing:.1em;}
+.todo-input-row{display:flex;gap:.5rem;margin-bottom:.65rem;}
+.todo-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:.85rem;padding:.55rem .85rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.83rem;color:var(--text);outline:none;}
+.todo-add-btn{background:var(--text);border:none;border-radius:.85rem;padding:.55rem .85rem;font-family:inherit;font-size:.83rem;color:var(--bg);cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.todo-item{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-bottom:1px solid var(--border);}
+.todo-item:last-child{border-bottom:none;}
+.todo-check{width:20px;height:20px;border-radius:50%;border:1.5px solid var(--border);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;}
+.todo-check.done{background:var(--success);border-color:var(--success);}
+.todo-text{flex:1;font-size:.83rem;color:var(--text);line-height:1.4;}
+.todo-text.done{text-decoration:line-through;color:var(--text-light);}
+.todo-del{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:.8rem;flex-shrink:0;opacity:.5;}
+.todo-del:hover{opacity:1;color:var(--danger);}
+.empty-note{text-align:center;padding:1.5rem;font-size:.78rem;color:var(--text-light);opacity:.6;}
+/* 設定 Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(88,75,66,.35);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;}
+.modal-sheet{background:var(--bg);border-radius:2rem 2rem 0 0;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;padding:1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom,0px));}
+.modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.5rem;}
+.modal-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:400;letter-spacing:.1em;margin-bottom:1.25rem;text-align:center;}
 .settings-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 0;border-bottom:1px solid var(--border);}
 .settings-row:last-child{border-bottom:none;}
 .settings-key{font-size:.82rem;color:var(--text);}
 .settings-val{font-size:.78rem;color:var(--text-light);}
 .settings-logout{width:100%;margin-top:1.25rem;padding:.85rem;background:rgba(201,135,107,.1);border:1px solid rgba(201,135,107,.3);border-radius:1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--danger);cursor:pointer;}
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:rgba(253,252,250,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom,0px));z-index:9999;}
-.nav-item{display:flex;flex-direction:column;align-items:center;gap:.2rem;opacity:.4;cursor:pointer;padding:.2rem .8rem;border-radius:1rem;transition:opacity .15s;}
+/* 底部導覽 */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:rgba(253,252,250,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;flex-direction:row;align-items:center;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom,0px));z-index:9999;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:.2rem;opacity:.4;cursor:pointer;padding:.2rem .8rem;min-width:0;}
 .nav-item.active{opacity:1;}
-.nav-item-icon{font-size:1.2rem;}
-.nav-item-label{font-size:.58rem;letter-spacing:.12em;color:var(--text-light);}
+.nav-item-icon{font-size:1.2rem;line-height:1;}
+.nav-item-label{font-size:.58rem;letter-spacing:.12em;color:var(--text-light);white-space:nowrap;}
 .nav-item.active .nav-item-label{color:var(--text);font-weight:500;}
-.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.65rem 1.4rem;border-radius:2rem;font-size:.8rem;z-index:500;white-space:nowrap;animation:toastIn .25s ease forwards;pointer-events:none;}
-@keyframes toastIn{from{transform:translateX(-50%) translateY(10px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}
+.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.65rem 1.4rem;border-radius:2rem;font-size:.8rem;z-index:500;white-space:nowrap;pointer-events:none;}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-
 const FIREBASE_CONFIG={apiKey:"AIzaSyAFGSQOvAp1thZkWBZ-nLHe-uR8llDQDI8",authDomain:"home-hub-be41f.firebaseapp.com",projectId:"home-hub-be41f",storageBucket:"home-hub-be41f.firebasestorage.app",messagingSenderId:"286497032414",appId:"1:286497032414:web:16d3f0242a400d0de85a4f"};
 let db=null,fbOk=false;
 try{if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();db.enablePersistence({synchronizeTabs:true}).catch(()=>{});fbOk=true;}catch(e){}
-function col(path){return db&&fbOk?db.collection(path):null;}
 
 const REMINDER_TYPE={financial:'💳',subscription:'📱',consumable:'🔄',chore:'🏠',health:'💊',other:'📌'};
 const CAT_WIKI={recipe:'🍳',health:'💊',baby:'🍼',home:'🏠',finance:'💰',travel:'✈️',tool:'🔧',memo:'📝',other:'📌'};
 const LL=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch{return null;}};
 const SL=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
+const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 
 function getGreeting(){
   const h=dayjs().hour();
-  if(h<6)  return{text:'深夜了，注意休息',sub:'晚安 🌙'};
-  if(h<12) return{text:'早安，美好的一天',sub:'今日要完成的事都記得了嗎？'};
-  if(h<14) return{text:'午安，稍事休息',sub:'下午繼續加油 ☀️'};
-  if(h<18) return{text:'午後好',sub:'今天過得如何？'};
-  if(h<22) return{text:'晚上好',sub:'家人都平安就是最好的一天 🌿'};
+  if(h<6)return{text:'深夜了，注意休息',sub:'晚安 🌙'};
+  if(h<12)return{text:'早安，美好的一天',sub:'今日要完成的事都記得了嗎？'};
+  if(h<14)return{text:'午安，稍事休息',sub:'下午繼續加油 ☀️'};
+  if(h<18)return{text:'午後好',sub:'今天過得如何？'};
+  if(h<22)return{text:'晚上好',sub:'家人都平安就是最好的一天 🌿'};
   return{text:'夜深了',sub:'記得早點休息 🌙'};
 }
-
-function LoginPage({onLogin}){
-  const[code,setCode]=React.useState('');const[err,setErr]=React.useState('');
-  function go(){const t=code.trim();if(!t){setErr('請輸入房間碼');return;}if(t.length<4){setErr('至少4位');return;}onLogin(t);}
-  return(
-    <div className="login-wrap">
-      <div className="login-logo">家庭數位管家</div>
-      <div className="login-sub">FAMILY DIGITAL BUTLER</div>
-      <div className="login-card">
-        <label className="login-label">房間碼 ROOM CODE</label>
-        <input className="login-input" placeholder="輸入你的房間碼" value={code} maxLength={12}
-          onChange={e=>{setCode(e.target.value);setErr('');}} onKeyDown={e=>e.key==='Enter'&&go()}/>
-        {err&&<div style={{fontSize:'.72rem',color:'var(--danger)',textAlign:'center',marginTop:'.4rem'}}>{err}</div>}
-        <div className="login-hint">家人共用相同房間碼，資料即時同步</div>
-        <button className="btn-login" onClick={go}>進入管家 →</button>
-        <div className="quick-codes">
-          {['DEMO','HOME','FAMILY'].map(c=>(
-            <button key={c} className="quick-btn" onClick={()=>{setCode(c);setErr('');}}>{c}</button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+function weatherIcon(code){
+  if(code===0)return'☀️';if(code<=2)return'🌤';if(code<=3)return'☁️';
+  if(code<=49)return'🌫';if(code<=55)return'🌦';if(code<=65)return'🌧';
+  if(code<=75)return'🌨';if(code<=82)return'🌦';if(code<=99)return'⛈';return'🌡';
+}
+function weatherDesc(code){
+  if(code===0)return'晴天';if(code<=2)return'晴時多雲';if(code<=3)return'多雲';
+  if(code<=49)return'有霧';if(code<=55)return'毛毛雨';if(code<=65)return'有雨';
+  if(code<=75)return'下雪';if(code<=82)return'陣雨';if(code<=99)return'雷陣雨';return'';
+}
+function clothingAdvice(temp,code){
+  const rain=code>=51&&code<=99;
+  let base='';
+  if(temp>=30)base='今天很熱，穿輕薄透氣的衣物最舒適';
+  else if(temp>=24)base='溫度宜人，短袖或薄外套都合適';
+  else if(temp>=18)base='有點涼意，建議帶件薄外套';
+  else if(temp>=10)base='天氣偏冷，記得穿上保暖外套';
+  else base='氣溫偏低，多穿幾件、注意保暖';
+  return base+(rain?'，記得帶傘 ☂️':'');
 }
 
-function SettingsModal({roomCode,onClose,onLogout}){
+function WeatherCard(){
+  const[w,setW]=React.useState(null);
+  const[loading,setLoading]=React.useState(true);
+  React.useEffect(()=>{
+    function fetchW(lat,lon,city){
+      fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weathercode&daily=temperature_2m_max,temperature_2m_min&timezone=Asia/Taipei&forecast_days=1`)
+        .then(r=>r.json())
+        .then(d=>{setW({temp:Math.round(d.current.temperature_2m),code:d.current.weathercode,max:Math.round(d.daily.temperature_2m_max[0]),min:Math.round(d.daily.temperature_2m_min[0]),city});setLoading(false);})
+        .catch(()=>setLoading(false));
+    }
+    if(navigator.geolocation){
+      navigator.geolocation.getCurrentPosition(
+        p=>fetchW(p.coords.latitude,p.coords.longitude,'目前位置'),
+        ()=>fetchW(25.0478,121.5319,'台北市'),
+        {timeout:5000}
+      );
+    }else{fetchW(25.0478,121.5319,'台北市');}
+  },[]);
+  if(loading)return <div className="weather-loading">⏳ 取得天氣中…</div>;
+  if(!w)return null;
   return(
-    <div className="settings-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="settings-sheet">
-        <div className="settings-handle"/>
-        <div className="settings-title">設定</div>
-        <div className="settings-row"><span className="settings-key">房間碼</span><span className="settings-val">{roomCode}</span></div>
-        <div className="settings-row"><span className="settings-key">同步狀態</span><span className="settings-val">{fbOk?'✓ Firebase 已連線':'本機模式'}</span></div>
-        <div className="settings-row"><span className="settings-key">版本</span><span className="settings-val">v1.0.0</span></div>
-        <button className="settings-logout" onClick={onLogout}>登出此房間</button>
+    <div className="weather-card">
+      <div className="weather-top">
+        <div className="weather-left">
+          <div className="weather-temp-row">
+            <span className="weather-temp">{w.temp}</span>
+            <span className="weather-unit">°C</span>
+          </div>
+          <div className="weather-desc">{weatherDesc(w.code)}</div>
+          <div className="weather-range">最高 {w.max}° · 最低 {w.min}°</div>
+        </div>
+        <div className="weather-right">
+          <div className="weather-icon">{weatherIcon(w.code)}</div>
+          <div className="weather-city">{w.city}</div>
+        </div>
       </div>
+      <div className="weather-advice">👗 {clothingAdvice(w.temp,w.code)}</div>
     </div>
   );
 }
@@ -178,6 +237,118 @@ function BmMini({article,onClick}){
   );
 }
 
+function QuickSection({rc}){
+  const[tab,setTab]=React.useState('memo');
+  const[memo,setMemo]=React.useState(()=>LL(`memo_${rc}`)||'');
+  const[memoSaved,setMemoSaved]=React.useState(true);
+  const[todos,setTodos]=React.useState(()=>LL(`todos_${rc}`)||[]);
+  const[todoInput,setTodoInput]=React.useState('');
+  const[shopping,setShopping]=React.useState(()=>LL(`shopping_${rc}`)||[]);
+  const[shopInput,setShopInput]=React.useState('');
+
+  function saveMemo(){SL(`memo_${rc}`,memo);setMemoSaved(true);}
+  function addTodo(){const t=todoInput.trim();if(!t)return;const n=[...todos,{id:gid(),text:t,done:false}];setTodos(n);SL(`todos_${rc}`,n);setTodoInput('');}
+  function toggleTodo(id){const n=todos.map(t=>t.id===id?{...t,done:!t.done}:t);setTodos(n);SL(`todos_${rc}`,n);}
+  function delTodo(id){const n=todos.filter(t=>t.id!==id);setTodos(n);SL(`todos_${rc}`,n);}
+  function addShop(){const t=shopInput.trim();if(!t)return;const n=[...shopping,{id:gid(),text:t,done:false}];setShopping(n);SL(`shopping_${rc}`,n);setShopInput('');}
+  function toggleShop(id){const n=shopping.map(t=>t.id===id?{...t,done:!t.done}:t);setShopping(n);SL(`shopping_${rc}`,n);}
+  function delShop(id){const n=shopping.filter(t=>t.id!==id);setShopping(n);SL(`shopping_${rc}`,n);}
+
+  const doneTodos=todos.filter(t=>t.done).length;
+  const doneShop=shopping.filter(t=>t.done).length;
+
+  return(
+    <div className="quick-section">
+      <div className="quick-tabs">
+        <button className={`quick-tab${tab==='memo'?' active':''}`} onClick={()=>setTab('memo')}>📝 備忘錄</button>
+        <button className={`quick-tab${tab==='todo'?' active':''}`} onClick={()=>setTab('todo')}>✅ 待辦 {todos.length>0&&<span style={{fontSize:'.6rem',color:'var(--primary)',marginLeft:'.2rem'}}>{todos.length-doneTodos}</span>}</button>
+        <button className={`quick-tab${tab==='shop'?' active':''}`} onClick={()=>setTab('shop')}>🛍 待買 {shopping.length>0&&<span style={{fontSize:'.6rem',color:'var(--primary)',marginLeft:'.2rem'}}>{shopping.length-doneShop}</span>}</button>
+      </div>
+      <div className="quick-body">
+        {tab==='memo'&&(
+          <>
+            <textarea className="memo-textarea" placeholder="隨手記下任何事情…" value={memo}
+              onChange={e=>{setMemo(e.target.value);setMemoSaved(false);}}/>
+            <button className="memo-save-btn" onClick={saveMemo}>{memoSaved?'✓ 已儲存':'點此儲存'}</button>
+          </>
+        )}
+        {tab==='todo'&&(
+          <>
+            <div className="todo-input-row">
+              <input className="todo-input" placeholder="新增待辦事項…" value={todoInput}
+                onChange={e=>setTodoInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addTodo()}/>
+              <button className="todo-add-btn" onClick={addTodo}>＋ 新增</button>
+            </div>
+            {todos.length===0?<div className="empty-note">沒有待辦事項</div>:
+              todos.map(t=>(
+                <div key={t.id} className="todo-item">
+                  <div className={`todo-check${t.done?' done':''}`} onClick={()=>toggleTodo(t.id)}>{t.done&&<span style={{fontSize:'.65rem',color:'#fff'}}>✓</span>}</div>
+                  <span className={`todo-text${t.done?' done':''}`}>{t.text}</span>
+                  <button className="todo-del" onClick={()=>delTodo(t.id)}>✕</button>
+                </div>
+              ))
+            }
+            {doneTodos>0&&<button onClick={()=>{const n=todos.filter(t=>!t.done);setTodos(n);SL(`todos_${rc}`,n);}} style={{marginTop:'.6rem',width:'100%',background:'none',border:'none',fontSize:'.7rem',color:'var(--text-light)',cursor:'pointer',letterSpacing:'.1em'}}>清除已完成（{doneTodos}）</button>}
+          </>
+        )}
+        {tab==='shop'&&(
+          <>
+            <div className="todo-input-row">
+              <input className="todo-input" placeholder="新增待買項目…" value={shopInput}
+                onChange={e=>setShopInput(e.target.value)} onKeyDown={e=>e.key==='Enter'&&addShop()}/>
+              <button className="todo-add-btn" onClick={addShop}>＋ 新增</button>
+            </div>
+            {shopping.length===0?<div className="empty-note">沒有待買項目</div>:
+              shopping.map(t=>(
+                <div key={t.id} className="todo-item">
+                  <div className={`todo-check${t.done?' done':''}`} onClick={()=>toggleShop(t.id)}>{t.done&&<span style={{fontSize:'.65rem',color:'#fff'}}>✓</span>}</div>
+                  <span className={`todo-text${t.done?' done':''}`}>{t.text}</span>
+                  <button className="todo-del" onClick={()=>delShop(t.id)}>✕</button>
+                </div>
+              ))
+            }
+            {doneShop>0&&<button onClick={()=>{const n=shopping.filter(t=>!t.done);setShopping(n);SL(`shopping_${rc}`,n);}} style={{marginTop:'.6rem',width:'100%',background:'none',border:'none',fontSize:'.7rem',color:'var(--text-light)',cursor:'pointer',letterSpacing:'.1em'}}>清除已勾選（{doneShop}）</button>}
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SettingsModal({rc,onClose,onLogout}){
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="modal-title">⚙️ 設定</div>
+        <div className="settings-row"><span className="settings-key">房間碼</span><span className="settings-val">{rc}</span></div>
+        <div className="settings-row"><span className="settings-key">同步狀態</span><span className="settings-val">{fbOk?'✓ Firebase 已連線':'本機模式'}</span></div>
+        <div className="settings-row"><span className="settings-key">版本</span><span className="settings-val">v1.0.0</span></div>
+        <button className="settings-logout" onClick={onLogout}>登出此房間</button>
+      </div>
+    </div>
+  );
+}
+
+function LoginPage({onLogin}){
+  const[code,setCode]=React.useState('');const[err,setErr]=React.useState('');
+  function go(){const t=code.trim();if(!t){setErr('請輸入房間碼');return;}if(t.length<4){setErr('至少4位');return;}onLogin(t);}
+  return(
+    <div className="login-wrap">
+      <div className="login-logo">家庭數位管家</div>
+      <div className="login-sub">FAMILY DIGITAL BUTLER</div>
+      <div className="login-card">
+        <label className="login-label">房間碼 ROOM CODE</label>
+        <input className="login-input" placeholder="輸入你的房間碼" value={code} maxLength={12}
+          onChange={e=>{setCode(e.target.value);setErr('');}} onKeyDown={e=>e.key==='Enter'&&go()}/>
+        {err&&<div style={{fontSize:'.72rem',color:'var(--danger)',textAlign:'center',marginTop:'.4rem'}}>{err}</div>}
+        <div className="login-hint">家人共用相同房間碼，資料即時同步</div>
+        <button className="btn-login" onClick={go}>進入管家 →</button>
+      </div>
+    </div>
+  );
+}
+
 function App(){
   const[rc,setRc]=React.useState(()=>{
     const u=new URLSearchParams(window.location.search).get('room');
@@ -186,11 +357,11 @@ function App(){
   });
   const[reminders,setReminders]=React.useState([]);
   const[inventory,setInventory]=React.useState([]);
-  const[wardrobe,setWardrobe]  =React.useState([]);
-  const[wiki,setWiki]          =React.useState([]);
+  const[wardrobe,setWardrobe]=React.useState([]);
+  const[wiki,setWiki]=React.useState([]);
   const[showSettings,setShowSettings]=React.useState(false);
   const[online,setOnline]=React.useState(fbOk);
-  const[toast,setToast]  =React.useState(null);
+  const[toast,setToast]=React.useState(null);
   const unsubs=React.useRef([]);
 
   React.useEffect(()=>{
@@ -218,7 +389,6 @@ function App(){
     setRc('');setReminders([]);setInventory([]);setWardrobe([]);setWiki([]);
     localStorage.removeItem('last_room_hub');setShowSettings(false);
   }
-
   function openModule(name){
     const map={提醒:'module-reminders.html',庫存:'module-inventory.html',衣櫥:'module-wardrobe.html',百科:'module-wiki.html'};
     if(map[name])window.location.href=`${map[name]}?room=${encodeURIComponent(rc)}`;
@@ -229,20 +399,17 @@ function App(){
     if(r.status==='completed'||!r.dueDate)return false;
     return dayjs(r.dueDate).diff(dayjs(today),'day')<=3;
   }).sort((a,b)=>dayjs(a.dueDate).diff(dayjs(b.dueDate)));
-
   const lowStock=inventory.filter(i=>i.threshold>0&&i.quantity<=i.threshold);
-
   const thisMonth=dayjs().format('YYYY-MM');
   const monthlyItems=reminders.filter(r=>['financial','subscription'].includes(r.type)&&r.dueDate&&dayjs(r.dueDate).format('YYYY-MM')===thisMonth&&r.amount);
   const paidItems=monthlyItems.filter(r=>(r.completionHistory||[]).some(h=>dayjs(h.completedAt).format('YYYY-MM')===thisMonth));
   const monthlyTotal=monthlyItems.reduce((s,r)=>s+Number(r.amount||0),0);
-
   const greeting=getGreeting();
+
   if(!rc)return <LoginPage onLogin={code=>setRc(code)}/>;
 
   return(
     <div className="app-wrap">
-
       <div className="app-header">
         <div className="header-inner">
           <div className="header-logo">家庭數位管家</div>
@@ -258,6 +425,8 @@ function App(){
         <div className="greeting-text">{greeting.text}</div>
         <div className="greeting-sub">{greeting.sub}</div>
       </div>
+
+      <WeatherCard/>
 
       <div className="stats-strip">
         <div className="ss-card ss-urgent" onClick={()=>openModule('提醒')}>
@@ -282,99 +451,84 @@ function App(){
         </div>
       </div>
 
-      {urgentReminders.length>0&&(
-        <>
-          <div className="section-header">
-            <div className="section-title">⚡ 急件提醒</div>
-            <div className="section-more" onClick={()=>openModule('提醒')}>全部 →</div>
-          </div>
-          <div className="urgent-list">
-            {urgentReminders.slice(0,4).map(r=>{
-              const diff=dayjs(r.dueDate).diff(dayjs(today),'day');
-              const label=diff<0?`逾期 ${Math.abs(diff)} 天`:diff===0?'今天到期':diff===1?'明天到期':`${diff} 天後`;
-              return(
-                <div key={r.id} className="urgent-card">
-                  <div className="urgent-dot" style={{background:diff<=1?'var(--urgent)':'var(--warning)'}}/>
-                  <div className="urgent-body">
-                    <div className="urgent-title">{r.title}</div>
-                    <div className="urgent-due">{label}</div>
-                  </div>
-                  <span className="urgent-type">{REMINDER_TYPE[r.type]||'📌'}</span>
+      {urgentReminders.length>0&&(<>
+        <div className="section-header">
+          <div className="section-title">⚡ 急件提醒</div>
+          <div className="section-more" onClick={()=>openModule('提醒')}>全部 →</div>
+        </div>
+        <div className="urgent-list">
+          {urgentReminders.slice(0,4).map(r=>{
+            const diff=dayjs(r.dueDate).diff(dayjs(today),'day');
+            const label=diff<0?`逾期 ${Math.abs(diff)} 天`:diff===0?'今天到期':diff===1?'明天到期':`${diff} 天後`;
+            return(
+              <div key={r.id} className="urgent-card">
+                <div className="urgent-dot" style={{background:diff<=1?'var(--urgent)':'var(--warning)'}}/>
+                <div className="urgent-body">
+                  <div className="urgent-title">{r.title}</div>
+                  <div className="urgent-due">{label}</div>
                 </div>
-              );
-            })}
-          </div>
-        </>
-      )}
-
-      {monthlyItems.length>0&&(
-        <>
-          <div className="section-header" style={{marginTop:'.75rem'}}>
-            <div className="section-title">💰 本月費用</div>
-            <div className="monthly-month">{dayjs().format('MM月')}</div>
-          </div>
-          <div className="monthly-card">
-            {monthlyItems.slice(0,5).map(r=>{
-              const paid=paidItems.some(p=>p.id===r.id);
-              return(
-                <div key={r.id} className="monthly-row">
-                  <span className={`monthly-name${paid?' monthly-done':''}`}>{REMINDER_TYPE[r.type]||'💳'} {r.title}</span>
-                  <span className={`monthly-amount${paid?' monthly-done':''}`}>TWD {Number(r.amount).toLocaleString()}</span>
-                </div>
-              );
-            })}
-            {monthlyTotal>0&&(
-              <div className="monthly-total-row">
-                <span className="monthly-total-label">本月合計</span>
-                <span className="monthly-total-num">TWD {monthlyTotal.toLocaleString()}</span>
+                <span className="urgent-type">{REMINDER_TYPE[r.type]||'📌'}</span>
               </div>
-            )}
-          </div>
-        </>
-      )}
+            );
+          })}
+        </div>
+      </>)}
 
-      {lowStock.length>0&&(
-        <>
-          <div className="section-header">
-            <div className="section-title">📦 庫存不足</div>
-            <div className="section-more" onClick={()=>openModule('庫存')}>前往補充 →</div>
-          </div>
-          <div className="lowstock-strip">
-            <div className="lowstock-title">⚠️ {lowStock.length} 個品項需要補充</div>
-            {lowStock.slice(0,4).map(i=>(
-              <div key={i.id} className="lowstock-row">
-                <span>{i.name}</span>
-                <span style={{color:'var(--warning)',fontWeight:500}}>{i.quantity}/{i.threshold} {i.unit}</span>
+      {monthlyItems.length>0&&(<>
+        <div className="section-header" style={{marginTop:'.75rem'}}>
+          <div className="section-title">💰 本月費用</div>
+          <div style={{fontSize:'.68rem',color:'var(--primary)',background:'var(--card)',border:'1px solid var(--border)',borderRadius:'.45rem',padding:'.12rem .5rem'}}>{dayjs().format('MM月')}</div>
+        </div>
+        <div className="monthly-card">
+          {monthlyItems.slice(0,5).map(r=>{
+            const paid=paidItems.some(p=>p.id===r.id);
+            return(
+              <div key={r.id} className="monthly-row">
+                <span className={paid?'monthly-done':''}>{REMINDER_TYPE[r.type]||'💳'} {r.title}</span>
+                <span style={{fontFamily:'Noto Serif TC,serif'}} className={paid?'monthly-done':''}>TWD {Number(r.amount).toLocaleString()}</span>
               </div>
-            ))}
-            {lowStock.length>4&&<div style={{fontSize:'.68rem',color:'var(--warning)',opacity:.7,marginTop:'.2rem'}}>還有 {lowStock.length-4} 個…</div>}
-          </div>
-        </>
-      )}
+            );
+          })}
+          {monthlyTotal>0&&(<div className="monthly-total-row"><span className="monthly-total-label">本月合計</span><span className="monthly-total-num">TWD {monthlyTotal.toLocaleString()}</span></div>)}
+        </div>
+      </>)}
 
-      {wiki.length>0&&(
-        <>
-          <div className="section-header" style={{marginTop:'.5rem'}}>
-            <div className="section-title">🔖 最近書籤</div>
-            <div className="section-more" onClick={()=>openModule('百科')}>全部 →</div>
-          </div>
-          <div className="bookmark-scroll">
-            {wiki.slice(0,5).map(a=><BmMini key={a.id} article={a} onClick={()=>openModule('百科')}/>)}
-          </div>
-        </>
-      )}
+      {lowStock.length>0&&(<>
+        <div className="section-header">
+          <div className="section-title">📦 庫存不足</div>
+          <div className="section-more" onClick={()=>openModule('庫存')}>前往補充 →</div>
+        </div>
+        <div className="lowstock-strip">
+          <div className="lowstock-title">⚠️ {lowStock.length} 個品項需要補充</div>
+          {lowStock.slice(0,4).map(i=>(
+            <div key={i.id} className="lowstock-row">
+              <span>{i.name}</span>
+              <span style={{color:'var(--warning)',fontWeight:500}}>{i.quantity}/{i.threshold} {i.unit}</span>
+            </div>
+          ))}
+          {lowStock.length>4&&<div style={{fontSize:'.68rem',color:'var(--warning)',opacity:.7,marginTop:'.2rem'}}>還有 {lowStock.length-4} 個…</div>}
+        </div>
+      </>)}
+
+      {wiki.length>0&&(<>
+        <div className="section-header" style={{marginTop:'.5rem'}}>
+          <div className="section-title">🔖 最近書籤</div>
+          <div className="section-more" onClick={()=>openModule('百科')}>全部 →</div>
+        </div>
+        <div className="bookmark-scroll">
+          {wiki.slice(0,5).map(a=><BmMini key={a.id} article={a} onClick={()=>openModule('百科')}/>)}
+        </div>
+      </>)}
+
+      <div className="section-header" style={{marginTop:'.5rem'}}>
+        <div className="section-title">📋 快速記錄</div>
+      </div>
+      <QuickSection rc={rc}/>
 
       {urgentReminders.length===0&&lowStock.length===0&&reminders.length>0&&(
-        <div style={{textAlign:'center',padding:'2rem 1rem',color:'var(--text-light)'}}>
+        <div style={{textAlign:'center',padding:'1.5rem 1rem',color:'var(--text-light)'}}>
           <div style={{fontSize:'1.5rem',marginBottom:'.5rem'}}>🌿</div>
           <div style={{fontSize:'.85rem',lineHeight:1.8}}>一切正常，今天過得不錯！</div>
-        </div>
-      )}
-
-      {reminders.length===0&&inventory.length===0&&wiki.length===0&&(
-        <div style={{padding:'2rem 1.5rem',textAlign:'center',color:'var(--text-light)'}}>
-          <div style={{fontSize:'2rem',marginBottom:'1rem',opacity:.4}}>🏡</div>
-          <div style={{fontSize:'.85rem',lineHeight:1.9}}>歡迎使用家庭數位管家<br/>點擊下方導覽列開始記錄</div>
         </div>
       )}
 
@@ -387,7 +541,7 @@ function App(){
         ))}
       </div>
 
-      {showSettings&&<SettingsModal roomCode={rc} onClose={()=>setShowSettings(false)} onLogout={handleLogout}/>}
+      {showSettings&&<SettingsModal rc={rc} onClose={()=>setShowSettings(false)} onLogout={handleLogout}/>}
       {toast&&<div className="toast">{toast}</div>}
     </div>
   );

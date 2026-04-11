@@ -1894,8 +1894,7 @@ function App() {
           <div style={{ display:'flex', alignItems:'center', gap:'.6rem' }}>
             <div className={`sync-dot${isOnline?'':' offline'}`} title={isOnline?'已連線 Firebase':'本機模式'} />
             <div className="header-room" onClick={()=>window.location.href='index.html'}>🏡</div>
-            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>CSV</div>
-            <div className="header-room" onClick={handleLogout}>登出</div>
+            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>⚙️</div>
           </div>
         </div>
       </div>

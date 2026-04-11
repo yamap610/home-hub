@@ -802,8 +802,7 @@ function App(){
               <button className={`vt-btn${viewMode==='list'?' active':''}`} onClick={()=>setViewMode('list')} title="列表">☰</button>
             </div>
             <div className="header-room" onClick={()=>window.location.href='index.html'}>🏡</div>
-            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>CSV</div>
-            <div className="header-room" onClick={()=>{if(window.confirm('確定登出？')){if(unsub.current)unsub.current();setRc('');setArticles([]);localStorage.removeItem('last_room_wiki');}}}>登出</div>
+            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>⚙️</div>
           </div>
         </div>
       </div>
