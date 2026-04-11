@@ -14,18 +14,9 @@
 <script src="https://unpkg.com/dayjs@1.11.9/dayjs.min.js"></script>
 <script src="https://unpkg.com/papaparse@5.4.1/papaparse.min.js"></script>
 <style>
-:root{
-  --bg:#FDFCFA;--card:#F6F2EE;--border:#EDE4E0;
-  --primary:#DCCBC3;--accent:#DDC7BF;
-  --text:#584B42;--text-light:#8B7D75;
-  --success:#8FB17A;--warning:#D4A574;--danger:#C9876B;--urgent:#E74C3C;
-  /* 狀態色 */
-  --s-current:#C3DCCA;--s-off:#DCD3C3;--s-small:#F5C4B3;--s-out:#D3D1C7;
-}
+:root{--bg:#FDFCFA;--card:#F6F2EE;--border:#EDE4E0;--primary:#DCCBC3;--accent:#DDC7BF;--text:#584B42;--text-light:#8B7D75;--success:#8FB17A;--warning:#D4A574;--danger:#C9876B;}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sans-serif;font-weight:300;min-height:100vh;-webkit-font-smoothing:antialiased;}
-
-/* 登入 */
 .login-wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem;background:radial-gradient(ellipse at 20% 20%,rgba(220,203,195,.35) 0%,transparent 55%),var(--bg);}
 .login-logo{font-family:'Noto Serif TC',serif;font-size:2rem;font-weight:300;letter-spacing:.15em;margin-bottom:.4rem;text-align:center;}
 .login-sub{font-size:.8rem;color:var(--text-light);letter-spacing:.2em;margin-bottom:3rem;}
@@ -37,8 +28,6 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .login-hint{font-size:.72rem;color:var(--text-light);text-align:center;margin:.6rem 0 1.8rem;}
 .btn-primary{width:100%;background:var(--primary);border:none;border-radius:1rem;padding:.9rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.9rem;font-weight:500;color:var(--text);letter-spacing:.15em;cursor:pointer;transition:background .2s;}
 .btn-primary:hover{background:var(--accent);}
-
-/* 框架 */
 .app-wrap{max-width:480px;margin:0 auto;padding-bottom:90px;}
 .app-header{position:sticky;top:0;z-index:100;background:rgba(253,252,250,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:env(safe-area-inset-top,0) 1.25rem 0;}
 .header-inner{display:flex;align-items:center;justify-content:space-between;height:56px;}
@@ -47,40 +36,28 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .sync-dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;box-shadow:0 0 0 2px rgba(143,177,122,.3);}
 .sync-dot.offline{background:var(--text-light);box-shadow:none;}
 .header-room{font-size:.7rem;color:var(--text-light);background:var(--card);padding:.25rem .7rem;border-radius:.5rem;border:1px solid var(--border);cursor:pointer;}
-.header-more{width:30px;height:30px;border-radius:50%;background:var(--card);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--text-light);position:relative;}
-.more-menu{position:absolute;top:36px;right:0;background:var(--bg);border:1px solid var(--border);border-radius:1rem;box-shadow:0 4px 20px rgba(88,75,66,.12);min-width:160px;z-index:300;overflow:hidden;}
+.more-wrap{position:relative;}
+.more-btn{width:30px;height:30px;border-radius:50%;background:var(--card);border:1px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.85rem;color:var(--text-light);}
+.more-menu{position:absolute;top:36px;right:0;background:var(--bg);border:1px solid var(--border);border-radius:1rem;box-shadow:0 4px 20px rgba(88,75,66,.12);min-width:150px;z-index:300;overflow:hidden;}
 .more-item{display:flex;align-items:center;gap:.6rem;padding:.75rem 1rem;font-size:.82rem;color:var(--text);cursor:pointer;transition:background .15s;}
 .more-item:hover{background:var(--card);}
-
-/* 搜尋列 */
 .search-wrap{padding:.75rem 1rem .4rem;}
 .search-box{width:100%;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.6rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--text);outline:none;transition:border-color .2s;}
 .search-box:focus{border-color:var(--accent);}
 .search-box::placeholder{color:var(--primary);}
-
-/* 篩選列 */
 .filter-row{display:flex;gap:.5rem;padding:.4rem 1rem .5rem;overflow-x:auto;scrollbar-width:none;}
 .filter-row::-webkit-scrollbar{display:none;}
 .chip{white-space:nowrap;background:var(--card);border:1px solid var(--border);border-radius:2rem;padding:.28rem .75rem;font-size:.72rem;color:var(--text-light);cursor:pointer;transition:all .15s;}
 .chip.active{background:var(--primary);border-color:var(--primary);color:var(--text);font-weight:500;}
-
-/* 統計列 */
 .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;padding:.5rem 1rem .75rem;}
 .stat-card{background:var(--card);border:1px solid var(--border);border-radius:1.1rem;padding:.65rem .4rem;text-align:center;}
 .stat-num{font-family:'Noto Serif TC',serif;font-size:1.3rem;font-weight:300;line-height:1;margin-bottom:.2rem;}
 .stat-label{font-size:.58rem;color:var(--text-light);letter-spacing:.06em;}
-
-/* 批次模式 bar */
 .batch-bar{position:sticky;top:56px;z-index:99;background:var(--text);color:var(--bg);padding:.65rem 1.25rem;display:flex;align-items:center;justify-content:space-between;font-size:.82rem;}
 .batch-actions{display:flex;gap:.6rem;}
-.batch-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:.75rem;padding:.35rem .8rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.75rem;color:var(--bg);cursor:pointer;transition:background .15s;}
-.batch-btn:hover{background:rgba(255,255,255,.25);}
+.batch-btn{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:.75rem;padding:.35rem .8rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.75rem;color:var(--bg);cursor:pointer;}
 .batch-btn.red{background:rgba(231,76,60,.4);border-color:rgba(231,76,60,.5);}
-
-/* 網格 */
 .grid-wrap{padding:0 1rem;display:grid;grid-template-columns:repeat(2,1fr);gap:.8rem;}
-
-/* 衣服卡片 */
 .cloth-card{background:var(--card);border:1.5px solid var(--border);border-radius:1.5rem;overflow:hidden;cursor:pointer;transition:box-shadow .2s,transform .15s;position:relative;}
 .cloth-card:hover{box-shadow:0 6px 20px rgba(88,75,66,.1);transform:translateY(-2px);}
 .cloth-card.selected{border-color:var(--text);box-shadow:0 0 0 2px var(--text);}
@@ -88,52 +65,40 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .cloth-placeholder{width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:2.8rem;background:linear-gradient(135deg,var(--bg),var(--primary));}
 .cloth-body{padding:.6rem .7rem .7rem;}
 .cloth-name{font-size:.82rem;font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:.3rem;}
-.cloth-row{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;margin-bottom:.2rem;}
+.cloth-row{display:flex;align-items:center;gap:.3rem;flex-wrap:wrap;}
 .cloth-type{font-size:.6rem;padding:.1rem .42rem;border-radius:1rem;background:var(--primary);color:var(--text);}
 .cloth-size{font-size:.6rem;padding:.1rem .42rem;border-radius:1rem;background:var(--bg);border:1px solid var(--border);color:var(--text-light);}
 .status-badge{font-size:.58rem;padding:.1rem .45rem;border-radius:1rem;font-weight:500;}
 .worn-dot{position:absolute;top:.55rem;left:.55rem;background:var(--success);border:1.5px solid var(--bg);border-radius:50%;width:9px;height:9px;}
 .select-check{position:absolute;top:.55rem;right:.55rem;width:22px;height:22px;border-radius:50%;border:2px solid var(--border);background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.7rem;transition:all .15s;}
 .select-check.checked{background:var(--text);border-color:var(--text);color:var(--bg);}
-
-/* 狀態色 */
 .s-current{background:rgba(143,177,122,.2);color:#3d6b30;}
 .s-off{background:rgba(220,203,195,.4);color:var(--text-light);}
 .s-small{background:rgba(245,196,179,.4);color:#8b3a1e;}
 .s-out{background:rgba(211,209,199,.4);color:var(--text-light);}
-
-/* 空狀態 */
 .empty-state{text-align:center;padding:4rem 2rem;color:var(--text-light);}
 .empty-icon{font-size:2.5rem;margin-bottom:1rem;opacity:.5;}
 .empty-text{font-size:.85rem;line-height:1.8;}
-
-/* FAB */
 .fab{position:fixed;bottom:calc(80px + env(safe-area-inset-bottom,0px));right:1.25rem;width:56px;height:56px;border-radius:50%;background:var(--text);border:none;color:var(--bg);font-size:1.5rem;cursor:pointer;box-shadow:0 4px 16px rgba(88,75,66,.3);transition:transform .2s;display:flex;align-items:center;justify-content:center;z-index:50;}
 .fab:hover{transform:scale(1.08);}
-
-/* Modal */
 .modal-overlay{position:fixed;inset:0;background:rgba(88,75,66,.35);backdrop-filter:blur(4px);z-index:200;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease;}
 @keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
 .modal-sheet{background:var(--bg);border-radius:2rem 2rem 0 0;width:100%;max-width:480px;max-height:92vh;overflow-y:auto;padding:1.5rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom,0px));animation:slideUp .25s ease;}
 @keyframes slideUp{from{transform:translateY(40px);opacity:0;}to{transform:translateY(0);opacity:1;}}
 .modal-handle{width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 1.5rem;}
 .modal-title{font-family:'Noto Serif TC',serif;font-size:1.1rem;font-weight:400;letter-spacing:.1em;margin-bottom:1.5rem;text-align:center;}
-
-/* 表單 */
 .form-group{margin-bottom:1rem;}
 .form-label{display:block;font-size:.72rem;letter-spacing:.15em;color:var(--text-light);margin-bottom:.5rem;}
 .form-input{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.72rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s;}
 .form-input:focus{border-color:var(--accent);}
 .form-select{width:100%;background:var(--card);border:1.5px solid var(--border);border-radius:1rem;padding:.72rem 1rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.88rem;color:var(--text);outline:none;appearance:none;cursor:pointer;}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem;}
-.form-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.65rem;}
 .modal-actions{display:flex;gap:.75rem;margin-top:1.5rem;}
 .btn-cancel{flex:1;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.82rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--text-light);cursor:pointer;}
 .btn-submit{flex:2;background:var(--text);border:none;border-radius:1rem;padding:.82rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;font-weight:500;color:var(--bg);cursor:pointer;}
 .btn-submit:disabled{opacity:.4;cursor:default;}
 .btn-danger-out{flex:1;background:rgba(201,135,107,.1);border:1px solid rgba(201,135,107,.3);border-radius:1rem;padding:.82rem;font-family:'Zen Kaku Gothic New',sans-serif;font-size:.85rem;color:var(--danger);cursor:pointer;}
 .toggle-wrap{display:flex;align-items:center;justify-content:space-between;background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.75rem 1rem;}
-.toggle-label{font-size:.88rem;color:var(--text);}
 .toggle{width:44px;height:24px;border-radius:12px;border:none;cursor:pointer;transition:background .2s;position:relative;flex-shrink:0;}
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:left .2s;}
 .toggle.on{background:var(--success);}
@@ -141,8 +106,6 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .toggle.off{background:var(--border);}
 .img-preview{width:100%;aspect-ratio:3/2;border-radius:1.25rem;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:.6rem;background:var(--card);}
 .img-preview img{width:100%;height:100%;object-fit:cover;}
-
-/* 詳情 */
 .detail-img{width:100%;aspect-ratio:4/3;border-radius:1.5rem;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:4rem;overflow:hidden;margin-bottom:1.1rem;background:linear-gradient(135deg,var(--bg),var(--primary));}
 .detail-img img{width:100%;height:100%;object-fit:cover;}
 .detail-name{font-family:'Noto Serif TC',serif;font-size:1.15rem;font-weight:400;margin-bottom:.75rem;}
@@ -150,47 +113,144 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .field-item{background:var(--card);border:1px solid var(--border);border-radius:1rem;padding:.65rem .85rem;}
 .field-label{font-size:.62rem;color:var(--text-light);letter-spacing:.1em;margin-bottom:.2rem;}
 .field-value{font-size:.83rem;color:var(--text);}
+.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem;}
+.status-opt{border:1.5px solid var(--border);border-radius:1rem;padding:.75rem;text-align:center;cursor:pointer;transition:all .15s;font-size:.82rem;color:var(--text);}
+.status-opt.sel{border-color:var(--text);background:var(--text);color:var(--bg);}
+.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.65rem 1.4rem;border-radius:2rem;font-size:.8rem;z-index:500;white-space:nowrap;animation:toastIn .25s ease forwards;pointer-events:none;}
+@keyframes toastIn{from{transform:translateX(-50%) translateY(10px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;margin:0 auto;width:100%;max-width:480px;background:rgba(253,252,250,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex;flex-direction:row;align-items:center;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom,0px));z-index:9999;}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:.2rem;opacity:.4;cursor:pointer;padding:.2rem .8rem;min-width:0;}
+.nav-item.active{opacity:1;}
+.nav-item-icon{font-size:1.2rem;line-height:1;}
+.nav-item-label{font-size:.58rem;letter-spacing:.12em;color:var(--text-light);white-space:nowrap;}
+.nav-item.active .nav-item-label{color:var(--text);font-weight:500;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const FIREBASE_CONFIG={apiKey:"AIzaSyAFGSQOvAp1thZkWBZ-nLHe-uR8llDQDI8",authDomain:"home-hub-be41f.firebaseapp.com",projectId:"home-hub-be41f",storageBucket:"home-hub-be41f.firebasestorage.app",messagingSenderId:"286497032414",appId:"1:286497032414:web:16d3f0242a400d0de85a4f"};
+let db=null,fbOk=false;
+try{if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();db.enablePersistence({synchronizeTabs:true}).catch(()=>{});fbOk=true;}catch(e){}
+const wRef=rc=>db&&fbOk?db.collection('wardrobe').doc(rc).collection('items'):null;
+const TYPES=['上衣','洋裝/連身','裙子/褲子','套裝','外套','居家','配件','其他'];
+const SIZES=['S','M','L','XL','70cm','80cm','90cm','100cm','110cm','120cm','12m','18m','24m','2T','3T','4T','自定義'];
+const SLEEVES=['長袖','短袖','無袖','加厚'];
+const SOURCES=['自購','恩典牌','二手','禮物'];
+const STATUSES=['當季','非當季','穿不下','已轉贈/售出'];
+const STATUS_CSS={'當季':'s-current','非當季':'s-off','穿不下':'s-small','已轉贈/售出':'s-out'};
+const STATUS_LABELS={'當季':'當季','非當季':'收納中','穿不下':'穿不下','已轉贈/售出':'已出清'};
+const TYPE_ICON={'上衣':'👕','洋裝/連身':'👗','裙子/褲子':'👖','套裝':'🩱','外套':'🧥','居家':'🌙','配件':'🎀','其他':'👔'};
+const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const LL=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch{return null;}};
+const SL=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 
-/* ── CSV Modal（三分頁：說明/匯入/匯出）── */
-function CsvImportModal({clothes, onImport, onClose}){
+function LoginPage({onLogin}){
+  const[code,setCode]=React.useState('');const[err,setErr]=React.useState('');
+  function go(){const t=code.trim();if(!t){setErr('請輸入房間碼');return;}if(t.length<4){setErr('至少4位');return;}onLogin(t);}
+  return(<div className="login-wrap"><div className="login-logo">家庭數位管家</div><div className="login-sub">WARDROBE</div><div className="login-card"><label className="login-label">房間碼 ROOM CODE</label><input className="login-input" placeholder="輸入你的房間碼" value={code} maxLength={12} onChange={e=>{setCode(e.target.value);setErr('');}} onKeyDown={e=>e.key==='Enter'&&go()}/>{err&&<div style={{fontSize:'.72rem',color:'var(--danger)',textAlign:'center',marginTop:'.4rem'}}>{err}</div>}<div className="login-hint">與家人共用相同房間碼</div><button className="btn-primary" onClick={go}>進入衣櫥 →</button></div></div>);
+}
+
+function ClothForm({initial,onSave,onClose}){
+  const isEdit=!!initial?.id;
+  const[f,setF]=React.useState({name:initial?.name||'',type:initial?.type||'上衣',size:initial?.size||'90cm',sizeCustom:initial?.sizeCustom||'',sleeve:initial?.sleeve||'長袖',source:initial?.source||'自購',status:initial?.status||'當季',location:initial?.location||'',imageUrl:initial?.imageUrl||'',worn:initial?.worn||false,note:initial?.note||''});
+  const[imgErr,setImgErr]=React.useState(false);
+  const s=(k,v)=>setF(x=>({...x,[k]:v}));
+  function save(){onSave({...(initial||{}),id:initial?.id||gid(),...f,sizeDisplay:f.size==='自定義'?f.sizeCustom:f.size,createdAt:initial?.createdAt||Date.now(),updatedAt:Date.now()});}
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet">
+        <div className="modal-handle"/>
+        <div className="modal-title">{isEdit?'編輯衣物':'新增衣物'}</div>
+        <div className="form-group">
+          <label className="form-label">照片網址（選填）</label>
+          <div className="img-preview">{f.imageUrl&&!imgErr?<img src={f.imageUrl} alt="" onError={()=>setImgErr(true)}/>:<span style={{fontSize:'3rem',opacity:.25}}>{TYPE_ICON[f.type]||'👗'}</span>}</div>
+          <input className="form-input" placeholder="貼上圖片網址 https://..." value={f.imageUrl} onChange={e=>{s('imageUrl',e.target.value);setImgErr(false);}}/>
+        </div>
+        <div className="form-group"><label className="form-label">名稱（選填）</label><input className="form-input" placeholder="例：粉色小兔包屁衣" value={f.name} onChange={e=>s('name',e.target.value)}/></div>
+        <div className="form-row">
+          <div className="form-group"><label className="form-label">類型</label><select className="form-select" value={f.type} onChange={e=>s('type',e.target.value)}>{TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+          <div className="form-group"><label className="form-label">狀態</label><select className="form-select" value={f.status} onChange={e=>s('status',e.target.value)}>{STATUSES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+        </div>
+        <div className="form-row">
+          <div className="form-group"><label className="form-label">尺碼</label><select className="form-select" value={f.size} onChange={e=>s('size',e.target.value)}>{SIZES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+          <div className="form-group"><label className="form-label">袖長</label><select className="form-select" value={f.sleeve} onChange={e=>s('sleeve',e.target.value)}>{SLEEVES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+        </div>
+        {f.size==='自定義'&&<div className="form-group"><label className="form-label">自訂尺碼</label><input className="form-input" placeholder="輸入尺碼" value={f.sizeCustom} onChange={e=>s('sizeCustom',e.target.value)}/></div>}
+        <div className="form-row">
+          <div className="form-group"><label className="form-label">來源</label><select className="form-select" value={f.source} onChange={e=>s('source',e.target.value)}>{SOURCES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
+          <div className="form-group"><label className="form-label">擺放位置（選填）</label><input className="form-input" placeholder="臥室衣櫃第二格" value={f.location} onChange={e=>s('location',e.target.value)}/></div>
+        </div>
+        <div className="form-group"><div className="toggle-wrap"><span style={{fontSize:'.88rem'}}>已實際穿過</span><button className={`toggle ${f.worn?'on':'off'}`} onClick={()=>s('worn',!f.worn)}/></div></div>
+        <div className="form-group"><label className="form-label">備註（選填）</label><input className="form-input" placeholder="購買心得、洗滌注意事項等" value={f.note} onChange={e=>s('note',e.target.value)}/></div>
+        <div className="modal-actions"><button className="btn-cancel" onClick={onClose}>取消</button><button className="btn-submit" onClick={save}>{isEdit?'儲存修改':'新增'}</button></div>
+      </div>
+    </div>
+  );
+}
+
+function DetailModal({cloth,onClose,onEdit,onDelete}){
+  const[confirmDel,setConfirmDel]=React.useState(false);
+  const[imgErr,setImgErr]=React.useState(false);
+  const icon=TYPE_ICON[cloth.type]||'👗';
+  const sc=STATUS_CSS[cloth.status]||'s-off';
+  const sl=STATUS_LABELS[cloth.status]||cloth.status;
+  const sizeShow=cloth.size==='自定義'?(cloth.sizeCustom||cloth.sizeDisplay||'—'):cloth.size;
+  if(confirmDel)return(<div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setConfirmDel(false)}><div className="modal-sheet"><div className="modal-handle"/><div style={{textAlign:'center',padding:'1rem 0'}}><div style={{fontSize:'2rem',marginBottom:'1rem'}}>🗑️</div><div style={{fontFamily:'Noto Serif TC',fontSize:'1.1rem',marginBottom:'.5rem'}}>確認刪除？</div><div style={{fontSize:'.82rem',color:'var(--text-light)',lineHeight:1.7}}>「{cloth.name||cloth.type}」將被永久刪除</div></div><div className="modal-actions"><button className="btn-cancel" onClick={()=>setConfirmDel(false)}>取消</button><button className="btn-danger-out" style={{background:'var(--danger)',color:'#fff',border:'none'}} onClick={onDelete}>確認刪除</button></div></div></div>);
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet"><div className="modal-handle"/>
+        <div className="detail-img">{cloth.imageUrl&&!imgErr?<img src={cloth.imageUrl} alt={cloth.name} onError={()=>setImgErr(true)}/>:<span>{icon}</span>}</div>
+        <div style={{display:'flex',alignItems:'center',gap:'.65rem',marginBottom:'.75rem'}}>
+          <div className="detail-name" style={{margin:0}}>{cloth.name||'（未命名）'}</div>
+          <span className={`status-badge ${sc}`}>{sl}</span>
+          {cloth.worn&&<span style={{fontSize:'.65rem',color:'var(--success)'}}>✓ 穿過</span>}
+        </div>
+        <div className="field-grid">
+          <div className="field-item"><div className="field-label">類型</div><div className="field-value">{icon} {cloth.type}</div></div>
+          <div className="field-item"><div className="field-label">尺碼</div><div className="field-value">{sizeShow}</div></div>
+          <div className="field-item"><div className="field-label">袖長</div><div className="field-value">{cloth.sleeve}</div></div>
+          <div className="field-item"><div className="field-label">來源</div><div className="field-value">{cloth.source}</div></div>
+          {cloth.location&&<div className="field-item" style={{gridColumn:'1/-1'}}><div className="field-label">擺放位置</div><div className="field-value">📍 {cloth.location}</div></div>}
+          {cloth.note&&<div className="field-item" style={{gridColumn:'1/-1'}}><div className="field-label">備註</div><div className="field-value" style={{lineHeight:1.6}}>{cloth.note}</div></div>}
+          <div className="field-item"><div className="field-label">新增日期</div><div className="field-value">{dayjs(cloth.createdAt).format('YYYY/MM/DD')}</div></div>
+        </div>
+        <div className="modal-actions"><button className="btn-danger-out" onClick={()=>setConfirmDel(true)}>刪除</button><button className="btn-cancel" onClick={onEdit}>編輯</button><button className="btn-submit" onClick={onClose}>關閉</button></div>
+      </div>
+    </div>
+  );
+}
+
+function BatchStatusModal({count,onSave,onClose}){
+  const[sel,setSel]=React.useState('穿不下');
+  return(
+    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
+      <div className="modal-sheet"><div className="modal-handle"/>
+        <div className="modal-title">批次修改狀態</div>
+        <div style={{fontSize:'.8rem',color:'var(--text-light)',textAlign:'center',marginBottom:'1.25rem'}}>將 {count} 件衣物的狀態改為：</div>
+        <div className="status-grid">{STATUSES.map(st=>(<div key={st} className={`status-opt${sel===st?' sel':''}`} onClick={()=>setSel(st)}>{st}</div>))}</div>
+        <div className="modal-actions"><button className="btn-cancel" onClick={onClose}>取消</button><button className="btn-submit" onClick={()=>onSave(sel)}>確認修改</button></div>
+      </div>
+    </div>
+  );
+}
+
+function CsvModal({clothes,onImport,onClose}){
   const[tab,setTab]=React.useState('guide');
   const[csvText,setCsvText]=React.useState('');
   const[preview,setPreview]=React.useState(null);
   const[err,setErr]=React.useState('');
-
-  const TYPES='上衣, 洋裝/連身, 裙子/褲子, 套裝, 外套, 居家, 配件, 其他';
-  const SLEEVES='長袖, 短袖, 無袖, 加厚';
-  const SOURCES='自購, 恩典牌, 二手, 禮物';
-  const STATUSES='當季, 非當季, 穿不下, 已轉贈/售出';
-  const EXAMPLE=[
-    'name,type,size,sleeve,source,status,location,worn,note',
-    '粉色小兔包屁衣,洋裝/連身,80cm,短袖,自購,當季,臥室衣櫃第一格,true,',
-    '格紋外套,外套,90cm,長袖,恩典牌,非當季,儲藏室,false,',
-    '藍色牛仔褲,裙子/褲子,2T,長袖,二手,當季,,true,',
-  ].join('\n');
   const VALID_TYPES=['上衣','洋裝/連身','裙子/褲子','套裝','外套','居家','配件','其他'];
   const VALID_SL=['長袖','短袖','無袖','加厚'];
   const VALID_SRC=['自購','恩典牌','二手','禮物'];
   const VALID_ST=['當季','非當季','穿不下','已轉贈/售出'];
-
+  const EXAMPLE='name,type,size,sleeve,source,status,location,worn,note\n粉色小兔包屁衣,洋裝/連身,80cm,短袖,自購,當季,臥室衣櫃第一格,true,\n格紋外套,外套,90cm,長袖,恩典牌,非當季,儲藏室,false,\n藍色牛仔褲,裙子/褲子,2T,長袖,二手,當季,,true,';
   function handleParse(){
     setErr('');setPreview(null);
     if(!csvText.trim()){setErr('請貼上內容');return;}
     const result=Papa.parse(csvText.trim(),{header:true,skipEmptyLines:true});
     if(!result.data.length){setErr('解析失敗，請確認格式');return;}
-    const parsed=result.data.map(r=>({
-      id:Date.now().toString(36)+Math.random().toString(36).slice(2,7),
-      name:r.name?.trim()||'',
-      type:VALID_TYPES.includes(r.type?.trim())?r.type.trim():'其他',
-      size:r.size?.trim()||'',sizeDisplay:r.size?.trim()||'',
-      sleeve:VALID_SL.includes(r.sleeve?.trim())?r.sleeve.trim():'長袖',
-      source:VALID_SRC.includes(r.source?.trim())?r.source.trim():'自購',
-      status:VALID_ST.includes(r.status?.trim())?r.status.trim():'當季',
-      location:r.location?.trim()||'',
-      worn:r.worn?.trim()==='true',
-      note:r.note?.trim()||'',
-      createdAt:Date.now(),updatedAt:Date.now(),
-    }));
+    const parsed=result.data.map(r=>({id:gid(),name:r.name?.trim()||'',type:VALID_TYPES.includes(r.type?.trim())?r.type.trim():'其他',size:r.size?.trim()||'',sizeDisplay:r.size?.trim()||'',sleeve:VALID_SL.includes(r.sleeve?.trim())?r.sleeve.trim():'長袖',source:VALID_SRC.includes(r.source?.trim())?r.source.trim():'自購',status:VALID_ST.includes(r.status?.trim())?r.status.trim():'當季',location:r.location?.trim()||'',worn:r.worn?.trim()==='true',note:r.note?.trim()||'',createdAt:Date.now(),updatedAt:Date.now()}));
     if(!parsed.length){setErr('沒有有效資料');return;}
     setPreview(parsed);
   }
@@ -214,264 +274,30 @@ function CsvImportModal({clothes, onImport, onClose}){
           ))}
         </div>
         {tab==='guide'&&(<>
-          <div style={SH}>
-            <b style={{color:'var(--text)'}}>步驟：</b><br/>
-            ① 開啟 Google Sheet，第一列填欄位名稱（見下方格式）<br/>
-            ② 填寫資料，選項欄位只能填規定的值<br/>
-            ③ 全選資料 → 複製（Ctrl+C）<br/>
-            ④ 切換「匯入」→ 貼上 → 解析預覽 → 確認匯入<br/><br/>
-            <b style={{color:'var(--text)'}}>Sheet 有異動後如何更新：</b><br/>
-            在 Sheet 修改完後，重新全選複製，再次執行匯入。<br/>
-            ⚠️ 相同 name 的衣物會自動略過，若要修改，<br/>
-            請先在 App 刪除該衣物，再重新匯入新版本。
-          </div>
-          <div style={SH}>
-            <b style={{color:'var(--text)'}}>欄位對照：</b><br/>
-            <b style={{color:'var(--text)'}}>name</b> — 衣物名稱（可留空）<br/>
-            <b style={{color:'var(--text)'}}>type</b>（必填）— 只能填：{TYPES}<br/>
-            <b style={{color:'var(--text)'}}>size</b> — 尺碼，如：80cm / 2T / S（可自訂）<br/>
-            <b style={{color:'var(--text)'}}>sleeve</b> — 只能填：{SLEEVES}<br/>
-            <b style={{color:'var(--text)'}}>source</b> — 只能填：{SOURCES}<br/>
-            <b style={{color:'var(--text)'}}>status</b> — 只能填：{STATUSES}<br/>
-            <b style={{color:'var(--text)'}}>location</b> — 擺放位置（可留空）<br/>
-            <b style={{color:'var(--text)'}}>worn</b> — 是否穿過：true 或 false<br/>
-            <b style={{color:'var(--text)'}}>note</b> — 備註（可留空）
-          </div>
+          <div style={SH}><b style={{color:'var(--text)'}}>步驟：</b><br/>① 開啟 Google Sheet，第一列填欄位名稱<br/>② 填寫資料，選項欄位只能填規定的值<br/>③ 全選 → 複製（Ctrl+C）<br/>④ 切換「匯入」→ 貼上 → 解析預覽 → 確認匯入<br/><br/><b style={{color:'var(--text)'}}>Sheet 有異動後如何更新：</b><br/>修改完後重新全選複製，再次執行匯入。<br/>⚠️ 相同 name 的衣物會自動略過，若要修改，請先刪除再匯入。</div>
+          <div style={SH}><b style={{color:'var(--text)'}}>欄位對照：</b><br/><b style={{color:'var(--text)'}}>name</b> — 衣物名稱（可留空）<br/><b style={{color:'var(--text)'}}>type</b>（必填）— 上衣 / 洋裝/連身 / 裙子/褲子 / 套裝 / 外套 / 居家 / 配件 / 其他<br/><b style={{color:'var(--text)'}}>size</b> — 尺碼（可自訂，如 80cm / 2T / S）<br/><b style={{color:'var(--text)'}}>sleeve</b> — 長袖 / 短袖 / 無袖 / 加厚<br/><b style={{color:'var(--text)'}}>source</b> — 自購 / 恩典牌 / 二手 / 禮物<br/><b style={{color:'var(--text)'}}>status</b> — 當季 / 非當季 / 穿不下 / 已轉贈/售出<br/><b style={{color:'var(--text)'}}>location</b> — 擺放位置（可留空）<br/><b style={{color:'var(--text)'}}>worn</b> — 是否穿過：true 或 false<br/><b style={{color:'var(--text)'}}>note</b> — 備註（可留空）</div>
           <div style={SF}>{EXAMPLE}</div>
         </>)}
         {tab==='import'&&(<>
           <div style={SH}>從 Google Sheet 複製全部資料後貼到下方（含第一列標題）。</div>
-          <textarea style={{width:'100%',minHeight:160,background:'var(--card)',border:'1.5px solid var(--border)',borderRadius:'1rem',padding:'.75rem 1rem',fontFamily:'monospace',fontSize:'.75rem',color:'var(--text)',outline:'none',resize:'vertical',lineHeight:1.6,marginBottom:'.75rem'}}
-            placeholder={'name,type,size,sleeve,source,status,location,worn,note\n粉色包屁衣,洋裝/連身,80cm,短袖,自購,當季,,true,'}
-            value={csvText} onChange={e=>{setCsvText(e.target.value);setPreview(null);setErr('');}}/>
+          <textarea style={{width:'100%',minHeight:160,background:'var(--card)',border:'1.5px solid var(--border)',borderRadius:'1rem',padding:'.75rem 1rem',fontFamily:'monospace',fontSize:'.75rem',color:'var(--text)',outline:'none',resize:'vertical',lineHeight:1.6,marginBottom:'.75rem'}} placeholder={'name,type,size,sleeve,source,status,location,worn,note\n粉色包屁衣,洋裝/連身,80cm,短袖,自購,當季,,true,'} value={csvText} onChange={e=>{setCsvText(e.target.value);setPreview(null);setErr('');}}/>
           {err&&<div style={{fontSize:'.75rem',color:'var(--danger)',marginBottom:'.75rem'}}>{err}</div>}
-          {preview&&(<div style={{background:'rgba(143,177,122,.1)',border:'1px solid rgba(143,177,122,.3)',borderRadius:'1rem',padding:'.75rem 1rem',marginBottom:'.75rem',fontSize:'.78rem',color:'var(--text)'}}>
-            解析到 <b>{preview.length}</b> 筆，確認後點「匯入」
-            <div style={{marginTop:'.4rem',color:'var(--text-light)',fontSize:'.7rem'}}>
-              {preview.slice(0,3).map((p,i)=><div key={i}>• {p.name||'（未命名）'} — {p.type} {p.size} {p.status}</div>)}
-              {preview.length>3&&<div>…還有 {preview.length-3} 筆</div>}
-            </div>
-          </div>)}
+          {preview&&(<div style={{background:'rgba(143,177,122,.1)',border:'1px solid rgba(143,177,122,.3)',borderRadius:'1rem',padding:'.75rem 1rem',marginBottom:'.75rem',fontSize:'.78rem',color:'var(--text)'}}>解析到 <b>{preview.length}</b> 筆，確認後點「匯入」<div style={{marginTop:'.4rem',color:'var(--text-light)',fontSize:'.7rem'}}>{preview.slice(0,3).map((p,i)=><div key={i}>• {p.name||'（未命名）'} — {p.type} {p.size} {p.status}</div>)}{preview.length>3&&<div>…還有 {preview.length-3} 筆</div>}</div></div>)}
           <div style={{display:'flex',gap:'.75rem'}}>
             <button style={{flex:1,background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',color:'var(--text-light)',cursor:'pointer'}} onClick={()=>{setCsvText('');setPreview(null);setErr('');}}>清除</button>
-            {!preview
-              ?<button style={{flex:2,background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer',opacity:csvText.trim()?1:.4}} onClick={handleParse} disabled={!csvText.trim()}>解析預覽</button>
-              :<button style={{flex:2,background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer'}} onClick={()=>onImport(preview)}>確認匯入 {preview.length} 筆</button>
-            }
+            {!preview?<button style={{flex:2,background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer',opacity:csvText.trim()?1:.4}} onClick={handleParse} disabled={!csvText.trim()}>解析預覽</button>:<button style={{flex:2,background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer'}} onClick={()=>onImport(preview)}>確認匯入 {preview.length} 筆</button>}
           </div>
         </>)}
         {tab==='export'&&(<>
-          <div style={SH}>匯出後貼到 Google Sheet 編輯，修改完再回來匯入更新。目前共 <b style={{color:'var(--text)'}}>{(clothes||[]).length}</b> 件衣物。</div>
+          <div style={SH}>匯出後貼到 Google Sheet 編輯，修改完再回來匯入更新。目前共 <b style={{color:'var(--text)'}}>{(clothes||[]).length}</b> 件。</div>
           <button style={{width:'100%',background:'var(--text)',border:'none',borderRadius:'1rem',padding:'.85rem',fontFamily:'inherit',fontSize:'.85rem',fontWeight:500,color:'var(--bg)',cursor:'pointer'}} onClick={handleExport}>下載 CSV 檔案</button>
         </>)}
-        <div style={{marginTop:'1rem'}}>
-          <button style={{width:'100%',background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',color:'var(--text-light)',cursor:'pointer'}} onClick={onClose}>關閉</button>
-        </div>
+        <div style={{marginTop:'1rem'}}><button style={{width:'100%',background:'var(--card)',border:'1px solid var(--border)',borderRadius:'1rem',padding:'.82rem',fontFamily:'inherit',fontSize:'.85rem',color:'var(--text-light)',cursor:'pointer'}} onClick={onClose}>關閉</button></div>
       </div>
     </div>
   );
 }
 
-
-/* 批次狀態改 modal */
-.status-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-bottom:1rem;}
-.status-opt{border:1.5px solid var(--border);border-radius:1rem;padding:.75rem;text-align:center;cursor:pointer;transition:all .15s;font-size:.82rem;color:var(--text);}
-.status-opt.sel{border-color:var(--text);background:var(--text);color:var(--bg);}
-
-/* Toast */
-.toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:.65rem 1.4rem;border-radius:2rem;font-size:.8rem;z-index:500;white-space:nowrap;animation:toastIn .25s ease forwards;pointer-events:none;}
-@keyframes toastIn{from{transform:translateX(-50%) translateY(10px);opacity:0;}to{transform:translateX(-50%) translateY(0);opacity:1;}}
-
-/* 底部導覽 */
-.bottom-nav{position:fixed !important;bottom:0 !important;left:50% !important;transform:translateX(-50%) !important;width:100%;max-width:480px;background:rgba(253,252,250,.95);backdrop-filter:blur(12px);border-top:1px solid var(--border);display:flex !important;flex-direction:row !important;align-items:center;justify-content:space-around;padding:.6rem 0 calc(.6rem + env(safe-area-inset-bottom,0px));z-index:100;}
-.nav-item{display:flex !important;flex-direction:column !important;align-items:center;gap:.2rem;opacity:.4;cursor:pointer;padding:.2rem .8rem;}
-.nav-item.active{opacity:1;}
-.nav-item-icon{font-size:1.2rem;}
-.nav-item-label{font-size:.58rem;letter-spacing:.12em;color:var(--text-light);}
-.nav-item.active .nav-item-label{color:var(--text);font-weight:500;}
-</style>
-</head>
-<body>
-<div id="root"></div>
-<script type="text/babel">
-
-const FIREBASE_CONFIG={apiKey:"AIzaSyAFGSQOvAp1thZkWBZ-nLHe-uR8llDQDI8",authDomain:"home-hub-be41f.firebaseapp.com",projectId:"home-hub-be41f",storageBucket:"home-hub-be41f.firebasestorage.app",messagingSenderId:"286497032414",appId:"1:286497032414:web:16d3f0242a400d0de85a4f"};
-let db=null,fbOk=false;
-try{if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);db=firebase.firestore();db.enablePersistence({synchronizeTabs:true}).catch(()=>{});fbOk=true;}catch(e){}
-const wRef=rc=>db&&fbOk?db.collection('wardrobe').doc(rc).collection('items'):null;
-
-/* ── 常數 ── */
-const TYPES=['上衣','洋裝/連身','裙子/褲子','套裝','外套','居家','配件','其他'];
-const SIZES=['S','M','L','XL','70cm','80cm','90cm','100cm','110cm','120cm','12m','18m','24m','2T','3T','4T','自定義'];
-const SLEEVES=['長袖','短袖','無袖','加厚'];
-const SOURCES=['自購','恩典牌','二手','禮物'];
-const STATUSES=['當季','非當季','穿不下','已轉贈/售出'];
-const STATUS_CSS={'當季':'s-current','非當季':'s-off','穿不下':'s-small','已轉贈/售出':'s-out'};
-const STATUS_LABELS={'當季':'當季','非當季':'收納中','穿不下':'穿不下','已轉贈/售出':'已出清'};
-const TYPE_ICON={'上衣':'👕','洋裝/連身':'👗','裙子/褲子':'👖','套裝':'🩱','外套':'🧥','居家':'🌙','配件':'🎀','其他':'👔'};
-
-const gid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
-const LL=k=>{try{return JSON.parse(localStorage.getItem(k)||'null');}catch{return null;}};
-const SL=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
-
-/* ── 登入 ── */
-function LoginPage({onLogin}){
-  const[code,setCode]=React.useState('');const[err,setErr]=React.useState('');
-  function go(){const t=code.trim();if(!t){setErr('請輸入房間碼');return;}if(t.length<4){setErr('至少4位');return;}onLogin(t);}
-  return(<div className="login-wrap"><div className="login-logo">家庭數位管家</div><div className="login-sub">WARDROBE</div><div className="login-card"><label className="login-label">房間碼 ROOM CODE</label><input className="login-input" placeholder="輸入你的房間碼" value={code} maxLength={12} onChange={e=>{setCode(e.target.value);setErr('');}} onKeyDown={e=>e.key==='Enter'&&go()}/>{err&&<div style={{fontSize:'.72rem',color:'var(--danger)',textAlign:'center',marginTop:'.4rem'}}>{err}</div>}<div className="login-hint">與家人共用相同房間碼</div><button className="btn-primary" onClick={go}>進入衣櫥 →</button></div></div>);
-}
-
-/* ── 新增/編輯 Modal ── */
-function ClothForm({initial,onSave,onClose}){
-  const isEdit=!!initial?.id;
-  const[f,setF]=React.useState({
-    name:initial?.name||'',type:initial?.type||'上衣',
-    size:initial?.size||'90cm',sizeCustom:initial?.sizeCustom||'',
-    sleeve:initial?.sleeve||'長袖',source:initial?.source||'自購',
-    status:initial?.status||'當季',location:initial?.location||'',
-    imageUrl:initial?.imageUrl||'',worn:initial?.worn||false,note:initial?.note||'',
-  });
-  const[imgErr,setImgErr]=React.useState(false);
-  const s=(k,v)=>setF(x=>({...x,[k]:v}));
-  const sizeDisplay=f.size==='自定義'?f.sizeCustom:f.size;
-  function save(){
-    onSave({...(initial||{}),id:initial?.id||gid(),...f,
-      sizeDisplay: f.size==='自定義'?f.sizeCustom:f.size,
-      createdAt:initial?.createdAt||Date.now(),updatedAt:Date.now()});
-  }
-  return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal-sheet">
-        <div className="modal-handle"/>
-        <div className="modal-title">{isEdit?'編輯衣物':'新增衣物'}</div>
-
-        {/* 圖片 */}
-        <div className="form-group">
-          <label className="form-label">照片網址（選填）</label>
-          <div className="img-preview">
-            {f.imageUrl&&!imgErr?<img src={f.imageUrl} alt="" onError={()=>setImgErr(true)}/>:<span style={{fontSize:'3rem',opacity:.25}}>{TYPE_ICON[f.type]||'👗'}</span>}
-          </div>
-          <input className="form-input" placeholder="貼上圖片網址 https://..." value={f.imageUrl} onChange={e=>{s('imageUrl',e.target.value);setImgErr(false);}}/>
-        </div>
-
-        {/* 名稱 */}
-        <div className="form-group"><label className="form-label">名稱（選填）</label><input className="form-input" placeholder="例：粉色小兔包屁衣" value={f.name} onChange={e=>s('name',e.target.value)}/></div>
-
-        {/* 類型 + 狀態 */}
-        <div className="form-row">
-          <div className="form-group"><label className="form-label">類型</label><select className="form-select" value={f.type} onChange={e=>s('type',e.target.value)}>{TYPES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
-          <div className="form-group"><label className="form-label">狀態</label><select className="form-select" value={f.status} onChange={e=>s('status',e.target.value)}>{STATUSES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
-        </div>
-
-        {/* 尺碼 + 袖長 */}
-        <div className="form-row">
-          <div className="form-group"><label className="form-label">尺碼</label><select className="form-select" value={f.size} onChange={e=>s('size',e.target.value)}>{SIZES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
-          <div className="form-group"><label className="form-label">袖長</label><select className="form-select" value={f.sleeve} onChange={e=>s('sleeve',e.target.value)}>{SLEEVES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
-        </div>
-        {f.size==='自定義'&&(<div className="form-group"><label className="form-label">自訂尺碼</label><input className="form-input" placeholder="輸入尺碼" value={f.sizeCustom} onChange={e=>s('sizeCustom',e.target.value)}/></div>)}
-
-        {/* 來源 + 位置 */}
-        <div className="form-row">
-          <div className="form-group"><label className="form-label">來源</label><select className="form-select" value={f.source} onChange={e=>s('source',e.target.value)}>{SOURCES.map(t=><option key={t} value={t}>{t}</option>)}</select></div>
-          <div className="form-group"><label className="form-label">擺放位置（選填）</label><input className="form-input" placeholder="臥室衣櫃第二格" value={f.location} onChange={e=>s('location',e.target.value)}/></div>
-        </div>
-
-        {/* 穿過紀錄 toggle */}
-        <div className="form-group">
-          <div className="toggle-wrap">
-            <span className="toggle-label">已實際穿過</span>
-            <button className={`toggle ${f.worn?'on':'off'}`} onClick={()=>s('worn',!f.worn)}/>
-          </div>
-        </div>
-
-        {/* 備註 */}
-        <div className="form-group"><label className="form-label">備註（選填）</label><input className="form-input" placeholder="購買心得、洗滌注意事項等" value={f.note} onChange={e=>s('note',e.target.value)}/></div>
-
-        <div className="modal-actions">
-          <button className="btn-cancel" onClick={onClose}>取消</button>
-          <button className="btn-submit" onClick={save}>{ isEdit?'儲存修改':'新增' }</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── 詳情 Modal ── */
-function DetailModal({cloth,onClose,onEdit,onDelete}){
-  const[confirmDel,setConfirmDel]=React.useState(false);
-  const[imgErr,setImgErr]=React.useState(false);
-  const icon=TYPE_ICON[cloth.type]||'👗';
-  const sc=STATUS_CSS[cloth.status]||'s-off';
-  const sl=STATUS_LABELS[cloth.status]||cloth.status;
-  const sizeShow=cloth.size==='自定義'?(cloth.sizeCustom||cloth.sizeDisplay||'—'):cloth.size;
-
-  if(confirmDel)return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&setConfirmDel(false)}>
-      <div className="modal-sheet"><div className="modal-handle"/>
-        <div style={{textAlign:'center',padding:'1rem 0'}}>
-          <div style={{fontSize:'2rem',marginBottom:'1rem'}}>🗑️</div>
-          <div style={{fontFamily:'Noto Serif TC',fontSize:'1.1rem',marginBottom:'.5rem'}}>確認刪除？</div>
-          <div style={{fontSize:'.82rem',color:'var(--text-light)',lineHeight:1.7}}>「{cloth.name||cloth.type}」將被永久刪除</div>
-        </div>
-        <div className="modal-actions">
-          <button className="btn-cancel" onClick={()=>setConfirmDel(false)}>取消</button>
-          <button className="btn-danger-out" style={{background:'var(--danger)',color:'#fff',border:'none'}} onClick={onDelete}>確認刪除</button>
-        </div>
-      </div>
-    </div>
-  );
-
-  return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal-sheet"><div className="modal-handle"/>
-        <div className="detail-img">
-          {cloth.imageUrl&&!imgErr?<img src={cloth.imageUrl} alt={cloth.name} onError={()=>setImgErr(true)}/>:<span>{icon}</span>}
-        </div>
-        <div style={{display:'flex',alignItems:'center',gap:'.65rem',marginBottom:'.75rem'}}>
-          <div className="detail-name" style={{margin:0}}>{cloth.name||'（未命名）'}</div>
-          <span className={`status-badge ${sc}`}>{sl}</span>
-          {cloth.worn&&<span style={{fontSize:'.65rem',color:'var(--success)'}}>✓ 穿過</span>}
-        </div>
-        <div className="field-grid">
-          <div className="field-item"><div className="field-label">類型</div><div className="field-value">{icon} {cloth.type}</div></div>
-          <div className="field-item"><div className="field-label">尺碼</div><div className="field-value">{sizeShow}</div></div>
-          <div className="field-item"><div className="field-label">袖長</div><div className="field-value">{cloth.sleeve}</div></div>
-          <div className="field-item"><div className="field-label">來源</div><div className="field-value">{cloth.source}</div></div>
-          {cloth.location&&<div className="field-item" style={{gridColumn:'1/-1'}}><div className="field-label">擺放位置</div><div className="field-value">📍 {cloth.location}</div></div>}
-          {cloth.note&&<div className="field-item" style={{gridColumn:'1/-1'}}><div className="field-label">備註</div><div className="field-value" style={{lineHeight:1.6}}>{cloth.note}</div></div>}
-          <div className="field-item"><div className="field-label">新增日期</div><div className="field-value">{dayjs(cloth.createdAt).format('YYYY/MM/DD')}</div></div>
-        </div>
-        <div className="modal-actions">
-          <button className="btn-danger-out" onClick={()=>setConfirmDel(true)}>刪除</button>
-          <button className="btn-cancel" onClick={onEdit}>編輯</button>
-          <button className="btn-submit" onClick={onClose}>關閉</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── 批次修改狀態 Modal ── */
-function BatchStatusModal({count,onSave,onClose}){
-  const[sel,setSel]=React.useState('穿不下');
-  return(
-    <div className="modal-overlay" onClick={e=>e.target===e.currentTarget&&onClose()}>
-      <div className="modal-sheet"><div className="modal-handle"/>
-        <div className="modal-title">批次修改狀態</div>
-        <div style={{fontSize:'.8rem',color:'var(--text-light)',textAlign:'center',marginBottom:'1.25rem'}}>將 {count} 件衣物的狀態改為：</div>
-        <div className="status-grid">
-          {STATUSES.map(st=>(<div key={st} className={`status-opt${sel===st?' sel':''}`} onClick={()=>setSel(st)}>{st}</div>))}
-        </div>
-        <div className="modal-actions">
-          <button className="btn-cancel" onClick={onClose}>取消</button>
-          <button className="btn-submit" onClick={()=>onSave(sel)}>確認修改</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* ── 衣物卡片 ── */
 function ClothCard({cloth,onClick,batchMode,selected,onSelect}){
   const[imgErr,setImgErr]=React.useState(false);
   const icon=TYPE_ICON[cloth.type]||'👗';
@@ -483,9 +309,7 @@ function ClothCard({cloth,onClick,batchMode,selected,onSelect}){
     <div className={`cloth-card${selected?' selected':''}`} onClick={handleClick}>
       {cloth.worn&&!batchMode&&<div className="worn-dot"/>}
       {batchMode&&<div className={`select-check${selected?' checked':''}`}>{selected?'✓':''}</div>}
-      {cloth.imageUrl&&!imgErr
-        ?<img className="cloth-img" src={cloth.imageUrl} alt={cloth.name} onError={()=>setImgErr(true)}/>
-        :<div className="cloth-placeholder">{icon}</div>}
+      {cloth.imageUrl&&!imgErr?<img className="cloth-img" src={cloth.imageUrl} alt={cloth.name} onError={()=>setImgErr(true)}/>:<div className="cloth-placeholder">{icon}</div>}
       <div className="cloth-body">
         <div className="cloth-name">{cloth.name||'（未命名）'}</div>
         <div className="cloth-row">
@@ -498,42 +322,32 @@ function ClothCard({cloth,onClick,batchMode,selected,onSelect}){
   );
 }
 
-/* ── 主應用 ── */
 function App(){
-  const[rc,setRc]=React.useState(()=>{
-    const urlRoom=new URLSearchParams(window.location.search).get('room');
-    if(urlRoom){localStorage.setItem('last_room_ward2',urlRoom);return urlRoom;}
-    return localStorage.getItem('last_room_ward2')||'';
-  });
-  const[clothes,setClothes]   =React.useState([]);
-  const[search,setSearch]     =React.useState('');
-  const[fType,setFType]       =React.useState('all');
-  const[fStatus,setFStatus]   =React.useState('all');
-  const[fWorn,setFWorn]       =React.useState('all');
-  const[showForm,setShowForm] =React.useState(false);
-  const[editItem,setEditItem] =React.useState(null);
-  const[detail,setDetail]     =React.useState(null);
-  const[batch,setBatch]       =React.useState(false);
-  const[selected,setSelected] =React.useState(new Set());
+  const[rc,setRc]=React.useState(()=>{const u=new URLSearchParams(window.location.search).get('room');if(u){localStorage.setItem('last_room_ward2',u);return u;}return localStorage.getItem('last_room_ward2')||'';});
+  const[clothes,setClothes]=React.useState([]);
+  const[search,setSearch]=React.useState('');
+  const[fType,setFType]=React.useState('all');
+  const[fStatus,setFStatus]=React.useState('all');
+  const[fWorn,setFWorn]=React.useState('all');
+  const[showForm,setShowForm]=React.useState(false);
+  const[editItem,setEditItem]=React.useState(null);
+  const[detail,setDetail]=React.useState(null);
+  const[batch,setBatch]=React.useState(false);
+  const[selected,setSelected]=React.useState(new Set());
   const[batchStatus,setBatchStatus]=React.useState(false);
-  const[showMore,setShowMore] =React.useState(false);
-  const[showCsv,setShowCsv]   =React.useState(false);
-  const[toast,setToast]       =React.useState(null);
-  const[online,setOnline]     =React.useState(fbOk);
-  const[syncing,setSyncing]   =React.useState(false);
+  const[showMore,setShowMore]=React.useState(false);
+  const[showCsv,setShowCsv]=React.useState(false);
+  const[toast,setToast]=React.useState(null);
+  const[online,setOnline]=React.useState(fbOk);
+  const[syncing,setSyncing]=React.useState(false);
   const unsub=React.useRef(null);
 
   React.useEffect(()=>{
     if(!rc)return;
     localStorage.setItem('last_room_ward2',rc);
     const ref=wRef(rc);
-    if(ref){
-      setSyncing(true);
-      unsub.current=ref.orderBy('createdAt','asc').onSnapshot(
-        s=>{const d=s.docs.map(doc=>({id:doc.id,...doc.data()}));setClothes(d);SL(`ward2_${rc}`,d);setSyncing(false);setOnline(true);},
-        ()=>{setClothes(LL(`ward2_${rc}`)||[]);setSyncing(false);setOnline(false);}
-      );
-    }else{setClothes(LL(`ward2_${rc}`)||[]);setOnline(false);}
+    if(ref){setSyncing(true);unsub.current=ref.orderBy('createdAt','asc').onSnapshot(s=>{const d=s.docs.map(doc=>({id:doc.id,...doc.data()}));setClothes(d);SL(`ward2_${rc}`,d);setSyncing(false);setOnline(true);},()=>{setClothes(LL(`ward2_${rc}`)||[]);setSyncing(false);setOnline(false);});}
+    else{setClothes(LL(`ward2_${rc}`)||[]);setOnline(false);}
     return()=>{if(unsub.current)unsub.current();};
   },[rc]);
 
@@ -548,64 +362,26 @@ function App(){
       else if(action?.type==='delete'){await ref.doc(action.id).delete();}
       else if(action?.type==='deleteMany'){const b=db.batch();action.ids.forEach(id=>b.delete(ref.doc(id)));await b.commit();}
       else if(action?.type==='updateMany'){const b=db.batch();action.items.forEach(item=>{const{id,...d}=item;b.set(ref.doc(id),d,{merge:true});});await b.commit();}
+      else if(action?.type==='batch'){const b=db.batch();action.items.forEach(item=>{const{id,...d}=item;b.set(ref.doc(id),d);});await b.commit();}
     }catch{t2('⚠️ 同步失敗');setClothes(list);SL(`ward2_${rc}`,list);}
   }
 
-  async function saveFn(item){
-    const upd=!!(item.id&&clothes.find(c=>c.id===item.id));
-    const list=upd?clothes.map(c=>c.id===item.id?item:c):[...clothes,item];
-    await persist(list,{type:upd?'update':'add',item});
-    t2(upd?'✓ 已儲存':'✓ 已新增');setShowForm(false);setEditItem(null);
-  }
+  async function saveFn(item){const upd=!!(item.id&&clothes.find(c=>c.id===item.id));const list=upd?clothes.map(c=>c.id===item.id?item:c):[...clothes,item];await persist(list,{type:upd?'update':'add',item});t2(upd?'✓ 已儲存':'✓ 已新增');setShowForm(false);setEditItem(null);}
+  async function delFn(id){await persist(clothes.filter(c=>c.id!==id),{type:'delete',id});setDetail(null);t2('已刪除');}
+  async function csvImportFn(newItems){const existing=new Set(clothes.map(c=>c.name+c.type));const toAdd=newItems.filter(n=>!existing.has(n.name+n.type));if(!toAdd.length){t2('沒有新資料（重複略過）');setShowCsv(false);return;}await persist([...clothes,...toAdd],{type:'batch',items:toAdd});setShowCsv(false);t2(`✓ 匯入 ${toAdd.length} 筆`);}
+  async function batchDeleteFn(){if(!window.confirm(`確定刪除選取的 ${selected.size} 件？`))return;const ids=[...selected];await persist(clothes.filter(c=>!selected.has(c.id)),{type:'deleteMany',ids});setSelected(new Set());setBatch(false);t2(`✓ 已刪除 ${ids.length} 件`);}
+  async function batchStatusFn(newStatus){const items=clothes.map(c=>selected.has(c.id)?{...c,status:newStatus,updatedAt:Date.now()}:c);const changedItems=items.filter(c=>selected.has(c.id));await persist(items,{type:'updateMany',items:changedItems});setSelected(new Set());setBatch(false);setBatchStatus(false);t2(`✓ 已更新 ${changedItems.length} 件`);}
+  function toggleSelect(id){setSelected(s=>{const ns=new Set(s);ns.has(id)?ns.delete(id):ns.add(id);return ns;});}
 
-  async function delFn(id){
-    await persist(clothes.filter(c=>c.id!==id),{type:'delete',id});
-    setDetail(null);t2('已刪除');
-  }
-
-  async function csvImportFn(newItems){
-    const existing=new Set(clothes.map(c=>c.name+c.type+c.size));
-    const toAdd=newItems.filter(n=>!existing.has(n.name+n.type+n.size));
-    if(!toAdd.length){t2('沒有新資料（重複略過）');setShowCsv(false);return;}
-    const merged=[...clothes,...toAdd];
-    const ref=wRef(rc);
-    if(ref){
-      const b=db.batch();
-      toAdd.forEach(item=>{const{id,...d}=item;b.set(ref.doc(id),d);});
-      try{await b.commit();}catch{t2('⚠️ 同步失敗');setClothes(merged);SL(`ward2_${rc}`,merged);}
-    } else {setClothes(merged);SL(`ward2_${rc}`,merged);}
-    setShowCsv(false);t2(`✓ 匯入 ${toAdd.length} 筆`);
-  }
-
-  async function batchDeleteFn(){
-    if(!window.confirm(`確定刪除選取的 ${selected.size} 件衣物？`))return;
-    const ids=[...selected];
-    await persist(clothes.filter(c=>!selected.has(c.id)),{type:'deleteMany',ids});
-    setSelected(new Set());setBatch(false);t2(`✓ 已刪除 ${ids.length} 件`);
-  }
-
-  async function batchStatusFn(newStatus){
-    const items=clothes.map(c=>selected.has(c.id)?{...c,status:newStatus,updatedAt:Date.now()}:c);
-    const changedItems=items.filter(c=>selected.has(c.id));
-    await persist(items,{type:'updateMany',items:changedItems});
-    setSelected(new Set());setBatch(false);setBatchStatus(false);t2(`✓ 已更新 ${changedItems.length} 件狀態`);
-  }
-
-  function toggleSelect(id){
-    setSelected(s=>{const ns=new Set(s);ns.has(id)?ns.delete(id):ns.add(id);return ns;});
-  }
-
-  /* 篩選 */
   const filtered=clothes.filter(c=>{
     if(fType!=='all'&&c.type!==fType)return false;
     if(fStatus!=='all'&&c.status!==fStatus)return false;
     if(fWorn==='worn'&&!c.worn)return false;
     if(fWorn==='unworn'&&c.worn)return false;
-    if(search){const q=search.toLowerCase();return (c.name||'').toLowerCase().includes(q)||(c.location||'').toLowerCase().includes(q);}
+    if(search){const q=search.toLowerCase();return(c.name||'').toLowerCase().includes(q)||(c.location||'').toLowerCase().includes(q);}
     return true;
   });
 
-  /* 統計 */
   const total=clothes.length;
   const current=clothes.filter(c=>c.status==='當季').length;
   const offSeason=clothes.filter(c=>c.status==='非當季').length;
@@ -615,8 +391,6 @@ function App(){
 
   return(
     <div className="app-wrap" onClick={()=>showMore&&setShowMore(false)}>
-
-      {/* Header */}
       <div className="app-header">
         <div className="header-inner">
           <div style={{display:'flex',alignItems:'center',gap:'.6rem'}}>
@@ -626,15 +400,13 @@ function App(){
           <div className="header-right">
             <div className={`sync-dot${online?'':' offline'}`}/>
             <div className="header-room" onClick={()=>window.location.href='index.html'}>🏡</div>
-            <div className="header-room" style={{cursor:'pointer'}} onClick={()=>setShowCsv(true)}>CSV</div>
+            <div className="header-room" onClick={()=>setShowCsv(true)}>CSV</div>
             <div className="header-room" onClick={()=>{if(window.confirm('確定登出？')){if(unsub.current)unsub.current();setRc('');setClothes([]);localStorage.removeItem('last_room_ward2');}}}>登出</div>
-            <div className="header-more" onClick={e=>{e.stopPropagation();setShowMore(m=>!m);}}>
-              ⋮
+            <div className="more-wrap">
+              <div className="more-btn" onClick={e=>{e.stopPropagation();setShowMore(m=>!m);}}>⋮</div>
               {showMore&&(
                 <div className="more-menu" onClick={e=>e.stopPropagation()}>
-                  <div className="more-item" onClick={()=>{setBatch(b=>!b);setSelected(new Set());setShowMore(false);}}>
-                    {batch?'✕ 退出批次模式':'☑ 批次管理'}
-                  </div>
+                  <div className="more-item" onClick={()=>{setBatch(b=>!b);setSelected(new Set());setShowMore(false);}}>{batch?'✕ 退出批次模式':'☑ 批次管理'}</div>
                 </div>
               )}
             </div>
@@ -642,22 +414,17 @@ function App(){
         </div>
       </div>
 
-      {/* 批次模式 bar */}
       {batch&&(
         <div className="batch-bar">
           <span>已選 {selected.size} 件</span>
           <div className="batch-actions">
-            <button className="batch-btn" onClick={()=>{
-              if(selected.size===filtered.length){setSelected(new Set());}
-              else{setSelected(new Set(filtered.map(c=>c.id)));}
-            }}>{selected.size===filtered.length?'取消全選':'全選'}</button>
+            <button className="batch-btn" onClick={()=>selected.size===filtered.length?setSelected(new Set()):setSelected(new Set(filtered.map(c=>c.id)))}>{selected.size===filtered.length?'取消全選':'全選'}</button>
             <button className="batch-btn" disabled={selected.size===0} onClick={()=>selected.size>0&&setBatchStatus(true)} style={{opacity:selected.size===0?.4:1}}>修改狀態</button>
             <button className="batch-btn red" disabled={selected.size===0} onClick={()=>selected.size>0&&batchDeleteFn()} style={{opacity:selected.size===0?.4:1}}>刪除</button>
           </div>
         </div>
       )}
 
-      {/* 統計列 */}
       <div className="stats-row">
         <div className="stat-card"><div className="stat-num">{total}</div><div className="stat-label">總計</div></div>
         <div className="stat-card"><div className="stat-num" style={{color:'var(--success)'}}>{current}</div><div className="stat-label">當季</div></div>
@@ -665,65 +432,39 @@ function App(){
         <div className="stat-card"><div className="stat-num" style={{color:'var(--text-light)'}}>{unwornCount}</div><div className="stat-label">未穿過</div></div>
       </div>
 
-      {/* 搜尋 */}
-      <div className="search-wrap">
-        <input className="search-box" placeholder="🔍 搜尋名稱、擺放位置…" value={search} onChange={e=>setSearch(e.target.value)}/>
-      </div>
+      <div className="search-wrap"><input className="search-box" placeholder="🔍 搜尋名稱、擺放位置…" value={search} onChange={e=>setSearch(e.target.value)}/></div>
 
-      {/* 篩選：類型 */}
       <div className="filter-row">
         <button className={`chip${fType==='all'?' active':''}`} onClick={()=>setFType('all')}>全部類型</button>
-        {TYPES.filter(t=>clothes.some(c=>c.type===t)).map(t=>(
-          <button key={t} className={`chip${fType===t?' active':''}`} onClick={()=>setFType(t)}>{TYPE_ICON[t]} {t}</button>
-        ))}
+        {TYPES.filter(t=>clothes.some(c=>c.type===t)).map(t=>(<button key={t} className={`chip${fType===t?' active':''}`} onClick={()=>setFType(t)}>{TYPE_ICON[t]} {t}</button>))}
       </div>
-
-      {/* 篩選：狀態 */}
       <div className="filter-row" style={{paddingTop:0}}>
         <button className={`chip${fStatus==='all'?' active':''}`} onClick={()=>setFStatus('all')}>全部狀態</button>
-        {STATUSES.map(st=>(
-          <button key={st} className={`chip${fStatus===st?' active':''}`} onClick={()=>setFStatus(st)}>{st}</button>
-        ))}
+        {STATUSES.map(st=>(<button key={st} className={`chip${fStatus===st?' active':''}`} onClick={()=>setFStatus(st)}>{st}</button>))}
       </div>
-
-      {/* 篩選：穿過 */}
       <div className="filter-row" style={{paddingTop:0,paddingBottom:'.75rem'}}>
         <button className={`chip${fWorn==='all'?' active':''}`} onClick={()=>setFWorn('all')}>全部</button>
         <button className={`chip${fWorn==='worn'?' active':''}`} onClick={()=>setFWorn('worn')}>✓ 穿過</button>
         <button className={`chip${fWorn==='unworn'?' active':''}`} onClick={()=>setFWorn('unworn')}>○ 未穿過</button>
       </div>
 
-      {/* 網格 */}
-      {clothes.length===0?(
-        <div className="empty-state"><div className="empty-icon">👗</div><div className="empty-text">衣櫥還是空的<br/>點擊右下角 ＋ 開始新增衣物！</div></div>
-      ):filtered.length===0?(
-        <div className="empty-state"><div className="empty-icon">🔍</div><div className="empty-text">找不到符合條件的衣物</div></div>
-      ):(
-        <div className="grid-wrap">
-          {filtered.map(c=>(
-            <ClothCard key={c.id} cloth={c}
-              batchMode={batch} selected={selected.has(c.id)}
-              onSelect={toggleSelect}
-              onClick={()=>setDetail(c)}
-            />
-          ))}
-        </div>
-      )}
+      {clothes.length===0?(<div className="empty-state"><div className="empty-icon">👗</div><div className="empty-text">衣櫥還是空的<br/>點擊右下角 ＋ 開始新增衣物！</div></div>):filtered.length===0?(<div className="empty-state"><div className="empty-icon">🔍</div><div className="empty-text">找不到符合條件的衣物</div></div>):(<div className="grid-wrap">{filtered.map(c=>(<ClothCard key={c.id} cloth={c} batchMode={batch} selected={selected.has(c.id)} onSelect={toggleSelect} onClick={()=>setDetail(c)}/>))}</div>)}
 
       {!batch&&<button className="fab" onClick={()=>{setEditItem(null);setShowForm(true);}}>＋</button>}
 
-      {/* 底部導覽 */}
       <div className="bottom-nav">
         {[{icon:'🏡',label:'首頁',href:'index.html'},{icon:'📋',label:'提醒',href:'module-reminders.html'},{icon:'📦',label:'庫存',href:'module-inventory.html'},{icon:'👗',label:'衣櫥',active:true},{icon:'📖',label:'百科',href:'module-wiki.html'}].map((n,i)=>(
-          <div key={i} className={`nav-item${n.active?' active':''}`} onClick={()=>n.href&&(window.location.href=`${n.href}?room=${rc}`)}><div className="nav-item-icon">{n.icon}</div><div className="nav-item-label">{n.label}</div></div>
+          <div key={i} className={`nav-item${n.active?' active':''}`} onClick={()=>n.href&&(window.location.href=`${n.href}?room=${rc}`)}>
+            <div className="nav-item-icon">{n.icon}</div>
+            <div className="nav-item-label">{n.label}</div>
+          </div>
         ))}
       </div>
 
-      {/* Modals */}
       {(showForm||editItem)&&<ClothForm initial={editItem} onSave={saveFn} onClose={()=>{setShowForm(false);setEditItem(null);}}/>}
       {detail&&<DetailModal cloth={clothes.find(c=>c.id===detail.id)||detail} onClose={()=>setDetail(null)} onEdit={()=>{setEditItem(clothes.find(c=>c.id===detail.id)||detail);setDetail(null);}} onDelete={()=>delFn(detail.id)}/>}
       {batchStatus&&<BatchStatusModal count={selected.size} onSave={batchStatusFn} onClose={()=>setBatchStatus(false)}/>}
-      {showCsv&&<CsvImportModal clothes={clothes} onImport={csvImportFn} onClose={()=>setShowCsv(false)}/>}
+      {showCsv&&<CsvModal clothes={clothes} onImport={csvImportFn} onClose={()=>setShowCsv(false)}/>}
       {toast&&<div className="toast">{toast}</div>}
     </div>
   );
