@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>診斷工具</title>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<style>
+body{font-family:sans-serif;padding:1.5rem;background:#fdfcfa;color:#2e2420;font-size:16px;}
+h2{margin-bottom:1rem;}
+.card{background:#fff;border:1px solid #ddd;border-radius:1rem;padding:1rem;margin-bottom:1rem;}
+.ok{color:#3a7d2c;font-weight:600;}
+.err{color:#c0392b;font-weight:600;}
+.row{display:flex;justify-content:space-between;padding:.4rem 0;border-bottom:1px solid #eee;font-size:.95rem;}
+.row:last-child{border-bottom:none;}
+button{width:100%;padding:.85rem;background:#3d3129;color:#fff;border:none;border-radius:.75rem;font-size:1rem;margin-top:.75rem;cursor:pointer;}
+pre{background:#f5f5f5;border-radius:.5rem;padding:.75rem;font-size:.82rem;overflow-x:auto;white-space:pre-wrap;word-break:break-all;}
+</style>
+</head>
+<body>
+<h2>🔍 診斷工具</h2>
+<div class="card" id="out">檢查中…</div>
+<button onclick="runDiag()">🔄 重新檢查</button>
+<script>
+const FIREBASE_CONFIG={apiKey:"AIzaSyAFGSQOvAp1thZkWBZ-nLHe-uR8llDQDI8",authDomain:"home-hub-be41f.firebaseapp.com",projectId:"home-hub-be41f",storageBucket:"home-hub-be41f.firebasestorage.app",messagingSenderId:"286497032414",appId:"1:286497032414:web:16d3f0242a400d0de85a4f"};
+if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);
+const db=firebase.firestore();
+
+const ROOM='MY0918';
+
+async function check(label, fn){
+  try{const r=await fn();return {label,ok:true,val:r};}
+  catch(e){return {label,ok:false,val:e.message};}
+}
+
+async function runDiag(){
+  const out=document.getElementById('out');
+  out.innerHTML='⏳ 檢查中…';
+  
+  const rc=localStorage.getItem('last_room_hub')||'（未設定）';
+  
+  const results=[];
+  
+  // 1. 房間碼
+  results.push({label:'localStorage 房間碼', ok: rc!=='（未設定）', val: rc});
+  results.push({label:'測試用房間碼', ok: true, val: ROOM});
+  
+  // 2. 各 collection 筆數
+  const cols=[
+    {name:'提醒', path:['reminders',ROOM,'items']},
+    {name:'庫存', path:['inventory',ROOM,'items']},
+    {name:'衣櫥', path:['wardrobe',ROOM,'items']},
+    {name:'百科', path:['wiki',ROOM,'articles']},
+  ];
+  
+  for(const col of cols){
+    const r=await check(`Firebase ${col.name} (${ROOM})`, async()=>{
+      const snap=await db.collection(col.path[0]).doc(col.path[1]).collection(col.path[2]).get();
+      return `${snap.docs.length} 筆`;
+    });
+    results.push(r);
+  }
+  
+  // 3. 如果 localStorage 房間碼不同，也查一下
+  if(rc!=='（未設定）'&&rc!==ROOM){
+    for(const col of cols){
+      const r=await check(`Firebase ${col.name} (${rc})`, async()=>{
+        const snap=await db.collection(col.path[0]).doc(rc).collection(col.path[2]).get();
+        return `${snap.docs.length} 筆`;
+      });
+      results.push(r);
+    }
+  }
+  
+  let html='';
+  for(const r of results){
+    html+=`<div class="row"><span>${r.label}</span><span class="${r.ok?'ok':'err'}">${r.val}</span></div>`;
+  }
+  out.innerHTML=html;
+}
+
+runDiag();
+</script>
+</body>
+</html>
