@@ -63,7 +63,7 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 
 /* 最近查閱 */
 .recent-wrap{padding:0 1rem .85rem;}
-.section-title{font-size:.68rem;letter-spacing:.18em;color:var(--text-light);margin-bottom:.6rem;padding-left:.1rem;}
+.section-title{font-size:.72rem;letter-spacing:.18em;color:var(--text-light);margin-bottom:.6rem;padding-left:.1rem;}
 .recent-scroll{display:flex;gap:.6rem;overflow-x:auto;scrollbar-width:none;}
 .recent-scroll::-webkit-scrollbar{display:none;}
 .recent-card{background:var(--card);border:1px solid var(--border);border-radius:1.1rem;padding:.65rem .85rem;min-width:130px;max-width:150px;flex-shrink:0;cursor:pointer;transition:box-shadow .15s;}
@@ -713,11 +713,12 @@ function App(){
     if(!rc)return;
     localStorage.setItem('last_room_hub',rc);
     const ref=aRef(rc);
+    const _wk=LL(`wiki_${rc}`)||[];if(_wk.length)setArticles(_wk);
     if(ref){
       setSyncing(true);
       unsub.current=ref.orderBy('updatedAt','desc').onSnapshot(
         s=>{const d=s.docs.map(doc=>({id:doc.id,...doc.data()}));setArticles(d);SL(`wiki_${rc}`,d);setSyncing(false);setOnline(true);},
-        ()=>{setArticles(LL(`wiki_${rc}`)||[]);setSyncing(false);setOnline(false);}
+        ()=>{setSyncing(false);setOnline(false);}
       );
     }else{setArticles(LL(`wiki_${rc}`)||[]);setOnline(false);}
     setRecent(LL(`wiki_recent_${rc}`)||[]);

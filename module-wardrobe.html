@@ -283,7 +283,8 @@ function App(){
     if(!rc)return;
     localStorage.setItem('last_room_hub',rc);
     const ref=wRef(rc);
-    if(ref){setSyncing(true);unsub.current=ref.orderBy('createdAt','asc').onSnapshot(s=>{const d=s.docs.map(doc=>({id:doc.id,...doc.data()}));setClothes(d);SL(`ward2_${rc}`,d);setSyncing(false);setOnline(true);},()=>{setClothes(LL(`ward2_${rc}`)||[]);setSyncing(false);setOnline(false);});}
+    const _wc=LL(`ward2_${rc}`)||[];if(_wc.length)setClothes(_wc);
+    if(ref){setSyncing(true);unsub.current=ref.orderBy('createdAt','asc').onSnapshot(s=>{const d=s.docs.map(doc=>({id:doc.id,...doc.data()}));setClothes(d);SL(`ward2_${rc}`,d);setSyncing(false);setOnline(true);},()=>{setSyncing(false);setOnline(false);});}
     else{setClothes(LL(`ward2_${rc}`)||[]);setOnline(false);}
     return()=>{if(unsub.current)unsub.current();};
   },[rc]);

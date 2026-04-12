@@ -353,7 +353,8 @@ function App(){
     if(!roomCode)return;
     localStorage.setItem('last_room_hub',roomCode);
     const ref=invRef(roomCode);
-    if(ref){setSyncing(true);unsub.current=ref.orderBy('createdAt','asc').onSnapshot(s=>{const d=s.docs.map(doc=>({id:doc.id,...doc.data()}));setItems(d);saveL(roomCode,d);setSyncing(false);setOnline(true);},()=>{setItems(loadL(roomCode));setSyncing(false);setOnline(false);});}
+    const _c=loadL(roomCode);if(_c.length)setItems(_c);
+    if(ref){setSyncing(true);unsub.current=ref.orderBy('createdAt','asc').onSnapshot(s=>{const d=s.docs.map(doc=>({id:doc.id,...doc.data()}));setItems(d);saveL(roomCode,d);setSyncing(false);setOnline(true);},()=>{setSyncing(false);setOnline(false);});}
     else{setItems(loadL(roomCode));setOnline(false);}
     return()=>{if(unsub.current)unsub.current();};
   },[roomCode]);

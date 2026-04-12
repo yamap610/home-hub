@@ -27,12 +27,12 @@
 <style>
   :root {
     --home-bg: #FDFCFA;
-    --home-card: #F6F2EE;
+    --home-card: #F0EBE7;
     --home-border: #EDE4E0;
     --home-primary: #DCCBC3;
     --home-accent: #DDC7BF;
-    --home-text: #4A3F38;
-    --home-text-light: #766A63;
+    --home-text: #3D3129;
+    --home-text-light: #6B5C54;
     --urgent: #E74C3C;
     --high: #F39C12;
     --medium: #F1C40F;
@@ -48,7 +48,7 @@
     background: var(--home-bg);
     color: var(--home-text);
     font-family: 'Zen Kaku Gothic New', sans-serif;
-    font-weight: 300;
+    font-weight: 400;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
@@ -1706,6 +1706,10 @@ function App() {
 
     const ref = remindersRef(roomCode);
 
+    // 立刻先顯示快取，避免跳頁時畫面空白
+    const cached = loadLocal(roomCode);
+    if (cached.length) setReminders(cached);
+
     if (ref) {
       // Firebase 模式：即時監聽
       setSyncing(true);
@@ -1713,13 +1717,12 @@ function App() {
         snap => {
           const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
           setReminders(data);
-          saveLocal(roomCode, data); // 同步備份到 localStorage
+          saveLocal(roomCode, data);
           setSyncing(false);
           setIsOnline(true);
         },
         err => {
           console.warn('Firebase 監聽失敗，切換 localStorage', err);
-          setReminders(loadLocal(roomCode));
           setSyncing(false);
           setIsOnline(false);
         }

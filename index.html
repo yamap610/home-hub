@@ -63,11 +63,11 @@ body{background:var(--bg);color:var(--text);font-family:'Zen Kaku Gothic New',sa
 .ss-card:hover{transform:translateY(-2px);box-shadow:0 4px 14px rgba(88,75,66,.1);}
 .ss-icon{font-size:1.1rem;margin-bottom:.3rem;}
 .ss-num{font-family:'Noto Serif TC',serif;font-size:1.35rem;font-weight:350;line-height:1;margin-bottom:.2rem;}
-.ss-label{font-size:.58rem;color:var(--text-light);letter-spacing:.06em;}
+.ss-label{font-size:.65rem;color:var(--text-light);letter-spacing:.06em;}
 .ss-urgent .ss-num{color:var(--urgent);}
 /* 區塊標題 */
 .section-header{display:flex;align-items:center;justify-content:space-between;padding:.1rem 1.25rem .55rem;}
-.section-title{font-size:.68rem;letter-spacing:.2em;color:var(--text-light);font-weight:500;}
+.section-title{font-size:.72rem;letter-spacing:.2em;color:var(--text-light);font-weight:500;}
 .section-more{font-size:.68rem;color:var(--primary);cursor:pointer;letter-spacing:.06em;}
 /* 急件 */
 .urgent-list{padding:0 1rem;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.25rem;}
@@ -368,13 +368,12 @@ function App(){
   React.useEffect(()=>{
     if(!rc)return;
     localStorage.setItem('last_room_hub',rc);
-    if(!db||!fbOk){
-      setReminders(LL(`reminders_${rc}`)||[]);
-      setInventory(LL(`inv_${rc}`)||[]);
-      setWardrobe(LL(`ward2_${rc}`)||[]);
-      setWiki(LL(`wiki_${rc}`)||[]);
-      setOnline(false);return;
-    }
+    // 先顯示快取避免空白
+    setReminders(LL(`reminders_${rc}`)||[]);
+    setInventory(LL(`inv_${rc}`)||[]);
+    setWardrobe(LL(`ward2_${rc}`)||[]);
+    setWiki(LL(`wiki_${rc}`)||[]);
+    if(!db||!fbOk){setOnline(false);return;}
     const u1=db.collection('reminders').doc(rc).collection('items').onSnapshot(s=>{setReminders(s.docs.map(d=>({id:d.id,...d.data()})));setOnline(true);},(()=>{}));
     const u2=db.collection('inventory').doc(rc).collection('items').onSnapshot(s=>{setInventory(s.docs.map(d=>({id:d.id,...d.data()})));},(()=>{}));
     const u3=db.collection('wardrobe').doc(rc).collection('items').onSnapshot(s=>{setWardrobe(s.docs.map(d=>({id:d.id,...d.data()})));},(()=>{}));
